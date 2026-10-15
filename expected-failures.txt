@@ -3,6 +3,3 @@
 # A listed test that fails passes the run; a listed test that passes fails it, so take it off the
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
-
-## exit status
-sig-siglongjmp/default
