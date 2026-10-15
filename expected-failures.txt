@@ -5,5 +5,4 @@
 # with `WASIXV2_TESTS_BLESS=1`.
 
 ## exit status
-net-fifo/default
 sig-siglongjmp/default
