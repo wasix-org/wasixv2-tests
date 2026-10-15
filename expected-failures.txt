@@ -6,3 +6,6 @@
 
 ## ENOSYS: RtSigaction, Tkill
 thr-cancel/default
+
+## exit status
+net-fifo/default
