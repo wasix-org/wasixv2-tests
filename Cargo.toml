@@ -1,0 +1,22 @@
+[package]
+name = "wasixv2-tests"
+version = "0.0.0"
+description = "The wasixv2 test suite and its runner"
+publish = false
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/wasix-org/wasixv2-tests"
+rust-version = "1.96"
+
+# Its own workspace, so that it builds the same standalone and as a submodule inside wasmer's
+# tree, without becoming a member there.
+[workspace]
+
+[dependencies]
+anyhow = "1.0"
+libtest-mimic = "0.8.2"
+tempfile = "3.6.0"
+walkdir = "2.3.2"
+wasmparser = { version = "0.259.0", default-features = false, features = [
+  "std",
+] }
