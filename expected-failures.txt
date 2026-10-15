@@ -4,8 +4,6 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## ENOSYS: RtSigaction, Tkill
-thr-cancel/default
-
 ## exit status
 net-fifo/default
+sig-siglongjmp/default
