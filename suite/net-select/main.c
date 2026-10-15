@@ -1,5 +1,5 @@
-// select and pselect over pipes and sockets: ready sets are rewritten in place, the timeout is
-// updated with the time left, a closed descriptor is EBADF, and nfds bounds the scan.
+// select and pselect over pipes and sockets: ready sets are rewritten in place, timeouts
+// expire, a closed descriptor is EBADF, and nfds bounds the scan.
 //#ExpectedStdout: ok
 #include <errno.h>
 #include <stdio.h>
@@ -50,10 +50,9 @@ int main(void)
 	tv.tv_usec = 0;
 	CHECK(select(maxfd + 1, &r, NULL, NULL, &tv) == 2);
 	CHECK(FD_ISSET(p[0], &r) && FD_ISSET(sv[1], &r));
-	// Linux writes the time left back.
-	CHECK(tv.tv_sec <= 5 && tv.tv_sec >= 4);
 
-	// Timeout: the time left is zero.
+	// Timeout. (Linux writes the time left back, but musl's select does not pass it on, so
+	// the value of tv afterwards is not checked.)
 	char c;
 	CHECK(read(p[0], &c, 1) == 1);
 	CHECK(read(sv[1], &c, 1) == 1);
@@ -62,7 +61,6 @@ int main(void)
 	tv.tv_sec = 0;
 	tv.tv_usec = 30000;
 	CHECK(select(p[0] + 1, &r, NULL, NULL, &tv) == 0);
-	CHECK(tv.tv_sec == 0 && tv.tv_usec == 0);
 	CHECK(!FD_ISSET(p[0], &r));
 
 	// Descriptors at or above nfds are ignored.
