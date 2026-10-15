@@ -15,7 +15,7 @@ use std::process::ExitCode;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use anyhow::{Context, Result, bail, ensure};
+use anyhow::{Context, Result, ensure};
 use libtest_mimic::{Arguments, Completion, Failed, Trial};
 
 use crate::fixture::Config;
@@ -57,6 +57,12 @@ fn root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
+fn find_on_path(name: &str) -> Option<PathBuf> {
+    std::env::split_paths(&std::env::var_os("PATH")?)
+        .map(|dir| dir.join(name))
+        .find(|path| path.is_file())
+}
+
 fn env_path(var: &str) -> Option<PathBuf> {
     std::env::var_os(var)
         .filter(|v| !v.is_empty())
@@ -65,14 +71,13 @@ fn env_path(var: &str) -> Option<PathBuf> {
 
 impl Suite {
     fn from_env() -> Result<Self> {
-        let Some(wasmer) = env_path("WASIXV2_TESTS_WASMER") else {
-            bail!("set WASIXV2_TESTS_WASMER to the wasmer binary under test");
+        let wasmer = match env_path("WASIXV2_TESTS_WASMER") {
+            Some(wasmer) => wasmer,
+            None => find_on_path("wasmer").context(
+                "no `wasmer` on PATH; set WASIXV2_TESTS_WASMER to the wasmer binary under test",
+            )?,
         };
-        ensure!(
-            wasmer.is_file(),
-            "WASIXV2_TESTS_WASMER: {} is not a file",
-            wasmer.display()
-        );
+        ensure!(wasmer.is_file(), "{} is not a file", wasmer.display());
         let timeout = match std::env::var("WASIXV2_TESTS_TIMEOUT_SECS") {
             Ok(secs) => secs.parse().context("WASIXV2_TESTS_TIMEOUT_SECS")?,
             Err(_) => DEFAULT_TIMEOUT_SECS,

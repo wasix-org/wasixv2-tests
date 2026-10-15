@@ -1,15 +1,15 @@
 # wasixv2-tests
 
-The test suite for wasixv2: C, C++, shell-built and Rust programs under `suite/`, built with
+The test suite for wasixv2: programs under `suite/`, built with
 [wasixcc](https://github.com/wasix-org/wasixcc) for `wasm32-wasixv2` against
 [libc2](https://github.com/wasix-org/libc2), and run with
 [wasmer](https://github.com/wasmerio/wasmer)'s `wasmer run`.
 
 This repository has no CI of its own. It is a submodule of wasmer (`tests/wasixv2`) and libc2
-(`wasix2/tests`), and each of them runs it against its own build:
+(`wasixv2/tests`), and each of them runs it against its own build:
 
-- wasmer: `make test-wasixv2`
-- libc2: `wasix2/test/run-suite.sh`
+- wasmer: `make test-wasixv2`, with the wasmer it builds
+- libc2: `make wasixv2-test`, with the sysroot it builds
 
 Most tests fail until wasixv2 is complete. `expected-failures.txt` tracks them, so a run is green
 when nothing regressed and nothing started passing silently.
@@ -20,16 +20,16 @@ The runner builds and runs every test. It needs, from the environment:
 
 | Variable | Meaning |
 | --- | --- |
-| `WASIXV2_TESTS_WASMER` | The `wasmer` binary under test (required). |
+| `WASIXV2_TESTS_WASMER` | The `wasmer` binary under test (default: `wasmer` on `PATH`). |
 | `PATH` | Must contain `wasixcc` and `wasix++` with wasixv2 support. The runner sets `WASIXCC_TARGET=wasm32-wasixv2`. |
-| `WASIXCC_LLVM_LOCATION`, `WASIXCC_SYSROOT` | wasixcc's own settings: the wasixv2 LLVM and the libc2 sysroot under test. Without them, wasixcc uses its downloaded defaults. |
+| `WASIXCC_*` | wasixcc's own settings, such as `WASIXCC_LLVM_LOCATION` and `WASIXCC_SYSROOT`, apply as usual. Without them, wasixcc uses its downloaded defaults. |
 | `WASIXV2_TESTS_BUILD_DIR` | Where tests are built (default `target/suite`). |
 | `WASIXV2_TESTS_TIMEOUT_SECS` | Per-test timeout (default 60). |
 | `WASIXV2_TESTS_EXPECTED_FAILURES` | An expected-failures file to use instead of `expected-failures.txt`. |
 | `WASIXV2_TESTS_BLESS` | Rewrite the expected-failures file from this run's results. |
 
 ```sh
-WASIXV2_TESTS_WASMER=/path/to/wasmer cargo run --release -- [FILTER] [--exact] [--list] ...
+cargo run --release -- [FILTER] [--exact] [--list] ...
 ```
 
 Arguments are those of the standard Rust test harness. A failure report names its cause, and for
@@ -55,8 +55,8 @@ separate test), in that order of precedence. Every build must produce `main`.
 - Shell scripts run with `CC=wasixcc`, `CXX=wasix++` and `WASIXCC_DISCARD_UNSUPPORTED_FLAGS=yes`.
 - Rust fixtures fail: there is no Rust toolchain for `wasm32-wasixv2` yet.
 
-The fixtures come from wasmer's WASIX v1 suite and keep its directive syntax: `//#Directive: args`
-in C, C++ and Rust, `##Directive: args` in shell scripts and `Cargo.toml`.
+Directives use the syntax of wasmer's WASIX v1 suite: `//#Directive: args` in C, C++ and Rust,
+`##Directive: args` in shell scripts and `Cargo.toml`.
 
 | Directive | Meaning |
 | --- | --- |
@@ -70,7 +70,7 @@ in C, C++ and Rust, `##Directive: args` in shell scripts and `Cargo.toml`.
 | `PrefilledFile:{path}:{text}`, `ExpectedFile:{path}:{text}` | A file in the build directory written before the run, or checked after it. |
 | `ProgramName:{name}` | argv[0]. `wasmer run` cannot set it, so these tests fail. |
 | `Ignored:{reason}`, `UnixOnly:{bool}`, `IgnoreMacOS:{bool}`, `SkipEngine:cranelift:{reason}` | Skip the test. |
-| `MinimalLibc`, `FileSystems`, `Toolchains`, `DefaultMappedDirectories` | Accepted for compatibility with the v1 suite, and ignored. |
+| `MinimalLibc`, `FileSystems`, `Toolchains`, `DefaultMappedDirectories` | Accepted for compatibility with the v1 suite's syntax, and ignored. |
 
-Unlike the v1 suite, the runner does not map the build directory into the guest by default: a
-test sees only what its directives map.
+The runner does not map the build directory into the guest: a test sees only what its directives
+map.
