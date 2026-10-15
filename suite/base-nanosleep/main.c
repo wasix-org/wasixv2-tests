@@ -74,7 +74,7 @@ int main(void)
 
 	/* A deadline in the past returns at once. */
 	start = now(CLOCK_MONOTONIC);
-	req = at(start - 1000 * MS);
+	req = at(start / 2);
 	CHECK(clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &req, NULL) == 0);
 	CHECK(now(CLOCK_MONOTONIC) - start < 500 * MS);
 

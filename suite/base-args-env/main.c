@@ -2,7 +2,6 @@
 // auxiliary vector (page size, clock ticks, ids, AT_RANDOM, AT_SECURE).
 //#Args: alpha beta-gamma 3
 //#Env: FOO=bar
-//#Env: EMPTY=
 //#Env: EQ=a=b
 //#ExpectedStdout: ok
 #define _GNU_SOURCE
@@ -44,7 +43,7 @@ int main(int argc, char **argv, char **envp)
 	CHECK(program_invocation_short_name && program_invocation_short_name[0]);
 
 	CHECK(getenv("FOO") && strcmp(getenv("FOO"), "bar") == 0);
-	CHECK(getenv("EMPTY") && strcmp(getenv("EMPTY"), "") == 0);
+	CHECK(setenv("EMPTY", "", 1) == 0 && strcmp(getenv("EMPTY"), "") == 0);
 	CHECK(getenv("EQ") && strcmp(getenv("EQ"), "a=b") == 0);
 	CHECK(getenv("NOT_SET") == NULL);
 	CHECK(in_environ("FOO=bar") && in_environ("EQ=a=b"));

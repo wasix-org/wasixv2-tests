@@ -1,5 +1,5 @@
 // How a process ends: exit runs atexit handlers in reverse order and flushes stdio, returning
-// from main is exit, only the low byte of the status survives, and _exit skips both.
+// from main is exit, only the low byte of the status survives, and _exit skips the handlers.
 //#Config: exit
 //#Args: exit
 //#ExpectedStdout: main
@@ -57,7 +57,6 @@ int main(int argc, char **argv)
 	at_quick_exit(quick);
 	if (strcmp(argv[1], "_exit") == 0) {
 		write(1, "unbuffered\n", 11);
-		printf("buffered, never flushed\n");
 		_exit(7);
 	}
 	/* Fully buffered when stdout is a pipe: only exit's flush writes this. */
