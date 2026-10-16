@@ -1,4 +1,4 @@
-# Tests of the wasixv2 suite that are expected to fail, grouped by the cause the runner reported.
+# Tests that are expected to fail, grouped by the cause the runner reported.
 #
 # A listed test that fails passes the run; a listed test that passes fails it, so take it off the
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file

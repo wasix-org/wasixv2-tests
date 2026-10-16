@@ -1,0 +1,15 @@
+# Tests that pass or fail from run to run. They are reported as ignored and never run, so they
+# neither fail the run nor land in expected-failures/. Fix the cause, then take the test off this
+# list; a name that matches no test fails discovery. Format as in excluded.txt.
+
+base-mmap-threads/default                                  # exits nonzero or passes
+posix/conformance/interfaces/aio_error/2-1                 # UNRESOLVED or PASS
+posix/conformance/interfaces/pthread_atfork/3-3            # timing
+posix/conformance/interfaces/pthread_attr_destroy/1-1      # timing
+posix/conformance/interfaces/pthread_barrier_destroy/2-1   # UNSUPPORTED or FAIL
+posix/conformance/interfaces/pthread_barrier_init/4-1      # under load the kernel panics: "syscall from an unknown task"
+posix/conformance/interfaces/pthread_cancel/3-1            # timing
+posix/conformance/interfaces/pthread_equal/2-1             # hangs about half the time
+posix/conformance/interfaces/pthread_mutex_trylock/4-3     # timing
+posix/conformance/interfaces/pthread_once/6-1              # hangs most of the time
+posix/conformance/interfaces/pthread_rwlock_unlock/3-1     # timing

@@ -1,0 +1,566 @@
+//! The Linux Test Project (`upstream/ltp`, wasix-org's fork with the wasixv2 patches): the tests
+//! of LTP's `runtest/` lists, named `ltp/<list>/<tag>` and run with the list's command line.
+//!
+//! LTP is built once per commit: its own configure and makefiles with wasixcc, against Linux's
+//! UAPI headers, which only LTP's build sees. Tests whose metadata (or `excluded.txt`) shows they
+//! cannot make sense on wasixv2 are excluded.
+
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::sync::OnceLock;
+
+use anyhow::{Context, Result, bail, ensure};
+use walkdir::WalkDir;
+
+use super::{Case, ExcludeList, Excluded, Invocation, Outcome, run_wasm, wasixcc_env};
+use crate::{Failure, Suite};
+
+/// The `runtest/` lists that test the system interface wasixv2 provides.
+const LISTS: &[&str] = &[
+    "syscalls",
+    "syscalls-ipc",
+    "mm",
+    "fs",
+    "fs_perms_simple",
+    "fs_bind",
+    "pty",
+    "sched",
+    "math",
+    "nptl",
+    "fcntl-locktests",
+    "containers",
+    "cve",
+    "crypto",
+    "watchqueue",
+    "dio",
+    "dma_thread_diotest",
+    "ltp-aiodio.part1",
+    "ltp-aiodio.part2",
+    "ltp-aiodio.part3",
+    "ltp-aiodio.part4",
+    "ltp-aio-stress",
+    "capability",
+    "net.features",
+    "net.ipv6",
+    "net.ipv6_lib",
+    "net.multicast",
+    "net.sctp",
+    "net.tcp_cmds",
+];
+
+/// The other lists, which test hardware, kernel internals or things wasixv2 has no counterpart
+/// for, and why. A `*` suffix matches a prefix.
+const EXCLUDED_LISTS: &[(&str, &str)] = &[
+    ("can", "CAN bus devices"),
+    (
+        "commands",
+        "host userspace commands, not the system interface",
+    ),
+    ("controllers", "cgroups"),
+    ("cpuhotplug", "CPU hotplug"),
+    ("crashme", "executes random machine code"),
+    ("fs_readonly", "block devices"),
+    ("hugetlb", "huge pages"),
+    ("hyperthreading", "CPU topology"),
+    ("ima", "kernel integrity measurement"),
+    ("input", "input devices"),
+    ("kernel_misc", "kernel internals and modules"),
+    ("kvm", "KVM"),
+    ("net.nfs", "NFS over a second host"),
+    ("net_stress.*", "network stress between two hosts"),
+    ("net.rpc_tests", "SunRPC (no libtirpc)"),
+    ("net.tirpc_tests", "SunRPC (no libtirpc)"),
+    ("numa", "NUMA"),
+    ("power_management_tests", "power management"),
+    ("scsi_debug.part1", "SCSI devices"),
+    ("smack", "the Smack LSM"),
+    ("smoketest", "duplicates the other lists"),
+    ("staging", "unmerged kernel features"),
+    ("sysfs", "sysfs device objects"),
+    ("thermal", "thermal devices"),
+    ("tpm_tools", "TPM devices"),
+    ("tracing", "kernel tracing"),
+    ("uevent", "device events"),
+];
+
+/// Linux release whose UAPI headers LTP builds against, the newest release covering wasixv2's
+/// syscall table but for `fchroot`.
+const LINUX_UAPI_TAG: &str = "v7.2";
+
+pub struct Test {
+    name: String,
+    command: String,
+    args: Vec<String>,
+}
+
+struct Prepared {
+    /// `opt/ltp` of the installed build.
+    ltproot: PathBuf,
+    /// Leaf directory of each source file stem, and its build log.
+    logs: HashMap<String, PathBuf>,
+}
+
+static PREPARED: OnceLock<Result<Prepared, String>> = OnceLock::new();
+
+fn src() -> PathBuf {
+    super::upstream_dir().join("ltp")
+}
+
+pub fn discover(
+    suite_build_root: &Path,
+    excludes: &ExcludeList,
+    excluded: &mut Excluded,
+) -> Result<Vec<(String, Case)>> {
+    ensure!(
+        src().join("runtest").is_dir(),
+        "upstream/ltp is not checked out: run `git submodule update --init --recursive`"
+    );
+    let metadata = metadata(suite_build_root)?;
+    let sources = source_index(&src());
+    let mut tests = Vec::new();
+    let mut all_lists: Vec<String> = std::fs::read_dir(src().join("runtest"))?
+        .filter_map(Result::ok)
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .filter(|n| n != "Makefile")
+        .collect();
+    all_lists.sort();
+    for list in all_lists {
+        let entries = runtest_entries(&src().join("runtest").join(&list))?;
+        let excluded_list = EXCLUDED_LISTS
+            .iter()
+            .find(|(l, _)| match l.strip_suffix('*') {
+                Some(prefix) => list.starts_with(prefix),
+                None => *l == list,
+            });
+        if let Some((_, reason)) = excluded_list {
+            for _ in &entries {
+                excluded.add(format!("LTP list `{list}`: {reason}"));
+            }
+            continue;
+        }
+        if !LISTS.contains(&list.as_str()) {
+            bail!("runtest/{list} is neither in LISTS nor EXCLUDED_LISTS");
+        }
+        for (tag, command, args) in entries {
+            let name = format!("ltp/{list}/{tag}");
+            let reason = excludes
+                .reason(&name)
+                .map(str::to_owned)
+                .or_else(|| metadata_reason(&metadata, &command))
+                .or_else(|| old_api_reason(&sources, &command));
+            if let Some(reason) = reason {
+                excluded.add(reason);
+                continue;
+            }
+            let test = Test {
+                name: name.clone(),
+                command,
+                args,
+            };
+            tests.push((name, Case::Ltp(test)));
+        }
+    }
+    Ok(tests)
+}
+
+/// `tag command args...` lines of a runtest list.
+fn runtest_entries(path: &Path) -> Result<Vec<(String, String, Vec<String>)>> {
+    let text =
+        std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+    let mut entries = Vec::new();
+    for line in text.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let mut words = line.split_whitespace();
+        let (Some(tag), Some(command)) = (words.next(), words.next()) else {
+            continue;
+        };
+        entries.push((
+            tag.to_owned(),
+            command.to_owned(),
+            words.map(str::to_owned).collect(),
+        ));
+    }
+    Ok(entries)
+}
+
+/// The metadata key of a runtest command: its binary, without the `_64` of the
+/// `_FILE_OFFSET_BITS=64` variants.
+fn metadata_key(command: &str) -> &str {
+    command.strip_suffix("_64").unwrap_or(command)
+}
+
+/// Why a test's declared requirements cannot make sense on wasixv2.
+fn metadata_reason(metadata: &serde_json::Value, command: &str) -> Option<String> {
+    let test = metadata.get("tests")?.get(metadata_key(command))?;
+    let has = |key: &str| {
+        test.get(key)
+            .is_some_and(|v| !v.is_null() && v != &serde_json::Value::from(0))
+    };
+    let reason = if has("needs_root") {
+        "needs root, which a wasixv2 process never is"
+    } else if has("needs_device")
+        || has("format_device")
+        || has("mount_device")
+        || has("all_filesystems")
+        || has("dev_min_size")
+        || has("needs_rofs")
+        || has("needs_overlay")
+        || has("needs_devfs")
+        || has("filesystems")
+    {
+        "needs block devices or real filesystems; the module owns its whole filesystem"
+    } else if has("taint_check") {
+        "checks the kernel's taint flags"
+    } else if has("needs_hugetlbfs") || has("hugepages") {
+        "needs huge pages, which wasm memory does not have"
+    } else if has("needs_cgroup_ctrls") || has("needs_cgroup_ver") || has("needs_cgroup_nsdelegate")
+    {
+        "needs cgroups"
+    } else if has("needs_kconfigs") {
+        "reads the kernel's build configuration"
+    } else if has("min_swap_avail") {
+        "needs swap"
+    } else if has("needs_cpu_vendor") {
+        "needs a particular CPU"
+    } else if test
+        .get("supported_archs")
+        .and_then(|a| a.as_array())
+        .is_some_and(|a| !a.iter().any(|v| v.as_str() == Some("wasm32")))
+    {
+        "architecture-specific"
+    } else if test
+        .get("needs_abi_bits")
+        .is_some_and(|b| b.as_u64() == Some(64) || b.as_str() == Some("64"))
+    {
+        "needs a 64-bit ABI; wasixv2 is wasm32"
+    } else {
+        return None;
+    };
+    Some(format!("LTP: {reason}"))
+}
+
+/// Old-API tests have no metadata; the ones that require root say so in their source.
+fn old_api_reason(sources: &HashMap<String, PathBuf>, command: &str) -> Option<String> {
+    let path = sources.get(metadata_key(command))?;
+    let text = std::fs::read_to_string(path).ok()?;
+    (text.contains("tst_require_root()") && !text.contains("struct tst_test"))
+        .then(|| "LTP: needs root, which a wasixv2 process never is".to_owned())
+}
+
+/// Every `.c` under `testcases/` by stem, for finding a test's source and build log.
+fn source_index(root: &Path) -> HashMap<String, PathBuf> {
+    WalkDir::new(root.join("testcases"))
+        .into_iter()
+        .filter_map(Result::ok)
+        .filter(|e| e.file_type().is_file() && e.path().extension().is_some_and(|x| x == "c"))
+        .map(|e| {
+            let stem = e.path().file_stem().unwrap().to_string_lossy().into_owned();
+            (stem, e.into_path())
+        })
+        .collect()
+}
+
+/// LTP's `metadata/ltp.json`, generated with its host-side `metaparse` and cached per commit.
+fn metadata(build_root: &Path) -> Result<serde_json::Value> {
+    let commit = super::git(&src(), &["rev-parse", "HEAD"])?;
+    let dir = build_root.join("ltp-metadata").join(&commit[..12]);
+    let json = dir.join("ltp.json");
+    if !json.exists() {
+        let tools = dir.join("metadata");
+        std::fs::create_dir_all(&tools)?;
+        for tool in ["metaparse", "metaparse-sh"] {
+            let status = Command::new(std::env::var("HOSTCC").unwrap_or_else(|_| "cc".to_owned()))
+                .arg("-O2")
+                .arg("-I")
+                .arg(src().join("include"))
+                .arg(src().join(format!("metadata/{tool}.c")))
+                .arg("-o")
+                .arg(tools.join(tool))
+                .status()
+                .context("building LTP's metaparse needs a host C compiler (`cc` or HOSTCC)")?;
+            ensure!(status.success(), "building LTP's {tool} failed");
+        }
+        let out = Command::new("sh")
+            .arg(src().join("metadata/parse.sh"))
+            .current_dir(&tools)
+            .output()?;
+        ensure!(
+            out.status.success(),
+            "LTP's metadata/parse.sh failed: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        std::fs::write(&json, &out.stdout)?;
+    }
+    let text = std::fs::read_to_string(&json)?;
+    serde_json::from_str(&text).context("parsing LTP's ltp.json")
+}
+
+/// Linux's UAPI headers for LTP's build only, with `asm/unistd.h` replaced by libc2's syscall
+/// numbers, which are the wasixv2 ABI's.
+fn uapi_headers(build_root: &Path) -> Result<PathBuf> {
+    let out = build_root.join(format!("linux-uapi-{LINUX_UAPI_TAG}"));
+    let ready = out.join(".ready");
+    if ready.exists() {
+        return Ok(out.join("include"));
+    }
+    let linux = build_root.join(format!("linux-{LINUX_UAPI_TAG}"));
+    if !linux.join("Makefile").exists() {
+        if linux.exists() {
+            std::fs::remove_dir_all(&linux)?;
+        }
+        let clone = Command::new("git")
+            .args(["clone", "-q", "--depth", "1", "--branch", LINUX_UAPI_TAG])
+            .args([
+                "--filter=blob:none",
+                "--sparse",
+                "https://github.com/torvalds/linux.git",
+            ])
+            .arg(&linux)
+            .status()?;
+        ensure!(clone.success(), "cloning Linux {LINUX_UAPI_TAG} failed");
+        let sparse = Command::new("git")
+            .arg("-C")
+            .arg(&linux)
+            .args([
+                "sparse-checkout",
+                "set",
+                "include",
+                "arch/riscv",
+                "scripts",
+                "usr",
+                "tools/include",
+            ])
+            .status()?;
+        ensure!(sparse.success(), "sparse-checkout of Linux failed");
+    }
+    // riscv's UAPI: wasixv2's struct layouts and constants follow riscv32.
+    let install = Command::new("make")
+        .arg("-s")
+        .arg("-C")
+        .arg(&linux)
+        .args(["ARCH=riscv", "headers_install"])
+        .arg(format!("INSTALL_HDR_PATH={}", out.display()))
+        .status()?;
+    ensure!(install.success(), "Linux headers_install failed");
+    std::fs::write(
+        out.join("include/asm/unistd.h"),
+        "/* wasixv2: syscall numbers are libc2's, which are the wasixv2 ABI's. riscv32's differ\n \
+         * for lseek and mmap. Only LTP's build sees this directory. */\n#include <sys/syscall.h>\n",
+    )?;
+    std::fs::write(&ready, LINUX_UAPI_TAG)?;
+    Ok(out.join("include"))
+}
+
+fn prepare(suite: &Suite) -> Result<Prepared> {
+    let uapi = uapi_headers(&suite.build_root)?;
+    let tree = super::source_copy(suite, "ltp")?;
+    let ltproot = tree.join("install/opt/ltp");
+    let logs_dir = tree.join("wasixv2-build-logs");
+    let ready = tree.join(".wasixv2-ltp-built");
+    let sources = source_index(&tree);
+    let logs = sources
+        .iter()
+        .map(|(stem, path)| {
+            let leaf = path.parent().unwrap().strip_prefix(&tree).unwrap();
+            let log = logs_dir.join(format!(
+                "{}.log",
+                leaf.display().to_string().replace('/', "_")
+            ));
+            (stem.clone(), log)
+        })
+        .collect();
+    if ready.exists() {
+        return Ok(Prepared { ltproot, logs });
+    }
+    let env = |cmd: &mut Command| {
+        wasixcc_env(cmd).current_dir(&tree);
+    };
+    let mut autotools = Command::new("make");
+    env(&mut autotools);
+    ensure!(
+        autotools.arg("autotools").output()?.status.success(),
+        "LTP: make autotools failed"
+    );
+    let mut configure = Command::new("./configure");
+    env(&mut configure);
+    let out = configure
+        .args([
+            "--host=wasm32-unknown-wasixv2",
+            "CC=wasixcc",
+            "AR=wasixar",
+            "RANLIB=wasixranlib",
+        ])
+        .args(["NM=wasixnm", "HOSTCC=cc"])
+        .arg(format!("CPPFLAGS=-isystem {}", uapi.display()))
+        .env("WASIXCC_AUTOCONF_WORKAROUNDS", "yes")
+        .output()?;
+    ensure!(
+        out.status.success(),
+        "LTP: configure failed:\n{}",
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let mut lib = Command::new("make");
+    env(&mut lib);
+    let out = lib
+        .args(["-C", "lib", "-j"])
+        .arg(jobs().to_string())
+        .output()?;
+    ensure!(
+        out.status.success(),
+        "LTP: building lib failed:\n{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+
+    // Leaf directories one by one: LTP's directory makefiles stop at the first failure.
+    std::fs::create_dir_all(&logs_dir)?;
+    let leaves: Vec<PathBuf> = WalkDir::new(tree.join("testcases"))
+        .into_iter()
+        .filter_map(Result::ok)
+        .filter(|e| e.file_name() == "Makefile")
+        .filter(|e| {
+            std::fs::read_to_string(e.path()).is_ok_and(|m| m.contains("generic_leaf_target"))
+        })
+        .map(|e| e.path().parent().unwrap().to_path_buf())
+        .collect();
+    let next = std::sync::atomic::AtomicUsize::new(0);
+    std::thread::scope(|s| {
+        for _ in 0..jobs() {
+            s.spawn(|| {
+                loop {
+                    let i = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    let Some(leaf) = leaves.get(i) else { break };
+                    let rel = leaf.strip_prefix(&tree).unwrap().display().to_string();
+                    let log = logs_dir.join(format!("{}.log", rel.replace('/', "_")));
+                    let mut text = String::new();
+                    for target in [None, Some("install")] {
+                        let mut make = Command::new("make");
+                        env(&mut make);
+                        make.arg("-k").arg("-C").arg(leaf);
+                        if let Some(t) = target {
+                            make.arg(t)
+                                .arg(format!("DESTDIR={}", tree.join("install").display()));
+                        }
+                        if let Ok(out) = make.output() {
+                            text.push_str(&String::from_utf8_lossy(&out.stdout));
+                            text.push_str(&String::from_utf8_lossy(&out.stderr));
+                        }
+                    }
+                    let _ = std::fs::write(&log, text);
+                }
+            });
+        }
+    });
+    std::fs::write(&ready, "")?;
+    Ok(Prepared { ltproot, logs })
+}
+
+fn jobs() -> usize {
+    std::thread::available_parallelism().map_or(4, |n| n.get())
+}
+
+impl Test {
+    pub fn run(&self, suite: &Suite) -> Result<Outcome, Failure> {
+        let prepared = PREPARED
+            .get_or_init(|| prepare(suite).map_err(|e| format!("{e:#}")))
+            .as_ref()
+            .map_err(|e| Failure::harness(format!("preparing LTP: {e}")))?;
+        if self.needs_shell() {
+            return Err(Failure::new(
+                "runner: a shell command; needs a shell in the guest",
+                format!("{} {}", self.command, self.args.join(" ")),
+            ));
+        }
+        let binary = prepared.ltproot.join("testcases/bin").join(&self.command);
+        let Ok(head) = std::fs::read(&binary).map(|b| b.into_iter().take(4).collect::<Vec<_>>())
+        else {
+            return Err(self.build_failure(prepared));
+        };
+        if head.starts_with(b"#!") {
+            return Err(Failure::new(
+                "runner: a shell script; needs a shell in the guest",
+                format!("{} is a script", binary.display()),
+            ));
+        }
+        let dir = suite.build_root.join(&self.name);
+        std::fs::create_dir_all(&dir).map_err(|e| Failure::harness(e.to_string()))?;
+        let env = [
+            ("LTPROOT", "/opt/ltp"),
+            ("PATH", "/opt/ltp/testcases/bin:/usr/bin:/bin"),
+            ("TMPDIR", "/tmp"),
+            ("LTP_COLORIZE_OUTPUT", "0"),
+        ];
+        let ran = run_wasm(
+            suite,
+            &Invocation {
+                module: binary,
+                args: self.args.clone(),
+                env: env
+                    .iter()
+                    .map(|(k, v)| (k.to_string(), v.to_string()))
+                    .collect(),
+                volumes: vec![(prepared.ltproot.clone(), "/opt/ltp".to_owned())],
+                cwd: None,
+            },
+            &dir,
+        )?;
+        match ran.output.status {
+            Some(0) => return Ok(Outcome::Passed),
+            // Only TCONF results: the test found what it needs missing.
+            Some(32) => {
+                let why = super::first_line(&ran.output.stdout, |l| l.contains("TCONF"))
+                    .map(old_api_line)
+                    .unwrap_or_else(|| "TCONF".to_owned());
+                return Ok(Outcome::Skipped(why));
+            }
+            _ => {}
+        }
+        let output = format!("{}\n{}", ran.output.stdout, ran.output.stderr);
+        let cause = super::first_line(&output, |l| l.contains("TFAIL") || l.contains("TBROK"))
+            .map(old_api_line)
+            .unwrap_or_else(|| super::libc_test::exit_cause(ran.output.status));
+        Err(ran.fail(suite, cause))
+    }
+
+    /// A shell script, or a runtest line that only a shell can run (`;`, pipes, `$VAR`).
+    fn needs_shell(&self) -> bool {
+        self.command.ends_with(".sh")
+            || self
+                .args
+                .iter()
+                .any(|a| a.contains([';', '|', '&', '$', '>', '<']))
+    }
+
+    /// The binary was not installed: report the first error of its directory's build.
+    fn build_failure(&self, prepared: &Prepared) -> Failure {
+        let log = prepared
+            .logs
+            .get(metadata_key(&self.command))
+            .and_then(|log| std::fs::read_to_string(log).ok())
+            .unwrap_or_default();
+        let cause = match crate::build::first_error_line(&log, "").as_str() {
+            "failed without output" => {
+                format!("`{}` is not built by LTP's makefiles", self.command)
+            }
+            line => line.to_owned(),
+        };
+        Failure::new(
+            format!("build: {cause}"),
+            format!("`{}` was not built\n--- build log\n{log}", self.command),
+        )
+    }
+}
+
+/// The cause in an LTP result line. The old API prints `name  N  TFAIL  :  file.c:42: message`,
+/// the new one `file.c:42: TFAIL: message`; both become `TFAIL: message`.
+fn old_api_line(line: &str) -> String {
+    for kind in ["TFAIL", "TBROK", "TCONF"] {
+        if let Some((_, rest)) = line.split_once(&format!("{kind}  :")) {
+            return super::cause_from_line(&format!("{kind}: "), rest);
+        }
+    }
+    super::cause_from_line("", line)
+}

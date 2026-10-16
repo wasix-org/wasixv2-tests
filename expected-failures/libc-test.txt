@@ -1,0 +1,97 @@
+# Tests that are expected to fail, grouped by the cause the runner reported.
+#
+# A listed test that fails passes the run; a listed test that passes fails it, so take it off the
+# list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
+# with `WASIXV2_TESTS_BLESS=1`.
+
+## "%s": for "683078400" expected 1991-08-25T00:00:00 but got 1900-01-00T00:00:00
+libc-test/functional/strptime
+
+## (fd = open("/dev/zero", O_RDONLY)) >= 0 failed: No such file or directory
+libc-test/regression/syscall-sign-extend
+
+## (pid = fork()) >= 0 failed (errno: Function not implemented)
+libc-test/regression/fflush-exit
+
+## ENOSYS: FutexTime64
+libc-test/functional/pthread_mutex_pi
+libc-test/functional/pthread_robust
+
+## ENOSYS: Msgctl, Msgget
+libc-test/functional/ipc_msg
+
+## ENOSYS: Semctl, Semget
+libc-test/functional/ipc_sem
+
+## ENOSYS: Shmctl, Shmget
+libc-test/functional/ipc_shm
+
+## RN fmaf(-0x1.001p-81,0x1.ffe002p-70,0x1.0002p-133) want 0x1.0001p-133 got 0x1.0002p-133 ulperr 0.500 = 0x1p+0 + -0x1p-1
+libc-test/math/fmaf
+
+## build: error: chained comparison 'X <= Y >= Z' does not behave the same as a mathematical expression [-Wparentheses]
+libc-test/musl/pleval
+
+## build: error: defining a type within '__builtin_offsetof' is a C23 extension [-Werror,-Wc23-extensions]
+libc-test/api/stddef
+
+## build: error: switch condition has boolean value [-Werror,-Wswitch-bool]
+libc-test/api/ftw
+libc-test/api/iso646
+libc-test/api/stdlib
+libc-test/api/sys_stat
+libc-test/api/sys_wait
+
+## build: error: use of undeclared identifier '_PC_TIMESTAMP_RESOLUTION'
+libc-test/api/unistd
+
+## build: wasm-ld: error: /tmp/.tmp00lVX0/tls_align.c.0.o: undefined symbol: t
+libc-test/functional/tls_align
+
+## dlopen failed
+libc-test/functional/tls_align_dlopen
+
+## dlopen failed: Dynamic loading not supported
+libc-test/functional/tls_init_dlopen
+
+## dlopen libc-test/functional/dlopen/dlopen_dso.so failed: Dynamic loading not supported
+libc-test/functional/dlopen
+
+## execl failed: No such file or directory
+libc-test/functional/vfork
+
+## execle failed: No such file or directory
+libc-test/regression/execle-env
+
+## f = popen("echo hello", "r") failed (errno = 2)
+libc-test/functional/popen
+
+## fork failed: Function not implemented
+libc-test/regression/daemon-failure
+libc-test/regression/pthread_exit-dtor
+libc-test/regression/raise-race
+
+## mod = dlopen("tls_get_new-dtv_dso.so", RTLD_NOW) failed
+libc-test/regression/tls_get_new-dtv
+
+## posix_spawnp(&pid, "echo", &fa, 0, (char *[]){"echo","hello",0}, 0) failed, got 2 want 0
+libc-test/functional/spawn
+
+## res != PTHREAD_CANCELED failed (shm_open, canceled thread exit status)
+libc-test/functional/pthread_cancel-points
+
+## stat("/dev/null",&st)==0 failed: errno = No such file or directory
+libc-test/functional/stat
+
+## strtold("0x1.111111111111111111111111111281") want 0x1.1111111111111111111111111113p+0 got 0x1.1111111111111111111111111112p+0
+libc-test/functional/strtold
+
+## timeout
+libc-test/functional/pthread_cancel
+libc-test/functional/sem_open
+
+## utimensat(AT_FDCWD, "/dev/null/invalid", ((struct timespec[2]){{.tv_nsec=UTIME_OMIT},{.tv_nsec=UTIME_OMIT}}), 0)==0 || errno==ENOTDIR failed: No such file or di
+libc-test/functional/utime
+
+## wordexp("one two three", 0) returned WRDE_NOSPACE, want 0
+libc-test/functional/wordexp

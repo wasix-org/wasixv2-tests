@@ -1,9 +1,23 @@
 # wasixv2-tests
 
-The test suite for wasixv2: programs under `suite/`, built with
-[wasixcc](https://github.com/wasix-org/wasixcc) for `wasm32-wasixv2` against
+The test suite for wasixv2: programs under `suite/`, and three upstream suites under `upstream/`,
+built with [wasixcc](https://github.com/wasix-org/wasixcc) for `wasm32-wasixv2` against
 [libc2](https://github.com/wasix-org/libc2), and run with
 [wasmer](https://github.com/wasmerio/wasmer)'s `wasmer run`.
+
+| Suite | Names | Source |
+| --- | --- | --- |
+| wasixv2's own tests | `<fixture>/<config>` | `suite/` |
+| musl's [libc-test](https://repo.or.cz/libc-test.git) | `libc-test/<dir>/<test>` | `upstream/libc-test` |
+| The Open POSIX Test Suite | `posix/<path>` | `testcases/open_posix_testsuite` in `upstream/ltp` |
+| The [Linux Test Project](https://github.com/linux-test-project/ltp) | `ltp/<runtest list>/<tag>` | `upstream/ltp`: [wasix-org/ltp](https://github.com/wasix-org/ltp), branch `wasixv2` |
+
+The upstream suites are submodules, so check out recursively:
+`git submodule update --init --recursive`. LTP is wasix-org's fork, whose `wasixv2` branch adds
+the few patches LTP needs here: its test library runs each test in its own process instead of a
+forked child sharing memory with the parent, it compares wasixv2 as newer than any kernel version,
+and its `__linux__` checks also accept `__wasixv2__`. The upstream code keeps its own licenses
+(LTP and the Open POSIX suite are GPLv2+), separate from this repository's.
 
 This repository has no CI of its own. It is a submodule of wasmer (`tests/wasixv2`) and libc2
 (`wasixv2/tests`), and each of them runs it against its own build:
@@ -11,8 +25,9 @@ This repository has no CI of its own. It is a submodule of wasmer (`tests/wasixv
 - wasmer: `make test-wasixv2`, with the wasmer it builds
 - libc2: `make wasixv2-test`, with the sysroot it builds
 
-Most tests fail until wasixv2 is complete. `expected-failures.txt` tracks them, so a run is green
-when nothing regressed and nothing started passing silently.
+Many tests fail until wasixv2 is complete. `expected-failures/<suite>.txt` tracks them, so a run
+is green when nothing regressed and nothing started passing silently. Upstream tests that cannot
+make sense on wasixv2 are excluded instead; see below.
 
 ## Running
 
@@ -25,8 +40,14 @@ The runner builds and runs every test. It needs, from the environment:
 | `WASIXCC_*` | wasixcc's own settings, such as `WASIXCC_LLVM_LOCATION` and `WASIXCC_SYSROOT`, apply as usual. Without them, wasixcc uses its downloaded defaults. |
 | `WASIXV2_TESTS_BUILD_DIR` | Where tests are built (default `target/suite`). |
 | `WASIXV2_TESTS_TIMEOUT_SECS` | Per-test timeout (default 60). |
-| `WASIXV2_TESTS_EXPECTED_FAILURES` | An expected-failures file to use instead of `expected-failures.txt`. |
-| `WASIXV2_TESTS_BLESS` | Rewrite the expected-failures file from this run's results. |
+| `WASIXV2_TESTS_EXPECTED_FAILURES` | A directory of expected-failures files to use instead of `expected-failures/`. |
+| `WASIXV2_TESTS_BLESS` | Rewrite the expected-failures files from this run's results. |
+| `HOSTCC` | The host C compiler that builds LTP's metadata parser (default `cc`). |
+
+The first run also fetches Linux's UAPI headers (v7.2, a shallow sparse clone) into the build
+directory: LTP's build needs `<linux/*.h>` and `<asm/*.h>`, and only its build sees them, with
+`asm/unistd.h` replaced by libc2's syscall numbers. Building LTP takes a few minutes, once per
+LTP commit.
 
 ```sh
 cargo run --release -- [FILTER] [--exact] [--list] ...
@@ -38,12 +59,45 @@ a test that fails at run time, the syscalls the kernel answered with `ENOSYS` (f
 
 ## Expected failures
 
-`expected-failures.txt` lists failing tests under `## <cause>` headings. A listed test that fails
-passes the run, and is shown as `[xfail]`. A listed test that passes fails the run: take it off
-the list. A name that matches no test fails the `expected-failures` check.
+`expected-failures/<suite>.txt` (`wasixv2`, `libc-test`, `posix`, `ltp`) lists failing tests under
+`## <cause>` headings. A listed test that fails passes the run, and is shown as `[xfail]`. A listed
+test that passes fails the run: take it off the list. A name that matches no test fails the
+`expected-failures` check.
 
-After changing wasmer or libc2, regenerate the list with `WASIXV2_TESTS_BLESS=1` and review the
+After changing wasmer or libc2, regenerate the lists with `WASIXV2_TESTS_BLESS=1` and review the
 diff. Tests that the run did not include keep their entries.
+
+## Excluded tests
+
+Upstream tests that cannot make sense on wasixv2 are not registered at all, and a run prints how
+many were excluded for each reason. Expected failures are for tests that make sense and do not
+work yet; exclusions are for tests that never will, such as tests that need root (a wasixv2
+process never is), block devices or real filesystems (the module owns its whole filesystem), huge
+pages, cgroups, kernel modules or a particular CPU.
+
+- LTP tests are excluded by the requirements their metadata declares (`needs_root`,
+  `needs_device`, `taint_check`, ...), see `metadata_reason` in `src/upstream/ltp.rs`.
+- Whole LTP runtest lists about hardware or kernel internals are excluded by `EXCLUDED_LISTS` in
+  the same file; every list is either included or excluded with a reason.
+- `excluded.txt` names the rest, each with a `# reason`; a pattern ending in `*` matches a prefix.
+
+## Flaky tests
+
+`flaky.txt`, in the same format, lists tests that pass or fail from run to run. They are reported
+as ignored and not run, so they neither fail the run nor land in `expected-failures/`. Fix the
+cause, then take the test off the list.
+
+## Results of upstream tests
+
+| Suite | Pass | Skip | Failure cause |
+| --- | --- | --- | --- |
+| libc-test | exit 0; api tests: compiles | | its first line of output |
+| Open POSIX | `PTS_PASS`; `-buildonly` tests: compiles | `PTS_UNSUPPORTED`, `PTS_UNTESTED` | `FAIL` or `UNRESOLVED` and the last line of stdout |
+| LTP | exit 0 | exit 32, only `TCONF` | the first `TFAIL` or `TBROK` line; shell scripts and shell command lines fail as needing a shell |
+
+LTP tests run with LTP's install mounted at `/opt/ltp`, `LTPROOT=/opt/ltp` and its
+`testcases/bin` on `PATH`, so tests can execute their helper programs. LTP tests that are shell
+scripts fail until the guest has a shell.
 
 ## Fixtures
 

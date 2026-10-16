@@ -1,0 +1,7 @@
+[submodule "upstream/ltp"]
+	path = upstream/ltp
+	url = https://github.com/wasix-org/ltp.git
+	branch = wasixv2
+[submodule "upstream/libc-test"]
+	path = upstream/libc-test
+	url = https://repo.or.cz/libc-test.git

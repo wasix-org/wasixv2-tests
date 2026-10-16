@@ -80,7 +80,7 @@ pub fn build(suite: &Suite, config: &Config, dir: &Path) -> Result<PathBuf, Fail
 
 /// The line that best names a build failure, for grouping failures by cause: the first line that
 /// mentions an error, without its source location or any machine-specific path.
-fn first_error_line(stderr: &str, stdout: &str) -> String {
+pub(crate) fn first_error_line(stderr: &str, stdout: &str) -> String {
     let lines = || stderr.lines().chain(stdout.lines()).map(str::trim);
     let line = lines()
         .find(|l| l.to_lowercase().contains("error"))
@@ -97,7 +97,7 @@ fn first_error_line(stderr: &str, stdout: &str) -> String {
 }
 
 /// Drops a leading `file:line:col: ` or `file:line: `, as compilers print it.
-fn strip_location(line: &str) -> &str {
+pub(crate) fn strip_location(line: &str) -> &str {
     let mut rest = line;
     let Some((_file, after)) = rest.split_once(':') else {
         return line;

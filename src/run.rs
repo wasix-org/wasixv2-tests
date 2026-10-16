@@ -12,11 +12,39 @@ use crate::{Failure, Suite, fixture::Config, fixture::Host};
 /// How many of the last syscalls a failure report lists.
 const RECENT_SYSCALLS: usize = 30;
 
-struct Output {
+pub(crate) struct Output {
     /// `None` when the process was killed after the timeout.
-    status: Option<i32>,
-    stdout: String,
-    stderr: String,
+    pub(crate) status: Option<i32>,
+    pub(crate) stdout: String,
+    pub(crate) stderr: String,
+}
+
+/// The output of a run, for failure reports.
+pub(crate) fn captured(output: &Output) -> String {
+    format!(
+        "--- stdout\n{}\n--- stderr\n{}\n",
+        output.stdout.trim_end(),
+        output.stderr.trim_end()
+    )
+}
+
+/// Reruns `cmd` with syscall tracing to name what the kernel does not implement yet: the cause
+/// becomes the ENOSYS syscalls, unless it was a timeout, and the details get the last syscalls.
+pub(crate) fn diagnose(
+    suite: &Suite,
+    cmd: &mut Command,
+    stdin: Option<&[u8]>,
+    failure: &mut Failure,
+) {
+    cmd.env("RUST_LOG", "wasixv2_trace=trace");
+    if let Ok(traced) = execute(suite, cmd, stdin) {
+        let syscalls = Syscalls::parse(&traced.stderr);
+        if !syscalls.enosys.is_empty() && failure.cause != "timeout" {
+            let names: Vec<_> = syscalls.enosys.keys().map(String::as_str).collect();
+            failure.cause = format!("ENOSYS: {}", names.join(", "));
+        }
+        failure.details.push_str(&syscalls.report());
+    }
 }
 
 /// Runs `main` for `config` in `dir` and checks every expectation.
@@ -65,22 +93,17 @@ pub fn run_and_check(
     match check(config, &output, dir) {
         Ok(()) => Ok(()),
         Err(mut failure) => {
-            // Rerun with syscall tracing to name what the kernel does not implement yet.
-            cmd.env("RUST_LOG", "wasixv2_trace=trace");
-            if let Ok(traced) = execute(suite, &mut cmd, config.stdin.as_deref()) {
-                let syscalls = Syscalls::parse(&traced.stderr);
-                if !syscalls.enosys.is_empty() && failure.cause != "timeout" {
-                    let names: Vec<_> = syscalls.enosys.keys().map(String::as_str).collect();
-                    failure.cause = format!("ENOSYS: {}", names.join(", "));
-                }
-                failure.details.push_str(&syscalls.report());
-            }
+            diagnose(suite, &mut cmd, config.stdin.as_deref(), &mut failure);
             Err(failure)
         }
     }
 }
 
-fn execute(suite: &Suite, cmd: &mut Command, stdin: Option<&[u8]>) -> Result<Output, Failure> {
+pub(crate) fn execute(
+    suite: &Suite,
+    cmd: &mut Command,
+    stdin: Option<&[u8]>,
+) -> Result<Output, Failure> {
     let mut child = cmd
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -128,13 +151,7 @@ fn execute(suite: &Suite, cmd: &mut Command, stdin: Option<&[u8]>) -> Result<Out
 }
 
 fn check(config: &Config, output: &Output, dir: &Path) -> Result<(), Failure> {
-    let captured = || {
-        format!(
-            "--- stdout\n{}\n--- stderr\n{}\n",
-            output.stdout.trim_end(),
-            output.stderr.trim_end()
-        )
-    };
+    let captured = || captured(output);
     let Some(status) = output.status else {
         return Err(Failure::new("timeout", captured()));
     };

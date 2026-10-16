@@ -1,13 +1,15 @@
-//! Runs the wasixv2 test suite: builds every fixture under `suite/` with wasixcc for
-//! `wasm32-wasixv2` and runs it with a `wasmer` binary. See the README for the environment it
+//! Runs the wasixv2 test suite: builds every fixture under `suite/`, and the upstream suites
+//! under `upstream/` (libc-test, the Open POSIX Test Suite and LTP), with wasixcc for
+//! `wasm32-wasixv2`, and runs them with a `wasmer` binary. See the README for the environment it
 //! needs.
 //!
-//! Most fixtures fail until wasixv2 is complete. `expected-failures.txt` lists them; a listed test
-//! that fails passes the run, and one that passes fails it so the list keeps shrinking.
+//! Many tests fail until wasixv2 is complete. `expected-failures/<suite>.txt` lists them; a listed
+//! test that fails passes the run, and one that passes fails it so the lists keep shrinking.
 
 mod build;
 mod fixture;
 mod run;
+mod upstream;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -19,6 +21,23 @@ use anyhow::{Context, Result, ensure};
 use libtest_mimic::{Arguments, Completion, Failed, Trial};
 
 use crate::fixture::Config;
+use crate::upstream::{Case, Excluded, Outcome};
+
+/// What a registered test runs.
+enum Test {
+    Fixture(Box<Config>),
+    Upstream(Case),
+}
+
+/// The suite a test belongs to: the first part of its name for upstream suites.
+fn suite_of(name: &str) -> &'static str {
+    match name.split('/').next() {
+        Some("libc-test") => "libc-test",
+        Some("posix") => "posix",
+        Some("ltp") => "ltp",
+        _ => "wasixv2",
+    }
+}
 
 const DEFAULT_TIMEOUT_SECS: u64 = 60;
 
@@ -27,7 +46,7 @@ pub struct Suite {
     pub wasmer: PathBuf,
     pub cc: String,
     pub cxx: String,
-    build_root: PathBuf,
+    pub(crate) build_root: PathBuf,
     pub timeout: Duration,
 }
 
@@ -63,6 +82,10 @@ fn find_on_path(name: &str) -> Option<PathBuf> {
         .find(|path| path.is_file())
 }
 
+pub(crate) fn build_root() -> PathBuf {
+    env_path("WASIXV2_TESTS_BUILD_DIR").unwrap_or_else(|| root().join("target/suite"))
+}
+
 fn env_path(var: &str) -> Option<PathBuf> {
     std::env::var_os(var)
         .filter(|v| !v.is_empty())
@@ -86,8 +109,7 @@ impl Suite {
             wasmer,
             cc: "wasixcc".to_owned(),
             cxx: "wasix++".to_owned(),
-            build_root: env_path("WASIXV2_TESTS_BUILD_DIR")
-                .unwrap_or_else(|| root().join("target/suite")),
+            build_root: build_root(),
             timeout: Duration::from_secs(timeout),
         };
         let probe = std::process::Command::new(&suite.cc)
@@ -101,7 +123,16 @@ impl Suite {
         Ok(suite)
     }
 
-    fn run(&self, config: &Config) -> Result<Completion, Failure> {
+    fn run(&self, test: &Test) -> Result<Completion, Failure> {
+        let config = match test {
+            Test::Fixture(config) => config,
+            Test::Upstream(case) => {
+                return case.run(self).map(|outcome| match outcome {
+                    Outcome::Passed => Completion::Completed,
+                    Outcome::Skipped(why) => Completion::ignored_with(why),
+                });
+            }
+        };
         if let Some(reason) = &config.ignored {
             return Ok(Completion::ignored_with(reason));
         }
@@ -126,25 +157,31 @@ impl Suite {
     }
 }
 
-/// `expected-failures.txt`: test names, grouped under `# <cause>` comment lines.
+/// `expected-failures/<suite>.txt`: test names, grouped under `## <cause>` comment lines.
 struct ExpectedFailures {
-    path: PathBuf,
+    dir: PathBuf,
     /// Test name to the cause it is listed under.
     tests: BTreeMap<String, String>,
 }
 
 impl ExpectedFailures {
     const HEADER: &str = "\
-# Tests of the wasixv2 suite that are expected to fail, grouped by the cause the runner reported.
+# Tests that are expected to fail, grouped by the cause the runner reported.
 #
 # A listed test that fails passes the run; a listed test that passes fails it, so take it off the
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 ";
 
-    fn load(path: PathBuf) -> Result<Self> {
+    fn load(dir: PathBuf) -> Result<Self> {
         let mut tests = BTreeMap::new();
-        if path.exists() {
+        let mut files: Vec<PathBuf> = std::fs::read_dir(&dir)
+            .with_context(|| format!("reading {}", dir.display()))?
+            .filter_map(|e| e.ok().map(|e| e.path()))
+            .filter(|p| p.extension().is_some_and(|x| x == "txt"))
+            .collect();
+        files.sort();
+        for path in files {
             let text = std::fs::read_to_string(&path)
                 .with_context(|| format!("reading {}", path.display()))?;
             let mut cause = String::new();
@@ -162,23 +199,36 @@ impl ExpectedFailures {
                 }
             }
         }
-        Ok(Self { path, tests })
+        Ok(Self { dir, tests })
     }
 
+    /// Writes one file per suite, including empty ones for suites with no failures left.
     fn write(&self) -> Result<()> {
-        let mut by_cause: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+        let mut by_suite: BTreeMap<&str, BTreeMap<&str, Vec<&str>>> = BTreeMap::new();
+        for suite in ["wasixv2", "libc-test", "posix", "ltp"] {
+            by_suite.entry(suite).or_default();
+        }
         for (test, cause) in &self.tests {
-            by_cause.entry(cause).or_default().push(test);
+            by_suite
+                .entry(suite_of(test))
+                .or_default()
+                .entry(cause)
+                .or_default()
+                .push(test);
         }
-        let mut out = String::from(Self::HEADER);
-        for (cause, tests) in by_cause {
-            out.push_str(&format!("\n## {cause}\n"));
-            for test in tests {
-                out.push_str(test);
-                out.push('\n');
+        for (suite, by_cause) in by_suite {
+            let mut out = String::from(Self::HEADER);
+            for (cause, tests) in by_cause {
+                out.push_str(&format!("\n## {cause}\n"));
+                for test in tests {
+                    out.push_str(test);
+                    out.push('\n');
+                }
             }
+            let path = self.dir.join(format!("{suite}.txt"));
+            std::fs::write(&path, out).with_context(|| format!("writing {}", path.display()))?;
         }
-        std::fs::write(&self.path, out).with_context(|| format!("writing {}", self.path.display()))
+        Ok(())
     }
 }
 
@@ -205,10 +255,27 @@ fn main() -> ExitCode {
 
 fn try_main() -> Result<ExitCode> {
     let args = Arguments::from_args();
-    let configs = fixture::discover(&root().join("suite"))?;
-    let expected_path = env_path("WASIXV2_TESTS_EXPECTED_FAILURES")
-        .unwrap_or_else(|| root().join("expected-failures.txt"));
-    let expected = ExpectedFailures::load(expected_path)?;
+    let build_root = build_root();
+    let mut tests: Vec<(String, Test)> = fixture::discover(&root().join("suite"))?
+        .into_iter()
+        .map(|config| (config.test_name(), Test::Fixture(Box::new(config))))
+        .collect();
+    let excludes = upstream::ExcludeList::load("excluded.txt")?;
+    let mut excluded = Excluded::default();
+    let upstream = [
+        upstream::libc_test::discover(&excludes, &mut excluded)?,
+        upstream::posix::discover(&excludes, &mut excluded)?,
+        upstream::ltp::discover(&build_root, &excludes, &mut excluded)?,
+    ];
+    tests.extend(
+        upstream
+            .into_iter()
+            .flatten()
+            .map(|(name, case)| (name, Test::Upstream(case))),
+    );
+    let expected_dir = env_path("WASIXV2_TESTS_EXPECTED_FAILURES")
+        .unwrap_or_else(|| root().join("expected-failures"));
+    let expected = ExpectedFailures::load(expected_dir)?;
     let bless = std::env::var_os("WASIXV2_TESTS_BLESS").is_some();
     // Listing tests needs no toolchain.
     let suite = Arc::new(if args.list {
@@ -218,20 +285,32 @@ fn try_main() -> Result<ExitCode> {
     });
     let tally = Arc::new(Mutex::new(Tally::default()));
 
-    let names: BTreeSet<String> = configs.iter().map(Config::test_name).collect();
+    let names: BTreeSet<String> = tests.iter().map(|(name, _)| name.clone()).collect();
+    ensure!(names.len() == tests.len(), "two tests share a name");
+    // Tests that pass or fail from run to run; they do not run until fixed.
+    let flaky = upstream::ExcludeList::load("flaky.txt")?;
+    let stale: Vec<_> = flaky.stale(&names).collect();
     ensure!(
-        names.len() == configs.len(),
-        "two configurations share a test name"
+        stale.is_empty(),
+        "flaky.txt lists tests that do not exist: {stale:?}"
     );
     let mut trials = vec![stale_entries_trial(&expected, &names)];
-    for config in configs {
-        let name = config.test_name();
+    for (name, test) in tests {
+        if let Some(reason) = flaky.reason(&name) {
+            let reason = format!("flaky: {reason}");
+            let tally = tally.clone();
+            trials.push(Trial::ignorable_test(name, move || {
+                tally.lock().unwrap().ignored += 1;
+                Ok(Completion::ignored_with(reason))
+            }));
+            continue;
+        }
         let listed = expected.tests.contains_key(&name);
         let suite = suite.clone();
         let tally = tally.clone();
         let trial = Trial::ignorable_test(name.clone(), move || {
             let suite = suite.as_ref().as_ref().expect("a toolchain outside --list");
-            let result = suite.run(&config);
+            let result = suite.run(&test);
             let mut tally = tally.lock().unwrap();
             match (result, listed) {
                 (Ok(Completion::Ignored { reason }), _) => {
@@ -248,7 +327,7 @@ fn try_main() -> Result<ExitCode> {
                         return Ok(Completion::Completed);
                     }
                     Err(Failed::from(
-                        "passed, but expected-failures.txt lists it: take it off the list",
+                        "passed, but expected-failures/ lists it: take it off the list",
                     ))
                 }
                 (Err(failure), listed) => {
@@ -284,6 +363,11 @@ fn try_main() -> Result<ExitCode> {
     }
 
     let tally = tally.lock().unwrap();
+    let total: usize = excluded.0.values().sum();
+    println!("excluded, as they cannot make sense on wasixv2: {total}");
+    for (reason, n) in &excluded.0 {
+        println!("  {n:5}  {reason}");
+    }
     println!(
         "wasixv2 suite: {} passed, {} failed as expected, {} failed unexpectedly, \
          {} passed unexpectedly, {} ignored",
@@ -303,11 +387,11 @@ fn try_main() -> Result<ExitCode> {
             .collect();
         tests.extend(tally.failures.clone());
         let blessed = ExpectedFailures {
-            path: expected.path.clone(),
+            dir: expected.dir.clone(),
             tests,
         };
         blessed.write()?;
-        println!("wrote {}", blessed.path.display());
+        println!("wrote {}", blessed.dir.display());
         return Ok(ExitCode::SUCCESS);
     }
     Ok(conclusion.exit_code())
@@ -321,7 +405,7 @@ fn stale_entries_trial(expected: &ExpectedFailures, names: &BTreeSet<String>) ->
         .filter(|name| !names.contains(*name))
         .cloned()
         .collect();
-    let path: PathBuf = expected.path.clone();
+    let path: PathBuf = expected.dir.clone();
     Trial::test("expected-failures", move || {
         if stale.is_empty() {
             return Ok(());

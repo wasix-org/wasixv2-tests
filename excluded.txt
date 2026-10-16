@@ -1,0 +1,12 @@
+# Upstream tests that cannot make sense on wasixv2, and why. They are not registered at all,
+# unlike expected failures, which make sense and do not work yet. Patterns ending in `*` match
+# prefixes. LTP tests are also excluded by the requirements their metadata declares, and whole
+# runtest lists by EXCLUDED_LISTS in src/upstream/ltp.rs.
+
+ltp/syscalls/ptrace* # no way to stop and inspect a guest at the instruction level
+ltp/syscalls/init_module* # loads kernel modules
+ltp/syscalls/finit_module* # loads kernel modules
+ltp/syscalls/delete_module* # unloads kernel modules
+ltp/syscalls/perf_event_open* # hardware performance counters
+ltp/syscalls/fmtmsg01 # glibc's addseverity, which musl does not have
+ltp/syscalls/timer_create01 # glibc's internal struct sigevent layout
