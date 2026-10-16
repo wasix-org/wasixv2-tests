@@ -5,18 +5,54 @@ use std::collections::BTreeMap;
 use std::io::{Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use crate::{Failure, Suite, fixture::Config, fixture::Host};
+
+/// The per-test timeout unless `WASIXV2_TESTS_TIMEOUT_SECS` sets one.
+const DEFAULT_TIMEOUT: Duration = Duration::from_secs(60);
+
+/// libc's `strerror(ENOSYS)`.
+const ENOSYS_MESSAGE: &str = "Function not implemented";
 
 /// How many of the last syscalls a failure report lists.
 const RECENT_SYSCALLS: usize = 30;
 
-struct Output {
+pub struct Output {
     /// `None` when the process was killed after the timeout.
-    status: Option<i32>,
-    stdout: String,
-    stderr: String,
+    pub status: Option<i32>,
+    pub stdout: String,
+    pub stderr: String,
+}
+
+impl Output {
+    /// Both streams, for a failure report.
+    pub fn captured(&self) -> String {
+        format!(
+            "--- stdout\n{}\n--- stderr\n{}\n",
+            self.stdout.trim_end(),
+            self.stderr.trim_end()
+        )
+    }
+
+    /// The guest's exit status, or why there is none: a timeout, or wasmer refusing to run it.
+    pub fn exit_status(&self) -> Result<i32, Failure> {
+        let Some(status) = self.status else {
+            return Err(Failure::new("timeout", self.captured()));
+        };
+        // wasmer's own refusal, e.g. an option the wasixv2 stack does not support yet.
+        if let Some(line) = self
+            .stderr
+            .lines()
+            .find(|l| l.contains("which does not support"))
+        {
+            return Err(Failure::new(
+                format!("wasmer: {}", line.trim().trim_start_matches("error: ")),
+                self.captured(),
+            ));
+        }
+        Ok(status)
+    }
 }
 
 /// Runs `main` for `config` in `dir` and checks every expectation.
@@ -61,17 +97,42 @@ pub fn run_and_check(
     }
     cmd.arg(main).arg("--").args(&config.args).current_dir(dir);
 
-    let output = execute(suite, &mut cmd, config.stdin.as_deref())?;
-    match check(config, &output, dir) {
-        Ok(()) => Ok(()),
+    run_checked(
+        suite,
+        &mut cmd,
+        config.stdin.as_deref(),
+        suite.timeout_or(DEFAULT_TIMEOUT),
+        |output| check(config, output, dir),
+    )
+}
+
+/// Runs a `wasmer run` command and judges its output with `check`. When the check fails, reruns
+/// it with syscall tracing to name what the kernel does not implement yet.
+pub fn run_checked<T>(
+    suite: &Suite,
+    cmd: &mut Command,
+    stdin: Option<&[u8]>,
+    timeout: Duration,
+    check: impl Fn(&Output) -> Result<T, Failure>,
+) -> Result<T, Failure> {
+    let output = execute(suite, cmd, stdin, timeout)?;
+    match check(&output) {
+        Ok(result) => Ok(result),
         Err(mut failure) => {
-            // Rerun with syscall tracing to name what the kernel does not implement yet.
             cmd.env("RUST_LOG", "wasixv2_trace=trace");
-            if let Ok(traced) = execute(suite, &mut cmd, config.stdin.as_deref()) {
+            if let Ok(traced) = execute(suite, cmd, stdin, timeout) {
                 let syscalls = Syscalls::parse(&traced.stderr);
-                if !syscalls.enosys.is_empty() && failure.cause != "timeout" {
+                let libc_enosys = [&output.stdout, &output.stderr]
+                    .iter()
+                    .any(|s| s.contains(ENOSYS_MESSAGE));
+                if failure.cause == "timeout" {
+                    // A hang is the cause, whatever else went wrong.
+                } else if !syscalls.enosys.is_empty() {
                     let names: Vec<_> = syscalls.enosys.keys().map(String::as_str).collect();
                     failure.cause = format!("ENOSYS: {}", names.join(", "));
+                } else if libc_enosys {
+                    // ENOSYS that no syscall returned: a libc stub, such as fork's.
+                    failure.cause.push_str(": ENOSYS from libc");
                 }
                 failure.details.push_str(&syscalls.report());
             }
@@ -80,7 +141,12 @@ pub fn run_and_check(
     }
 }
 
-fn execute(suite: &Suite, cmd: &mut Command, stdin: Option<&[u8]>) -> Result<Output, Failure> {
+fn execute(
+    suite: &Suite,
+    cmd: &mut Command,
+    stdin: Option<&[u8]>,
+    timeout: Duration,
+) -> Result<Output, Failure> {
     let mut child = cmd
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -106,7 +172,7 @@ fn execute(suite: &Suite, cmd: &mut Command, stdin: Option<&[u8]>) -> Result<Out
         buf
     });
 
-    let deadline = Instant::now() + suite.timeout;
+    let deadline = Instant::now() + timeout;
     let status = loop {
         match child.try_wait() {
             Ok(Some(status)) => break status.code().or(Some(-1)),
@@ -128,27 +194,8 @@ fn execute(suite: &Suite, cmd: &mut Command, stdin: Option<&[u8]>) -> Result<Out
 }
 
 fn check(config: &Config, output: &Output, dir: &Path) -> Result<(), Failure> {
-    let captured = || {
-        format!(
-            "--- stdout\n{}\n--- stderr\n{}\n",
-            output.stdout.trim_end(),
-            output.stderr.trim_end()
-        )
-    };
-    let Some(status) = output.status else {
-        return Err(Failure::new("timeout", captured()));
-    };
-    // wasmer's own refusal, e.g. an option the wasixv2 stack does not support yet.
-    if let Some(line) = output
-        .stderr
-        .lines()
-        .find(|l| l.contains("which does not support"))
-    {
-        return Err(Failure::new(
-            format!("wasmer: {}", line.trim().trim_start_matches("error: ")),
-            captured(),
-        ));
-    }
+    let captured = || output.captured();
+    let status = output.exit_status()?;
     if config.must_fail {
         if status == 0 {
             return Err(Failure::new("exit status: expected non-zero", captured()));

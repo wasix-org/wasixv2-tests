@@ -1,0 +1,4 @@
+[submodule "ltp"]
+	path = external/ltp
+	url = https://github.com/linux-test-project/ltp.git
+	shallow = true

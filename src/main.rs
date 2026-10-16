@@ -1,11 +1,12 @@
-//! Runs the wasixv2 test suite: builds every fixture under `suite/` with wasixcc for
-//! `wasm32-wasixv2` and runs it with a `wasmer` binary. See the README for the environment it
-//! needs.
+//! Runs the wasixv2 test suite: builds every fixture under `suite/`, and every test of the external
+//! suites checked out under `external/`, with wasixcc for `wasm32-wasixv2` and runs it with a
+//! `wasmer` binary. See the README for the environment it needs.
 //!
-//! Most fixtures fail until wasixv2 is complete. `expected-failures.txt` lists them; a listed test
+//! Most tests fail until wasixv2 is complete. `expected-failures.txt` lists them; a listed test
 //! that fails passes the run, and one that passes fails it so the list keeps shrinking.
 
 mod build;
+mod external;
 mod fixture;
 mod run;
 
@@ -20,15 +21,40 @@ use libtest_mimic::{Arguments, Completion, Failed, Trial};
 
 use crate::fixture::Config;
 
-const DEFAULT_TIMEOUT_SECS: u64 = 60;
-
 /// Everything a test needs from the environment.
 pub struct Suite {
     pub wasmer: PathBuf,
     pub cc: String,
     pub cxx: String,
-    build_root: PathBuf,
-    pub timeout: Duration,
+    pub build_root: PathBuf,
+    /// `WASIXV2_TESTS_TIMEOUT_SECS`, for every test; each source has its own default.
+    timeout: Option<Duration>,
+}
+
+/// How a test that did not fail ended.
+pub enum Outcome {
+    Passed,
+    Ignored(String),
+    /// The test needs an optional feature that is missing, such as Open POSIX's
+    /// `PTS_UNSUPPORTED`.
+    Unsupported(String),
+    /// The test could not check what it tests, such as Open POSIX's `PTS_UNTESTED`.
+    Untested(String),
+}
+
+/// A fixture, or a test of an external suite.
+enum Test {
+    Fixture(Box<Config>),
+    External(Box<dyn external::ExternalTest>),
+}
+
+impl Test {
+    fn name(&self) -> String {
+        match self {
+            Self::Fixture(config) => config.test_name(),
+            Self::External(test) => test.name().to_owned(),
+        }
+    }
 }
 
 /// Why a test failed. `cause` is a short, fixture-independent summary that groups failures in
@@ -79,8 +105,10 @@ impl Suite {
         };
         ensure!(wasmer.is_file(), "{} is not a file", wasmer.display());
         let timeout = match std::env::var("WASIXV2_TESTS_TIMEOUT_SECS") {
-            Ok(secs) => secs.parse().context("WASIXV2_TESTS_TIMEOUT_SECS")?,
-            Err(_) => DEFAULT_TIMEOUT_SECS,
+            Ok(secs) => Some(Duration::from_secs(
+                secs.parse().context("WASIXV2_TESTS_TIMEOUT_SECS")?,
+            )),
+            Err(_) => None,
         };
         let suite = Self {
             wasmer,
@@ -88,7 +116,7 @@ impl Suite {
             cxx: "wasix++".to_owned(),
             build_root: env_path("WASIXV2_TESTS_BUILD_DIR")
                 .unwrap_or_else(|| root().join("target/suite")),
-            timeout: Duration::from_secs(timeout),
+            timeout,
         };
         let probe = std::process::Command::new(&suite.cc)
             .arg("--version")
@@ -101,15 +129,26 @@ impl Suite {
         Ok(suite)
     }
 
-    fn run(&self, config: &Config) -> Result<Completion, Failure> {
+    pub fn timeout_or(&self, default: Duration) -> Duration {
+        self.timeout.unwrap_or(default)
+    }
+
+    fn run(&self, test: &Test) -> Result<Outcome, Failure> {
+        match test {
+            Test::Fixture(config) => self.run_fixture(config),
+            Test::External(test) => test.run(self),
+        }
+    }
+
+    fn run_fixture(&self, config: &Config) -> Result<Outcome, Failure> {
         if let Some(reason) = &config.ignored {
-            return Ok(Completion::ignored_with(reason));
+            return Ok(Outcome::Ignored(reason.clone()));
         }
         if config.unix_only && !cfg!(unix) {
-            return Ok(Completion::ignored_with("Unix only"));
+            return Ok(Outcome::Ignored("Unix only".to_owned()));
         }
         if config.ignore_macos && cfg!(target_os = "macos") {
-            return Ok(Completion::ignored_with("ignored on macOS"));
+            return Ok(Outcome::Ignored("ignored on macOS".to_owned()));
         }
         // The wasmer under test runs on its default backend, Cranelift.
         if let Some((_, reason)) = config
@@ -117,12 +156,12 @@ impl Suite {
             .iter()
             .find(|(e, _)| e == "cranelift")
         {
-            return Ok(Completion::ignored_with(reason));
+            return Ok(Outcome::Ignored(reason.clone()));
         }
         let dir = self.build_root.join(config.test_name());
         let main = build::build(self, config, &dir)?;
         run::run_and_check(self, config, &main, &dir)?;
-        Ok(Completion::Completed)
+        Ok(Outcome::Passed)
     }
 }
 
@@ -189,6 +228,8 @@ struct Tally {
     unexpected_failures: usize,
     unexpected_passes: usize,
     ignored: usize,
+    unsupported: usize,
+    untested: usize,
     /// Every failure's cause, by test name, for blessing.
     failures: BTreeMap<String, String>,
 }
@@ -205,7 +246,23 @@ fn main() -> ExitCode {
 
 fn try_main() -> Result<ExitCode> {
     let args = Arguments::from_args();
-    let configs = fixture::discover(&root().join("suite"))?;
+    let mut tests: Vec<Test> = fixture::discover(&root().join("suite"))?
+        .into_iter()
+        .map(|config| Test::Fixture(Box::new(config)))
+        .collect();
+    let external::Discovered {
+        tests: external,
+        missing,
+    } = external::discover(&root())?;
+    tests.extend(external.into_iter().map(Test::External));
+    if !missing.is_empty() {
+        eprintln!(
+            "note: not checked out, so their tests do not run: {}; \
+             run `git submodule update --init` in {}",
+            missing.join(", "),
+            root().display()
+        );
+    }
     let expected_path = env_path("WASIXV2_TESTS_EXPECTED_FAILURES")
         .unwrap_or_else(|| root().join("expected-failures.txt"));
     let expected = ExpectedFailures::load(expected_path)?;
@@ -218,40 +275,52 @@ fn try_main() -> Result<ExitCode> {
     });
     let tally = Arc::new(Mutex::new(Tally::default()));
 
-    let names: BTreeSet<String> = configs.iter().map(Config::test_name).collect();
-    ensure!(
-        names.len() == configs.len(),
-        "two configurations share a test name"
-    );
-    let mut trials = vec![stale_entries_trial(&expected, &names)];
-    for config in configs {
-        let name = config.test_name();
+    let names: BTreeSet<String> = tests.iter().map(Test::name).collect();
+    ensure!(names.len() == tests.len(), "two tests share a name");
+    // Without its submodule, an external suite's entries cannot be checked, so they stay.
+    let known = |name: &str| {
+        names.contains(name)
+            || missing
+                .iter()
+                .any(|suite| name.split('/').next() == Some(*suite))
+    };
+    let mut trials = vec![stale_entries_trial(&expected, &known)];
+    for test in tests {
+        let name = test.name();
         let listed = expected.tests.contains_key(&name);
+        let (kind, opt_in) = match &test {
+            Test::External(t) => (t.kind(), t.opt_in()),
+            Test::Fixture(_) => ("", false),
+        };
         let suite = suite.clone();
         let tally = tally.clone();
         let trial = Trial::ignorable_test(name.clone(), move || {
             let suite = suite.as_ref().as_ref().expect("a toolchain outside --list");
-            let result = suite.run(&config);
+            let result = suite.run(&test);
             let mut tally = tally.lock().unwrap();
-            match (result, listed) {
-                (Ok(Completion::Ignored { reason }), _) => {
+            let not_tested = match result {
+                Ok(Outcome::Ignored(reason)) => {
                     tally.ignored += 1;
-                    Ok(Completion::Ignored { reason })
+                    return Ok(Completion::ignored_with(reason));
                 }
-                (Ok(Completion::Completed), false) => {
+                Ok(Outcome::Passed) if !listed => {
                     tally.passed += 1;
-                    Ok(Completion::Completed)
+                    return Ok(Completion::Completed);
                 }
-                (Ok(Completion::Completed), true) => {
-                    tally.unexpected_passes += 1;
-                    if bless {
-                        return Ok(Completion::Completed);
-                    }
-                    Err(Failed::from(
-                        "passed, but expected-failures.txt lists it: take it off the list",
-                    ))
+                Ok(Outcome::Unsupported(detail)) if !listed => {
+                    tally.unsupported += 1;
+                    return Ok(Completion::ignored_with(format!(
+                        "PTS_UNSUPPORTED: {detail}"
+                    )));
                 }
-                (Err(failure), listed) => {
+                Ok(Outcome::Untested(detail)) if !listed => {
+                    tally.untested += 1;
+                    return Ok(Completion::ignored_with(format!("PTS_UNTESTED: {detail}")));
+                }
+                Ok(Outcome::Passed) => "passed",
+                Ok(Outcome::Unsupported(_)) => "reported PTS_UNSUPPORTED",
+                Ok(Outcome::Untested(_)) => "reported PTS_UNTESTED",
+                Err(failure) => {
                     tally.failures.insert(name, failure.cause.clone());
                     if listed || bless {
                         tally.expected_failures += usize::from(listed);
@@ -259,18 +328,23 @@ fn try_main() -> Result<ExitCode> {
                         return Ok(Completion::Completed);
                     }
                     tally.unexpected_failures += 1;
-                    Err(Failed::from(format!(
+                    return Err(Failed::from(format!(
                         "{}\n{}",
                         failure.cause, failure.details
-                    )))
+                    )));
                 }
+            };
+            // Listed, but it no longer fails.
+            tally.unexpected_passes += 1;
+            if bless {
+                return Ok(Completion::Completed);
             }
+            Err(Failed::from(format!(
+                "{not_tested}, but expected-failures.txt lists it: take it off the list"
+            )))
         });
-        trials.push(if listed {
-            trial.with_kind("xfail")
-        } else {
-            trial
-        });
+        let kind = if listed { "xfail" } else { kind };
+        trials.push(trial.with_kind(kind).with_ignored_flag(opt_in));
     }
 
     let ran: BTreeSet<String> = trials
@@ -286,19 +360,21 @@ fn try_main() -> Result<ExitCode> {
     let tally = tally.lock().unwrap();
     println!(
         "wasixv2 suite: {} passed, {} failed as expected, {} failed unexpectedly, \
-         {} passed unexpectedly, {} ignored",
+         {} passed unexpectedly, {} ignored, {} unsupported, {} untested",
         tally.passed,
         tally.expected_failures,
         tally.unexpected_failures,
         tally.unexpected_passes,
-        tally.ignored
+        tally.ignored,
+        tally.unsupported,
+        tally.untested
     );
     if bless {
         // Tests outside this run keep their entries.
         let mut tests: BTreeMap<String, String> = expected
             .tests
             .iter()
-            .filter(|(name, _)| !ran.contains(*name) && names.contains(*name))
+            .filter(|(name, _)| !ran.contains(*name) && known(name))
             .map(|(n, c)| (n.clone(), c.clone()))
             .collect();
         tests.extend(tally.failures.clone());
@@ -314,14 +390,14 @@ fn try_main() -> Result<ExitCode> {
 }
 
 /// Fails when `expected-failures.txt` names a test that does not exist.
-fn stale_entries_trial(expected: &ExpectedFailures, names: &BTreeSet<String>) -> Trial {
+fn stale_entries_trial(expected: &ExpectedFailures, known: &impl Fn(&str) -> bool) -> Trial {
     let stale: Vec<String> = expected
         .tests
         .keys()
-        .filter(|name| !names.contains(*name))
+        .filter(|name| !known(name))
         .cloned()
         .collect();
-    let path: PathBuf = expected.path.clone();
+    let path = expected.path.clone();
     Trial::test("expected-failures", move || {
         if stale.is_empty() {
             return Ok(());

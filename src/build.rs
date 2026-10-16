@@ -37,15 +37,29 @@ pub fn build(suite: &Suite, config: &Config, dir: &Path) -> Result<PathBuf, Fail
     };
 
     copy_tree(&config.src_dir, dir).map_err(|e| Failure::harness(format!("{e:#}")))?;
-    cmd.current_dir(dir)
-        .env("WASIXCC_TARGET", "wasm32-wasixv2")
-        .env("WASIXCC_DISCARD_UNSUPPORTED_FLAGS", "yes")
+    target_wasixv2(&mut cmd)
+        .current_dir(dir)
         // Build scripts may tune compile-time parameters per backend and architecture.
         .env("WASMER_BACKEND", "cranelift")
         .env("WASMER_ARCH", std::env::consts::ARCH);
     for (key, value) in &config.build_env {
         cmd.env(key, value);
     }
+    run_build(&mut cmd)?;
+
+    let main = dir.join("main");
+    check_module(&main)?;
+    Ok(main)
+}
+
+/// Points wasixcc at wasixv2.
+pub fn target_wasixv2(cmd: &mut Command) -> &mut Command {
+    cmd.env("WASIXCC_TARGET", "wasm32-wasixv2")
+        .env("WASIXCC_DISCARD_UNSUPPORTED_FLAGS", "yes")
+}
+
+/// Runs a build command, and names the failure if it fails.
+pub fn run_build(cmd: &mut Command) -> Result<(), Failure> {
     let output = cmd
         .output()
         .map_err(|e| Failure::harness(format!("cannot run {cmd:?}: {e}")))?;
@@ -60,30 +74,41 @@ pub fn build(suite: &Suite, config: &Config, dir: &Path) -> Result<PathBuf, Fail
             ),
         ));
     }
+    Ok(())
+}
 
-    let main = dir.join("main");
-    let wasm = std::fs::read(&main).map_err(|e| {
+/// Checks that a build produced `main` and that it is a wasixv2 module.
+pub fn check_module(main: &Path) -> Result<(), Failure> {
+    let wasm = std::fs::read(main).map_err(|e| {
         Failure::new(
-            "build: no `main` produced",
+            format!(
+                "build: no `{}` produced",
+                main.file_name().unwrap_or_default().to_string_lossy()
+            ),
             format!("the build succeeded but {} is missing: {e}", main.display()),
         )
     })?;
     if !imports_wasixv2(&wasm) {
         return Err(Failure::new(
             "build: not a wasixv2 module",
-            "`main` imports nothing from `wasixv2`; does this wasixcc support \
-             WASIXCC_TARGET=wasm32-wasixv2?",
+            format!(
+                "`{}` imports nothing from `wasixv2`; does this wasixcc support \
+                 WASIXCC_TARGET=wasm32-wasixv2?",
+                main.display()
+            ),
         ));
     }
-    Ok(main)
+    Ok(())
 }
 
 /// The line that best names a build failure, for grouping failures by cause: the first line that
 /// mentions an error, without its source location or any machine-specific path.
 fn first_error_line(stderr: &str, stdout: &str) -> String {
     let lines = || stderr.lines().chain(stdout.lines()).map(str::trim);
+    // A diagnostic's `error:` beats a warning that merely mentions, say, `strerror`.
     let line = lines()
-        .find(|l| l.to_lowercase().contains("error"))
+        .find(|l| l.to_lowercase().contains("error:"))
+        .or_else(|| lines().find(|l| l.to_lowercase().contains("error")))
         .or_else(|| lines().find(|l| !l.is_empty()))
         .unwrap_or("failed without output");
     let line = strip_location(line);
