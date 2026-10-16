@@ -19,14 +19,19 @@ posix/conformance/interfaces/fork/1-1
 posix/conformance/interfaces/fork/11-1
 posix/conformance/interfaces/fork/12-1
 posix/conformance/interfaces/fork/13-1
+posix/conformance/interfaces/fork/14-1
+posix/conformance/interfaces/fork/16-1
 posix/conformance/interfaces/fork/18-1
+posix/conformance/interfaces/fork/19-1
 posix/conformance/interfaces/fork/2-1
+posix/conformance/interfaces/fork/21-1
 posix/conformance/interfaces/fork/22-1
 posix/conformance/interfaces/fork/3-1
 posix/conformance/interfaces/fork/4-1
 posix/conformance/interfaces/fork/6-1
 posix/conformance/interfaces/fork/8-1
 posix/conformance/interfaces/fork/9-1
+posix/conformance/interfaces/getpid/1-1
 posix/conformance/interfaces/kill/1-2
 posix/conformance/interfaces/killpg/1-2
 posix/conformance/interfaces/mmap/11-5
@@ -34,7 +39,30 @@ posix/conformance/interfaces/mmap/11-6
 posix/conformance/interfaces/mmap/6-1
 posix/conformance/interfaces/mmap/6-2
 posix/conformance/interfaces/mmap/6-3
+posix/conformance/interfaces/mmap/7-3
+posix/conformance/interfaces/mmap/7-4
 posix/conformance/interfaces/mq_close/2-1
+posix/conformance/interfaces/mq_notify/2-1
+posix/conformance/interfaces/mq_notify/9-1
+posix/conformance/interfaces/mq_open/16-1
+posix/conformance/interfaces/mq_open/2-1
+posix/conformance/interfaces/mq_open/7-2
+posix/conformance/interfaces/mq_open/8-2
+posix/conformance/interfaces/mq_open/9-2
+posix/conformance/interfaces/mq_receive/13-1
+posix/conformance/interfaces/mq_receive/5-1
+posix/conformance/interfaces/mq_send/12-1
+posix/conformance/interfaces/mq_send/5-1
+posix/conformance/interfaces/mq_send/5-2
+posix/conformance/interfaces/mq_timedreceive/18-1
+posix/conformance/interfaces/mq_timedreceive/18-2
+posix/conformance/interfaces/mq_timedreceive/5-1
+posix/conformance/interfaces/mq_timedreceive/5-2
+posix/conformance/interfaces/mq_timedreceive/5-3
+posix/conformance/interfaces/mq_timedreceive/8-1
+posix/conformance/interfaces/mq_timedsend/16-1
+posix/conformance/interfaces/mq_timedsend/5-2
+posix/conformance/interfaces/mq_timedsend/5-3
 posix/conformance/interfaces/mq_unlink/2-1
 posix/conformance/interfaces/mq_unlink/2-2
 posix/conformance/interfaces/nanosleep/1-2
@@ -50,14 +78,35 @@ posix/conformance/interfaces/pthread_atfork/2-1
 posix/conformance/interfaces/pthread_atfork/2-2
 posix/conformance/interfaces/pthread_atfork/3-2
 posix/conformance/interfaces/pthread_atfork/4-1
+posix/conformance/interfaces/pthread_barrierattr_getpshared/2-1
+posix/conformance/interfaces/pthread_cond_broadcast/2-3
+posix/conformance/interfaces/pthread_cond_destroy/2-1
 posix/conformance/interfaces/pthread_cond_init/4-1
+posix/conformance/interfaces/pthread_cond_signal/1-2
+posix/conformance/interfaces/pthread_cond_timedwait/2-4
+posix/conformance/interfaces/pthread_cond_timedwait/2-7
+posix/conformance/interfaces/pthread_cond_timedwait/4-2
+posix/conformance/interfaces/pthread_cond_wait/2-2
 posix/conformance/interfaces/pthread_mutex_init/5-1
+posix/conformance/interfaces/pthread_mutex_trylock/1-2
+posix/conformance/interfaces/pthread_mutex_trylock/2-1
+posix/conformance/interfaces/pthread_mutex_trylock/4-2
+posix/conformance/interfaces/pthread_rwlockattr_getpshared/2-1
+posix/conformance/interfaces/pthread_spin_init/2-1
+posix/conformance/interfaces/pthread_spin_init/2-2
 posix/conformance/interfaces/raise/1-2
 posix/conformance/interfaces/sched_getparam/4-1
 posix/conformance/interfaces/sched_getscheduler/5-1
 posix/conformance/interfaces/sched_setparam/1-1
 posix/conformance/interfaces/sched_setscheduler/21-1
+posix/conformance/interfaces/sem_init/3-2
+posix/conformance/interfaces/sem_init/3-3
+posix/conformance/interfaces/sem_timedwait/2-1
 posix/conformance/interfaces/sem_timedwait/9-1
+posix/conformance/interfaces/sem_unlink/2-2
+posix/conformance/interfaces/sem_unlink/3-1
+posix/conformance/interfaces/sem_wait/7-1
+posix/conformance/interfaces/shm_open/23-1
 posix/conformance/interfaces/shm_open/5-1
 posix/conformance/interfaces/sigaction/10-1
 posix/conformance/interfaces/sigaction/11-1
@@ -178,149 +227,8 @@ posix/conformance/interfaces/timer_getoverrun/speculative/6-1
 posix/conformance/interfaces/timer_gettime/speculative/6-1
 posix/conformance/interfaces/timer_settime/speculative/12-1
 
-## ENOSYS: Clone, MqOpen
-posix/conformance/interfaces/mq_open/2-1
-posix/conformance/interfaces/mq_open/7-2
-posix/conformance/interfaces/mq_open/8-2
-posix/conformance/interfaces/mq_open/9-2
-
-## ENOSYS: Clone, MqOpen, MqTimedreceiveTime64, MqUnlink
-posix/conformance/interfaces/mq_receive/13-1
-posix/conformance/interfaces/mq_receive/5-1
-posix/conformance/interfaces/mq_timedreceive/18-1
-posix/conformance/interfaces/mq_timedreceive/18-2
-posix/conformance/interfaces/mq_timedreceive/5-1
-posix/conformance/interfaces/mq_timedreceive/5-2
-posix/conformance/interfaces/mq_timedreceive/5-3
-posix/conformance/interfaces/mq_timedreceive/8-1
-
-## ENOSYS: FutexTime64
-posix/conformance/interfaces/pthread_mutexattr_getprotocol/1-2
-posix/conformance/interfaces/pthread_mutexattr_setprotocol/1-1
-
-## ENOSYS: MqNotify
-posix/conformance/interfaces/mq_notify/8-1
-
-## ENOSYS: MqOpen
-posix/conformance/interfaces/fork/19-1
-posix/conformance/interfaces/mq_close/1-1
-posix/conformance/interfaces/mq_close/3-1
-posix/conformance/interfaces/mq_close/4-1
-posix/conformance/interfaces/mq_getattr/2-1
-posix/conformance/interfaces/mq_getattr/2-2
-posix/conformance/interfaces/mq_getattr/3-1
-posix/conformance/interfaces/mq_getattr/4-1
-posix/conformance/interfaces/mq_getattr/speculative/7-1
-posix/conformance/interfaces/mq_notify/1-1
-posix/conformance/interfaces/mq_notify/2-1
-posix/conformance/interfaces/mq_notify/3-1
-posix/conformance/interfaces/mq_notify/4-1
-posix/conformance/interfaces/mq_notify/9-1
-posix/conformance/interfaces/mq_open/1-1
-posix/conformance/interfaces/mq_open/11-1
-posix/conformance/interfaces/mq_open/12-1
-posix/conformance/interfaces/mq_open/13-1
-posix/conformance/interfaces/mq_open/15-1
-posix/conformance/interfaces/mq_open/18-1
-posix/conformance/interfaces/mq_open/19-1
-posix/conformance/interfaces/mq_open/20-1
-posix/conformance/interfaces/mq_open/23-1
-posix/conformance/interfaces/mq_open/25-2
-posix/conformance/interfaces/mq_open/27-1
-posix/conformance/interfaces/mq_open/27-2
-posix/conformance/interfaces/mq_open/7-1
-posix/conformance/interfaces/mq_open/7-3
-posix/conformance/interfaces/mq_open/8-1
-posix/conformance/interfaces/mq_open/9-1
-posix/conformance/interfaces/mq_send/1-1
-posix/conformance/interfaces/mq_send/10-1
-posix/conformance/interfaces/mq_send/11-1
-posix/conformance/interfaces/mq_send/11-2
-posix/conformance/interfaces/mq_send/12-1
-posix/conformance/interfaces/mq_send/13-1
-posix/conformance/interfaces/mq_send/14-1
-posix/conformance/interfaces/mq_send/2-1
-posix/conformance/interfaces/mq_send/3-1
-posix/conformance/interfaces/mq_send/3-2
-posix/conformance/interfaces/mq_send/4-1
-posix/conformance/interfaces/mq_send/4-2
-posix/conformance/interfaces/mq_send/4-3
-posix/conformance/interfaces/mq_send/5-1
-posix/conformance/interfaces/mq_send/5-2
-posix/conformance/interfaces/mq_send/7-1
-posix/conformance/interfaces/mq_send/8-1
-posix/conformance/interfaces/mq_send/9-1
-posix/conformance/interfaces/mq_setattr/1-1
-posix/conformance/interfaces/mq_setattr/1-2
-posix/conformance/interfaces/mq_setattr/2-1
-posix/conformance/interfaces/mq_setattr/5-1
-posix/conformance/interfaces/mq_timedsend/1-1
-posix/conformance/interfaces/mq_timedsend/10-1
-posix/conformance/interfaces/mq_timedsend/11-1
-posix/conformance/interfaces/mq_timedsend/11-2
-posix/conformance/interfaces/mq_timedsend/12-1
-posix/conformance/interfaces/mq_timedsend/13-1
-posix/conformance/interfaces/mq_timedsend/14-1
-posix/conformance/interfaces/mq_timedsend/15-1
-posix/conformance/interfaces/mq_timedsend/18-1
-posix/conformance/interfaces/mq_timedsend/19-1
-posix/conformance/interfaces/mq_timedsend/2-1
-posix/conformance/interfaces/mq_timedsend/20-1
-posix/conformance/interfaces/mq_timedsend/3-1
-posix/conformance/interfaces/mq_timedsend/3-2
-posix/conformance/interfaces/mq_timedsend/4-1
-posix/conformance/interfaces/mq_timedsend/4-2
-posix/conformance/interfaces/mq_timedsend/4-3
-posix/conformance/interfaces/mq_timedsend/5-1
-posix/conformance/interfaces/mq_timedsend/5-2
-posix/conformance/interfaces/mq_timedsend/5-3
-posix/conformance/interfaces/mq_timedsend/7-1
-posix/conformance/interfaces/mq_timedsend/8-1
-posix/conformance/interfaces/mq_timedsend/9-1
-posix/conformance/interfaces/mq_timedsend/speculative/18-2
-posix/conformance/interfaces/mq_unlink/1-1
-
-## ENOSYS: MqOpen, MqTimedreceiveTime64, MqTimedsendTime64, MqUnlink
-posix/conformance/interfaces/mq_receive/1-1
-posix/conformance/interfaces/mq_receive/12-1
-posix/conformance/interfaces/mq_receive/2-1
-posix/conformance/interfaces/mq_receive/8-1
-posix/conformance/interfaces/mq_timedreceive/1-1
-posix/conformance/interfaces/mq_timedreceive/10-1
-posix/conformance/interfaces/mq_timedreceive/10-2
-posix/conformance/interfaces/mq_timedreceive/11-1
-posix/conformance/interfaces/mq_timedreceive/15-1
-posix/conformance/interfaces/mq_timedreceive/2-1
-posix/conformance/interfaces/mq_timedreceive/speculative/10-2
-
-## ENOSYS: MqOpen, MqTimedreceiveTime64, MqUnlink
-posix/conformance/interfaces/mq_receive/10-1
-posix/conformance/interfaces/mq_receive/11-1
-posix/conformance/interfaces/mq_receive/11-2
-posix/conformance/interfaces/mq_receive/7-1
-posix/conformance/interfaces/mq_timedreceive/13-1
-posix/conformance/interfaces/mq_timedreceive/14-1
-posix/conformance/interfaces/mq_timedreceive/17-1
-posix/conformance/interfaces/mq_timedreceive/17-2
-posix/conformance/interfaces/mq_timedreceive/17-3
-posix/conformance/interfaces/mq_timedreceive/7-1
-
-## ENOSYS: MqOpen, MqUnlink
-posix/conformance/interfaces/mq_notify/5-1
-posix/conformance/interfaces/mq_open/29-1
-posix/conformance/interfaces/mq_open/speculative/26-1
-posix/conformance/interfaces/mq_timedsend/16-1
-
-## ENOSYS: MqUnlink
-posix/conformance/interfaces/mq_unlink/7-1
-posix/conformance/interfaces/mq_unlink/speculative/7-2
-
-## ENOSYS: Shmget
-posix/conformance/interfaces/sched_setparam/9-1
-
 ## FAIL: At least one test FAILED -- see output for status
 posix/conformance/interfaces/kill/2-2
-posix/conformance/interfaces/sigqueue/2-2
 
 ## FAIL: Combination of PROT_READ PROT_WRITE PROT_EXEC with MAP_PRIVATE has failed: Permission denied
 posix/conformance/interfaces/mmap/5-1
@@ -328,43 +236,11 @@ posix/conformance/interfaces/mmap/5-1
 ## FAIL: Could not call killpg with sig = 0
 posix/conformance/interfaces/killpg/2-1
 
-## FAIL: Could not call sigqueue with sig = 0
-posix/conformance/interfaces/sigqueue/2-1
-
 ## FAIL: Different results between pid == 0 and pid == getpid().
 posix/conformance/interfaces/sched_getparam/2-1
 
-## FAIL: Error at first mmap(): No such device
-posix/conformance/interfaces/mmap/24-2
-
-## FAIL: Error at mmap(): No such device
-posix/conformance/interfaces/mmap/11-2
-posix/conformance/interfaces/mmap/11-3
-posix/conformance/interfaces/mmap/6-5
-posix/conformance/interfaces/mmap/7-1
-posix/conformance/interfaces/mmap/7-2
-posix/conformance/interfaces/mmap/7-3
-
-## FAIL: Error at mmap: No such device
-posix/conformance/interfaces/mmap/1-1
-posix/conformance/interfaces/mmap/1-2
-posix/conformance/interfaces/mmap/12-1
-posix/conformance/interfaces/mmap/13-1
-posix/conformance/interfaces/mmap/14-1
-posix/conformance/interfaces/mmap/3-1
-posix/conformance/interfaces/mmap/7-4
-
 ## FAIL: Failed: func: pthread_attr_setschedpolicy() rc: No error information (0)
 posix/conformance/interfaces/pthread_attr_setschedpolicy/4-1
-
-## FAIL: Failed: policy: SCHED_FIFO, func: pthread_create(), rc: No such process (3)
-posix/conformance/interfaces/pthread_attr_setschedpolicy/1-2
-
-## FAIL: Failed: policy: SCHED_OTHER, func: pthread_create(), rc: No such process (3)
-posix/conformance/interfaces/pthread_attr_setschedpolicy/1-1
-
-## FAIL: Failed: policy: SCHED_RR, func: pthread_create(), rc: No such process (3)
-posix/conformance/interfaces/pthread_attr_setschedpolicy/1-3
 
 ## FAIL: Policy: SCHED_OTHER
 posix/conformance/interfaces/sched_setscheduler/19-1
@@ -375,29 +251,32 @@ posix/conformance/interfaces/sched_getparam/1-1
 ## FAIL: Returned code is -1.
 posix/conformance/interfaces/sched_getscheduler/3-1
 
-## FAIL: TEST FAILED
-posix/conformance/interfaces/sem_open/1-1
-posix/conformance/interfaces/sem_open/1-2
-posix/conformance/interfaces/sem_open/3-1
-posix/conformance/interfaces/sem_open/4-1
-
 ## FAIL: TEST FAILED: semaphore does exist
 posix/conformance/interfaces/sem_unlink/4-1
 
 ## FAIL: Test FAILED
-posix/conformance/interfaces/mmap/6-4
-posix/conformance/interfaces/mmap/6-6
+posix/conformance/interfaces/mq_receive/1-1
+posix/conformance/interfaces/mq_receive/10-1
+posix/conformance/interfaces/mq_receive/12-1
+posix/conformance/interfaces/mq_receive/8-1
+posix/conformance/interfaces/mq_timedreceive/1-1
+posix/conformance/interfaces/mq_timedreceive/10-1
+posix/conformance/interfaces/mq_timedreceive/10-2
+posix/conformance/interfaces/mq_timedreceive/11-1
+posix/conformance/interfaces/mq_timedreceive/13-1
+posix/conformance/interfaces/mq_timedreceive/15-1
+posix/conformance/interfaces/shm_open/1-1
+posix/conformance/interfaces/shm_open/14-2
 posix/conformance/interfaces/sigismember/5-1
 posix/conformance/interfaces/timer_create/9-1
 
-## FAIL: Test FAILED: EPERM error not received
-posix/conformance/interfaces/sigqueue/3-1
+## FAIL: Test FAILED: Did not trigger SIGSEGV
+posix/conformance/interfaces/munmap/1-1
+posix/conformance/interfaces/munmap/1-2
 
-## FAIL: Test FAILED: Error at mmap: No such device
-posix/conformance/interfaces/mmap/10-1
-
-## FAIL: Test FAILED: Expected EINVAL got No such device
-posix/conformance/interfaces/mmap/32-1
+## FAIL: Test FAILED: SIGBUS not triggered, while Memory Protection is enabled
+posix/conformance/interfaces/mmap/11-2
+posix/conformance/interfaces/mmap/11-3
 
 ## FAIL: Test FAILED: The cause of the signal hasn't been stored in the si_code
 posix/conformance/interfaces/sigwaitinfo/6-1
@@ -405,11 +284,20 @@ posix/conformance/interfaces/sigwaitinfo/6-1
 ## FAIL: Test FAILED: kill() succeeded even though this program's user id did not match the recieving process's user id
 posix/conformance/interfaces/kill/3-1
 
-## FAIL: Test Fail: munmap/4-1.c Error at mmap: No such device
-posix/conformance/interfaces/munmap/4-1
+## FAIL: Test FAILED: sigqueue() succeeded even though this program's user id did not match the recieving process's user id
+posix/conformance/interfaces/sigqueue/3-1
 
 ## FAIL: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_init/7-1.c FAILED: We were able to sem_init more than SEM_NSEMS_MAX sem
 posix/conformance/interfaces/sem_init/7-1
+
+## musl names semaphores /dev/shm/<name> without glibc's sem. prefix, so a NAME_MAX name is valid
+posix/conformance/interfaces/sem_unlink/5-1
+
+## FAIL: The mapped files pages of the process are not locked.
+posix/conformance/interfaces/mlockall/3-7
+
+## FAIL: The shared memory pages of the process are not locked.
+posix/conformance/interfaces/mlockall/3-6
 
 ## FAIL: Unexpected error: Function not implemented
 posix/conformance/interfaces/sched_getparam/3-1
@@ -423,11 +311,14 @@ posix/conformance/interfaces/sched_setscheduler/19-5
 posix/conformance/interfaces/mlock/12-1
 posix/conformance/interfaces/mlock/speculative/12-1
 
-## FAIL: aio_cancel/2-1.c AIO request 3 was not canceled: No error information
+## FAIL: aio_cancel/2-1.c Unexpected aio_cancel() return value: 2
 posix/conformance/interfaces/aio_cancel/2-1
 
 ## FAIL: aio_cancel/3-1.c 0 AIO requests got canceled, expected 5
 posix/conformance/interfaces/aio_cancel/3-1
+
+## FAIL: aio_cancel/4-1.c Bad task #3 result: No error information (expected ECANCELED)
+posix/conformance/interfaces/aio_cancel/4-1
 
 ## FAIL: aio_cancel/5-1.c Unexpected aio_cancel() return value: 2
 posix/conformance/interfaces/aio_cancel/5-1
@@ -460,6 +351,9 @@ posix/conformance/interfaces/pthread_detach/1-1
 posix/conformance/interfaces/pthread_detach/4-1
 posix/conformance/interfaces/pthread_join/speculative/6-1
 
+## runs as pid 1 (kill(-1) semantics): killpg(getpgrp()) is kill(-1), which spares init and finds no target (ESRCH before EINVAL)
+posix/conformance/interfaces/killpg/6-1
+
 ## FAIL: lio_listio/13-1.c Error lio_listio() should have returned -1
 posix/conformance/interfaces/lio_listio/13-1
 
@@ -472,36 +366,17 @@ posix/conformance/interfaces/lio_listio/18-1
 ## FAIL: lio_listio/5-1.c lio_listio() accepts invalid opcode
 posix/conformance/interfaces/lio_listio/5-1
 
-## FAIL: mmap: No such device
-posix/conformance/interfaces/shm_open/20-3
-
-## FAIL: mq_open/16-1.c Error at mmap: No such device
-posix/conformance/interfaces/mq_open/16-1
-
 ## FAIL: off: ffffffff0000, len: ffff0000
 posix/conformance/interfaces/mmap/31-1
 
-## FAIL: sigqueue() failed but errno not set correctly
+## FAIL: sigqueue() did not return -1
 posix/conformance/interfaces/sigqueue/12-1
-
-## FAIL: sigqueue() failed on ESRCH but errno not set correctly
-posix/conformance/interfaces/sigqueue/11-1
 
 ## FAIL: unexpected error: pthread_attr_setschedparam 3-1: pthread_attr_setschedparam did not fail
 posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-1
 
 ## FAIL: unexpected error: pthread_attr_setschedparam 3-2: pthread_attr_setschedparam did not fail
 posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-2
-
-## UNRESOLVED: An error occurs when calling mmap(): No such device
-posix/conformance/interfaces/mlockall/3-6
-posix/conformance/interfaces/mlockall/3-7
-posix/conformance/interfaces/shm_open/1-1
-posix/conformance/interfaces/shm_open/14-2
-posix/conformance/interfaces/shm_open/28-1
-posix/conformance/interfaces/shm_open/28-2
-posix/conformance/interfaces/shm_open/28-3
-posix/conformance/interfaces/shm_unlink/3-1
 
 ## UNRESOLVED: An error occurs when calling sched_getparam(): Function not implemented
 posix/conformance/interfaces/sched_setparam/22-1
@@ -522,20 +397,12 @@ posix/conformance/interfaces/sched_setscheduler/16-1
 ## UNRESOLVED: An error occurs when calling sched_setscheduler(): Function not implemented
 posix/conformance/interfaces/sched_setparam/2-1
 posix/conformance/interfaces/sched_setparam/2-2
+posix/conformance/interfaces/sched_setparam/9-1
 
 ## UNRESOLVED: Could not raise signal being tested
 posix/conformance/interfaces/killpg/1-1
 
-## UNRESOLVED: Error at first mmap(): No such device
-posix/conformance/interfaces/pthread_barrierattr_getpshared/2-1
-posix/conformance/interfaces/pthread_rwlockattr_getpshared/2-1
-posix/conformance/interfaces/pthread_spin_init/2-1
-posix/conformance/interfaces/pthread_spin_init/2-2
-
-## UNRESOLVED: Error at mmap(): No such device
-posix/conformance/interfaces/mmap/27-1
-
-## UNRESOLVED: Error at pthread_create(): No such process
+## UNRESOLVED: Error at pthread_create(): Operation not permitted
 posix/conformance/interfaces/pthread_attr_setinheritsched/2-2
 
 ## UNRESOLVED: Error at setrlimit(): Operation not permitted
@@ -544,23 +411,30 @@ posix/conformance/interfaces/mmap/18-1
 ## UNRESOLVED: Error calling sched_setscheduler() for SCHED_OTHER policy
 posix/conformance/interfaces/sched_setscheduler/1-1
 
+## UNRESOLVED: Error setting protocol to 2
+posix/conformance/interfaces/pthread_mutexattr_getprotocol/1-2
+posix/conformance/interfaces/pthread_mutexattr_setprotocol/1-1
+
 ## UNRESOLVED: Failed to map memory: No such device (19)
 posix/conformance/interfaces/munmap/2-1
 
 ## UNRESOLVED: Failed: execl() errno: No such file or directory
 posix/conformance/interfaces/sigaltstack/9-1
 
-## UNRESOLVED: Failed: func pthread_setschedparam() rc: No such process (3)
+## UNRESOLVED: Failed: func pthread_setschedparam() rc: Operation not permitted (1)
 posix/conformance/interfaces/pthread_getschedparam/1-2
 
 ## UNRESOLVED: Failed: function: pthread_setschedparam() status: Operation not permitted(1)
 posix/conformance/interfaces/pthread_attr_setschedpolicy/2-1
 
-## UNRESOLVED: Failed: line: 161 func: pthread_create() rc: No such process (3)
+## UNRESOLVED: Failed: line: 161 func: pthread_create() rc: Operation not permitted (1)
 posix/conformance/interfaces/pthread_getschedparam/1-3
 
-## UNRESOLVED: Failed: pthread_setschedparam(SCHED_FIFO), root?
-posix/conformance/interfaces/sigaction/16-1
+## UNRESOLVED: Failed: policy: SCHED_FIFO, func: pthread_create(), rc: Operation not permitted (1)
+posix/conformance/interfaces/pthread_attr_setschedpolicy/1-2
+
+## UNRESOLVED: Failed: policy: SCHED_RR, func: pthread_create(), rc: Operation not permitted (1)
+posix/conformance/interfaces/pthread_attr_setschedpolicy/1-3
 
 ## UNRESOLVED: Failed: sched_getparam() rc: -1 errno: Function not implemented
 posix/conformance/interfaces/sched_setscheduler/17-5
@@ -574,27 +448,26 @@ posix/conformance/interfaces/pthread_create/1-6
 ## UNRESOLVED: Policy: SCHED_FIFO
 posix/conformance/interfaces/sched_setscheduler/17-1
 
-## UNRESOLVED: Test UNRESOLVED: munmap/1-1.c Error at mmap: No such device
-posix/conformance/interfaces/munmap/1-1
-
-## UNRESOLVED: Test UNRESOLVED: munmap/1-2.c Error at mmap: No such device
-posix/conformance/interfaces/munmap/1-2
-
-## UNRESOLVED: Test Unresolved: munmap/3-1.c Error at mmap: No such device
-posix/conformance/interfaces/munmap/3-1
-
-## UNRESOLVED: Test Unresolved: munmap/9-1.c Error at mmap: No such device
-posix/conformance/interfaces/munmap/9-1
+## UNRESOLVED: Test UNRESOLVED
+posix/conformance/interfaces/mq_open/19-1
+posix/conformance/interfaces/mq_open/7-1
+posix/conformance/interfaces/mq_open/8-1
+posix/conformance/interfaces/mq_open/9-1
+posix/conformance/interfaces/mq_receive/11-1
+posix/conformance/interfaces/mq_receive/11-2
+posix/conformance/interfaces/mq_receive/2-1
+posix/conformance/interfaces/mq_receive/7-1
+posix/conformance/interfaces/mq_timedreceive/14-1
+posix/conformance/interfaces/mq_timedreceive/17-1
+posix/conformance/interfaces/mq_timedreceive/17-2
+posix/conformance/interfaces/mq_timedreceive/17-3
+posix/conformance/interfaces/mq_timedreceive/2-1
+posix/conformance/interfaces/mq_timedreceive/7-1
+posix/conformance/interfaces/mq_timedreceive/speculative/10-2
 
 ## UNRESOLVED: Test must be run as superuser
 posix/conformance/interfaces/clock_settime/17-2
 posix/conformance/interfaces/clock_settime/20-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/14-1.c unresolved: got 19 (No such device) on line 64 (Failed to creat
-posix/conformance/interfaces/fork/14-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/16-1.c unresolved: got 19 (No such device) on line 100 (Failed to mmap
-posix/conformance/interfaces/fork/16-1
 
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/17-1.c unresolved: got 38 (Function not implemented) on line 73 (Faile
 posix/conformance/interfaces/fork/17-1
@@ -602,77 +475,14 @@ posix/conformance/interfaces/fork/17-1
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/17-2.c unresolved: got 38 (Function not implemented) on line 104 (Fail
 posix/conformance/interfaces/fork/17-2
 
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/21-1.c unresolved: got 19 (No such device) on line 82 (Failed to open 
-posix/conformance/interfaces/fork/21-1
-
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
 
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/getpid/1-1.c unresolved: got 19 (No such device) on line 143 (mmap failed)
-posix/conformance/interfaces/getpid/1-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_broadcast/2-3.c unresolved: got 19 (No such device) on line 33
-posix/conformance/interfaces/pthread_cond_broadcast/2-3
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_destroy/2-1.c unresolved: got 19 (No such device) on line 427 
-posix/conformance/interfaces/pthread_cond_destroy/2-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_signal/1-2.c unresolved: got 19 (No such device) on line 385 (
-posix/conformance/interfaces/pthread_cond_signal/1-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_timedwait/2-4.c unresolved: got 19 (No such device) on line 33
-posix/conformance/interfaces/pthread_cond_timedwait/2-4
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_timedwait/2-7.c unresolved: got 19 (No such device) on line 34
-posix/conformance/interfaces/pthread_cond_timedwait/2-7
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_timedwait/4-2.c unresolved: got 19 (No such device) on line 29
-posix/conformance/interfaces/pthread_cond_timedwait/4-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_wait/2-2.c unresolved: got 19 (No such device) on line 352 (mm
-posix/conformance/interfaces/pthread_cond_wait/2-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/1-2.c unresolved: got 19 (No such device) on line 242
-posix/conformance/interfaces/pthread_mutex_trylock/1-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/2-1.c unresolved: got 19 (No such device) on line 209
-posix/conformance/interfaces/pthread_mutex_trylock/2-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/4-2.c unresolved: got 19 (No such device) on line 243
-posix/conformance/interfaces/pthread_mutex_trylock/4-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/1-2.c unresolved: got 3 (No such process) on line 143
+## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/1-2.c unresolved: got 1 (Operation not permitted) on 
 posix/conformance/interfaces/pthread_setschedparam/1-2
 
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/4-1.c unresolved: got 3 (No such process) on line 123
+## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/4-1.c unresolved: got 1 (Operation not permitted) on 
 posix/conformance/interfaces/pthread_setschedparam/4-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_close/3-2.c unresolved: got 19 (No such device) on line 106 (Failed to 
-posix/conformance/interfaces/sem_close/3-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_init/3-2.c unresolved: got 19 (No such device) on line 118 (Failed to m
-posix/conformance/interfaces/sem_init/3-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_init/3-3.c unresolved: got 19 (No such device) on line 118 (Failed to m
-posix/conformance/interfaces/sem_init/3-3
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_open/15-1.c unresolved: got 19 (No such device) on line 99 (Failed to s
-posix/conformance/interfaces/sem_open/15-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/2-2.c unresolved: got 19 (No such device) on line 146 (Failed to
-posix/conformance/interfaces/sem_unlink/2-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c unresolved: got 19 (No such device) on line 145 (Failed to
-posix/conformance/interfaces/sem_unlink/3-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/6-1.c unresolved: got 19 (No such device) on line 102 (Failed to
-posix/conformance/interfaces/sem_unlink/6-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/7-1.c unresolved: got 19 (No such device) on line 117 (Failed to
-posix/conformance/interfaces/sem_unlink/7-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/9-1.c unresolved: got 19 (No such device) on line 124 (Failed to
-posix/conformance/interfaces/sem_unlink/9-1
 
 ## UNRESOLVED: There is no other user than current and root.
 posix/conformance/interfaces/shm_open/26-2
@@ -697,11 +507,14 @@ posix/conformance/interfaces/clock_settime/speculative/4-4
 ## UNRESOLVED: errno is not EPERM: The system allows a non-rootuser to use sched_getparam(): Function not implemented
 posix/conformance/interfaces/sched_getparam/6-1
 
-## UNRESOLVED: error at sem_open: No such device
-posix/conformance/interfaces/shm_open/23-1
-
 ## UNRESOLVED: killpg did not return success.
 posix/conformance/interfaces/killpg/4-1
+
+## UNRESOLVED: mq_open() did not return success: Invalid argument
+posix/conformance/interfaces/mq_send/14-1
+posix/conformance/interfaces/mq_timedsend/14-1
+posix/conformance/interfaces/mq_timedsend/3-2
+posix/conformance/interfaces/mq_timedsend/9-1
 
 ## UNRESOLVED: pthread_create(&high_id, &high_attr, hi_prio_thread, NULL)
 posix/functional/threads/schedule/1-1
@@ -712,16 +525,19 @@ posix/functional/threads/schedule/1-2
 ## UNRESOLVED: sched_getparam() return -1 and sets errno == 38.
 posix/conformance/interfaces/sched_getparam/speculative/7-1
 
-## UNRESOLVED: sched_rr_get_interval() return 0 and sets errno == 0.
-posix/conformance/interfaces/sched_rr_get_interval/speculative/5-1
-
 ## UNRESOLVED: sched_setscheduler failed: 38 (Function not implemented)
 posix/conformance/interfaces/sched_rr_get_interval/1-1
 posix/conformance/interfaces/sched_rr_get_interval/2-1
 posix/conformance/interfaces/sched_rr_get_interval/3-1
 
-## UNRESOLVED: unexpected errno: sem_trywait 5-1: sem_open: No such device
-posix/conformance/interfaces/sem_wait/5-1
+## UNRESOLVED: unexpected error: mq_getattr 3-1: mq_open(): Invalid argument
+posix/conformance/interfaces/mq_getattr/3-1
+
+## UNRESOLVED: unexpected error: mq_getattr 4-1: mq_open(): Invalid argument
+posix/conformance/interfaces/mq_getattr/4-1
+
+## UNRESOLVED: unexpected error: mq_notify 5-1: mq_open: Invalid argument
+posix/conformance/interfaces/mq_notify/5-1
 
 ## UNRESOLVED: unexpected error: pthread_attr_getstack 1-1: pthread_attr_getstack: No error information
 posix/conformance/interfaces/pthread_attr_getstack/1-1
@@ -756,87 +572,6 @@ posix/conformance/interfaces/pthread_attr_setinheritsched/2-3
 ## UNRESOLVED: unexpected error: scheduler 2-4: pthread_setschedparam
 posix/conformance/interfaces/pthread_attr_setinheritsched/2-4
 
-## UNRESOLVED: unexpected error: sem_close 1-1: sem_open: No such device
-posix/conformance/interfaces/sem_close/1-1
-
-## UNRESOLVED: unexpected error: sem_close 2-1: sem_open: No such device
-posix/conformance/interfaces/sem_close/2-1
-
-## UNRESOLVED: unexpected error: sem_close 3-1: sem_open: No such device
-posix/conformance/interfaces/sem_close/3-1
-
-## UNRESOLVED: unexpected error: sem_getvalue 1-1: sem_open: No such device
-posix/conformance/interfaces/sem_getvalue/1-1
-
-## UNRESOLVED: unexpected error: sem_getvalue 2-1: sem_open: No such device
-posix/conformance/interfaces/sem_getvalue/2-1
-
-## UNRESOLVED: unexpected error: sem_getvalue 4-1: sem_open: No such device
-posix/conformance/interfaces/sem_getvalue/4-1
-
-## UNRESOLVED: unexpected error: sem_getvalue 5-1: sem_open: No such device
-posix/conformance/interfaces/sem_getvalue/5-1
-
-## UNRESOLVED: unexpected error: sem_open 1-3: sem_open: No such device
-posix/conformance/interfaces/sem_open/1-3
-
-## UNRESOLVED: unexpected error: sem_open 1-4: sem_open: No such device
-posix/conformance/interfaces/sem_open/1-4
-
-## UNRESOLVED: unexpected error: sem_open 10-1: sem_open: No such device
-posix/conformance/interfaces/sem_open/10-1
-
-## UNRESOLVED: unexpected error: sem_open 2-1: sem_open: No such device
-posix/conformance/interfaces/sem_open/2-1
-
-## UNRESOLVED: unexpected error: sem_open 2-2: sem_open: No such device
-posix/conformance/interfaces/sem_open/2-2
-
-## UNRESOLVED: unexpected error: sem_post 1-1: sem_open: No such device
-posix/conformance/interfaces/sem_post/1-1
-
-## UNRESOLVED: unexpected error: sem_post 1-2: sem_open: No such device
-posix/conformance/interfaces/sem_post/1-2
-
-## UNRESOLVED: unexpected error: sem_post 2-1: sem_open: No such device
-posix/conformance/interfaces/sem_post/2-1
-
-## UNRESOLVED: unexpected error: sem_post 4-1: sem_open: No such device
-posix/conformance/interfaces/sem_post/4-1
-
-## UNRESOLVED: unexpected error: sem_post 5-1: sem_open: No such device
-posix/conformance/interfaces/sem_post/5-1
-
-## UNRESOLVED: unexpected error: sem_post 6-1: sem_open: No such device
-posix/conformance/interfaces/sem_post/6-1
-
-## UNRESOLVED: unexpected error: sem_timedwait 2-1: mmap: No such device
-posix/conformance/interfaces/sem_timedwait/2-1
-
-## UNRESOLVED: unexpected error: sem_trywait 11-1: sem_open: No such device
-posix/conformance/interfaces/sem_wait/11-1
-
-## UNRESOLVED: unexpected error: sem_trywait 12-1: sem_open: No such device
-posix/conformance/interfaces/sem_wait/12-1
-
-## UNRESOLVED: unexpected error: sem_unlink 1-1: sem_open: No such device
-posix/conformance/interfaces/sem_unlink/1-1
-
-## UNRESOLVED: unexpected error: sem_unlink 2-1: sem_open: No such device
-posix/conformance/interfaces/sem_unlink/2-1
-
-## UNRESOLVED: unexpected error: sem_wait 1-1: sem_open: No such device
-posix/conformance/interfaces/sem_wait/1-1
-
-## UNRESOLVED: unexpected error: sem_wait 1-2: sem_open: No such device
-posix/conformance/interfaces/sem_wait/1-2
-
-## UNRESOLVED: unexpected error: sem_wait 3-1: sem_open: No such device
-posix/conformance/interfaces/sem_wait/3-1
-
-## UNRESOLVED: unexpected error: sem_wait 7-1: sem_open: No such device
-posix/conformance/interfaces/sem_wait/7-1
-
 ## build: error: "_POSIX_SPORADIC_SERVER not defined correctly"
 posix/conformance/interfaces/sched_setparam/25-3
 
@@ -853,23 +588,23 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmpKgKBJx/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmp6k2sSS/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
 
-## build: wasm-ld: error: /tmp/.tmpR3xX40/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
-
-## build: wasm-ld: error: /tmp/.tmpWBvIt7/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpP37ulM/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
 
-## build: wasm-ld: error: /tmp/.tmpgVfAiF/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpgALjMP/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
 
-## build: wasm-ld: error: /tmp/.tmpoLuykc/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
+## build: wasm-ld: error: /tmp/.tmphWNT88/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmprphTl6/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpqZ0w1C/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
+
+## build: wasm-ld: error: /tmp/.tmpxEnsoG/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
 
 ## exit status 139
 posix/conformance/interfaces/pthread_attr_init/2-1
@@ -946,8 +681,7 @@ posix/conformance/interfaces/sigpause/2-1
 posix/conformance/interfaces/sigpause/3-1
 
 ## timeout
-posix/conformance/interfaces/aio_cancel/4-1
-posix/conformance/interfaces/mmap/24-1
+posix/conformance/interfaces/mq_timedsend/5-1
 posix/conformance/interfaces/pthread_create/11-1
 posix/conformance/interfaces/pthread_mutex_init/1-2
 posix/conformance/interfaces/pthread_mutex_init/3-2

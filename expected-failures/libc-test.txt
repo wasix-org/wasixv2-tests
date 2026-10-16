@@ -8,24 +8,14 @@
 libc-test/functional/strptime
 
 ## ENOSYS: Clone
+libc-test/functional/ipc_msg
+libc-test/functional/ipc_sem
+libc-test/functional/ipc_shm
 libc-test/functional/wordexp
 libc-test/regression/daemon-failure
 libc-test/regression/fflush-exit
 libc-test/regression/pthread_exit-dtor
 libc-test/regression/raise-race
-
-## ENOSYS: FutexTime64
-libc-test/functional/pthread_mutex_pi
-libc-test/functional/pthread_robust
-
-## ENOSYS: Msgctl, Msgget
-libc-test/functional/ipc_msg
-
-## ENOSYS: Semctl, Semget
-libc-test/functional/ipc_sem
-
-## ENOSYS: Shmctl, Shmget
-libc-test/functional/ipc_shm
 
 ## RN fmaf(-0x1.001p-81,0x1.ffe002p-70,0x1.0002p-133) want 0x1.0001p-133 got 0x1.0002p-133 ulperr 0.500 = 0x1p+0 + -0x1p-1
 libc-test/math/fmaf
@@ -46,7 +36,7 @@ libc-test/api/sys_wait
 ## build: error: use of undeclared identifier '_PC_TIMESTAMP_RESOLUTION'
 libc-test/api/unistd
 
-## build: wasm-ld: error: /tmp/.tmphLyqnT/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmpSF6GI2/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## dlopen failed
@@ -78,4 +68,3 @@ libc-test/functional/strtold
 
 ## timeout
 libc-test/functional/pthread_cancel
-libc-test/functional/sem_open

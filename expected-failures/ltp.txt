@@ -4,10 +4,10 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdCreate, MemfdSecret, OpenTree, PerfEventOpen, Splice, Userfaultfd
+## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdSecret, OpenTree, PerfEventOpen, Splice, Userfaultfd
 ltp/syscalls/splice07
 
-## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdCreate, MemfdSecret, OpenTree, PerfEventOpen, Userfaultfd
+## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdSecret, OpenTree, PerfEventOpen, Userfaultfd
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
 
@@ -15,196 +15,26 @@ ltp/syscalls/epoll_ctl06
 ltp/cve/cve-2018-11508
 ltp/syscalls/adjtimex03
 
-## ENOSYS: Clone, Clone3
-ltp/syscalls/close_range02
-
-## ENOSYS: MqNotify
-ltp/syscalls/mq_notify02
-
-## ENOSYS: MqOpen, MqUnlink
-ltp/syscalls/mq_notify01
-ltp/syscalls/mq_timedreceive01
-ltp/syscalls/mq_timedsend01
-
-## ENOSYS: Msgget
-ltp/syscalls-ipc/msgctl01
-ltp/syscalls-ipc/msgctl02
-ltp/syscalls-ipc/msgctl03
-ltp/syscalls-ipc/msgctl05
-ltp/syscalls-ipc/msgctl12
-ltp/syscalls-ipc/msgget01
-ltp/syscalls-ipc/msgrcv01
-ltp/syscalls-ipc/msgrcv05
-ltp/syscalls-ipc/msgrcv06
-ltp/syscalls-ipc/msgrcv07
-ltp/syscalls-ipc/msgrcv08
-ltp/syscalls-ipc/msgsnd01
-ltp/syscalls/msgctl01
-ltp/syscalls/msgctl02
-ltp/syscalls/msgctl03
-ltp/syscalls/msgctl05
-ltp/syscalls/msgctl12
-ltp/syscalls/msgget01
-ltp/syscalls/msgrcv01
-ltp/syscalls/msgrcv05
-ltp/syscalls/msgrcv06
-ltp/syscalls/msgrcv07
-ltp/syscalls/msgrcv08
-ltp/syscalls/msgsnd01
-
-## ENOSYS: RemapFilePages, Shmget
-ltp/syscalls-ipc/shmctl05
-ltp/syscalls/shmctl05
-
-## ENOSYS: SchedGetattr
-ltp/syscalls/sched_getattr02
-
-## ENOSYS: SchedSetattr
-ltp/syscalls/sched_setattr02
-
-## ENOSYS: Semctl, Semget
-ltp/syscalls/pipeio_1
-ltp/syscalls/pipeio_2
-ltp/syscalls/pipeio_3
-ltp/syscalls/pipeio_4
-ltp/syscalls/pipeio_5
-ltp/syscalls/pipeio_6
-ltp/syscalls/pipeio_7
-ltp/syscalls/pipeio_8
-
-## ENOSYS: Semget
-ltp/syscalls-ipc/semctl01
-ltp/syscalls-ipc/semctl03
-ltp/syscalls-ipc/semctl05
-ltp/syscalls-ipc/semctl07
-ltp/syscalls-ipc/semctl08
-ltp/syscalls-ipc/semget01
-ltp/syscalls/semctl01
-ltp/syscalls/semctl03
-ltp/syscalls/semctl05
-ltp/syscalls/semctl07
-ltp/syscalls/semctl08
-ltp/syscalls/semget01
-ltp/syscalls/semop04
-ltp/syscalls/semop05
-
-## ENOSYS: Shmctl
-ltp/syscalls-ipc/shmctl03
-ltp/syscalls/shmctl03
-
-## ENOSYS: Shmctl, Shmget
-ltp/syscalls-ipc/shmctl01
-ltp/syscalls/shmctl01
-
-## ENOSYS: Shmget
-ltp/mm/shm_test01
-ltp/mm/shmt03
-ltp/mm/shmt05
-ltp/mm/shmt07
-ltp/mm/shmt08
-ltp/mm/shmt10
-ltp/syscalls-ipc/shmat04
-ltp/syscalls-ipc/shmctl06
-ltp/syscalls-ipc/shmctl07
-ltp/syscalls-ipc/shmctl08
-ltp/syscalls-ipc/shmdt02
-ltp/syscalls/futex_waitv03
-ltp/syscalls/shmat04
-ltp/syscalls/shmctl06
-ltp/syscalls/shmctl07
-ltp/syscalls/shmctl08
-ltp/syscalls/shmdt02
-
-## ENOSYS: Splice
-ltp/cve/cve-2022-0847
-ltp/syscalls/dirtypipe
-ltp/syscalls/splice01
-ltp/syscalls/splice03
-ltp/syscalls/splice04
-ltp/syscalls/splice05
-ltp/syscalls/splice08
-ltp/syscalls/splice09
-ltp/syscalls/tee01
-
-## ENOSYS: Tee
-ltp/syscalls/tee02
-
-## ENOSYS: Unshare
-ltp/syscalls/statmount03
-
-## ENOSYS: Vmsplice
-ltp/syscalls/vmsplice01
-ltp/syscalls/vmsplice02
-ltp/syscalls/vmsplice03
-ltp/syscalls/vmsplice04
-
-## TBROK: Cannot parse kernel .config
-ltp/syscalls/timer_create02
-
-## TBROK: Expected 1 conversions got 0 FILE '/proc/self/maps'
-ltp/syscalls/mmap04
-
-## TBROK: FORK FAILED - terminating test.
-ltp/syscalls/kill12
-
-## TBROK: Failed to copy '/opt/ltp/testcases/bin/creat07_child' to '.'
-ltp/syscalls/creat07
-
-## TBROK: Failed to copy '/opt/ltp/testcases/bin/execve_child' to '.'
-ltp/syscalls/execve04
-ltp/syscalls/execve05
-
-## TBROK: Failed to copy '/opt/ltp/testcases/bin/execveat_child' to '.'
-ltp/syscalls/execveat01
-
-## TBROK: Failed to copy '/opt/ltp/testcases/bin/execveat_errno' to '.'
-ltp/syscalls/execveat02
-
-## TBROK: Failed to copy '/opt/ltp/testcases/bin/getrusage03_child' to '.'
-ltp/syscalls/getrusage03
-
-## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_queued_events' for reading: ENOENT (2)
-ltp/syscalls/inotify05
-
-## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
-ltp/syscalls/pipe15
-
-## TBROK: Failed to open FILE '/proc/sys/kernel/core_pattern' for reading: ENOENT (2)
-ltp/syscalls/waitid10
-
-## TBROK: Failed to open FILE '/proc/sys/kernel/msgmni' for reading: ENOENT (2)
-ltp/syscalls-ipc/msgstress01
-ltp/syscalls/msgstress01
-
-## TBROK: Fork failed (may be OK if under stress)
-ltp/mm/page02
-ltp/mm/stack_space
-
-## TBROK: Fork failed: child 1: errno=ENOSYS(38): Function not implemented
-ltp/syscalls/fcntl17
-ltp/syscalls/fcntl17_64
-
-## TBROK: Fork failed: errno=ENOSYS(38): Function not implemented
-ltp/syscalls/fcntl22
-ltp/syscalls/fcntl22_64
-
-## TBROK: Locked memory after mlockall() should be > 0
-ltp/syscalls/munlockall01
-
-## TBROK: Reason: Fork failed (may be OK if under stress):Function not implemented
-ltp/mm/page01
-
-## TBROK: fcntl(3,F_SETPIPE_SZ,...) failed: EINVAL (22)
-ltp/syscalls/pipe2_04
-
-## TBROK: fopen(/proc/self/smaps,r) failed: ENOENT (2)
-ltp/syscalls/mlock05
-
-## TBROK: fopen(/proc/sysvipc/shm,r) failed: ENOENT (2)
-ltp/syscalls-ipc/shmget03
-ltp/syscalls/shmget03
-
-## TBROK: fork failed: errno=ENOSYS(38): Function not implemented
+## ENOSYS: Clone
+ltp/containers/utsname01
+ltp/cve/cve-2017-12192
+ltp/cve/cve-2017-17052
+ltp/cve/cve-2021-4034
+ltp/dio/dio03
+ltp/dio/dio06
+ltp/dio/dio09
+ltp/dio/dio12
+ltp/dio/dio15
+ltp/dio/dio17
+ltp/dio/dio19
+ltp/dio/dio21
+ltp/dio/dio23
+ltp/dio/dio25
+ltp/dio/dio26
+ltp/dio/dio27
+ltp/dio/dio28
+ltp/dio/dio29
+ltp/dio/dio30
 ltp/fs/ftest01
 ltp/fs/ftest02
 ltp/fs/ftest03
@@ -213,35 +43,38 @@ ltp/fs/ftest05
 ltp/fs/ftest06
 ltp/fs/ftest07
 ltp/fs/ftest08
-ltp/mm/data_space
-ltp/syscalls/fcntl11
-ltp/syscalls/fcntl11_64
-ltp/syscalls/kill02
-
-## TBROK: fork() #1 failed
-ltp/syscalls/pipe09
-
-## TBROK: fork() failed - errno 38
-ltp/syscalls/pipe04
-
-## TBROK: fork() failed in fork_pgrps(2): errno=ENOSYS(38): Function not implemented
-ltp/syscalls/kill10
-
-## TBROK: fork() failed: ENOSYS (38)
-ltp/containers/utsname01
-ltp/cve/cve-2017-12192
-ltp/cve/cve-2017-17052
-ltp/cve/cve-2021-4034
 ltp/fs/read_all_dev
 ltp/fs/read_all_proc
 ltp/fs/read_all_sys
+ltp/mm/data_space
+ltp/mm/mmap21_01
+ltp/mm/mmap21_02
 ltp/mm/mmapstress01
+ltp/mm/mmapstress09
+ltp/mm/mmapstress10
 ltp/mm/mtest01
 ltp/mm/mtest01w
+ltp/mm/page01
+ltp/mm/page02
 ltp/mm/shmt02
 ltp/mm/shmt04
+ltp/mm/shmt07
+ltp/mm/shmt10
+ltp/mm/stack_space
+ltp/mm/vma01
+ltp/sched/hackbench01
 ltp/sched/starvation
+ltp/sched/time-schedule01
+ltp/syscalls-ipc/msgrcv05
+ltp/syscalls-ipc/msgrcv06
+ltp/syscalls-ipc/semctl01
+ltp/syscalls-ipc/semctl06
+ltp/syscalls-ipc/semop03
+ltp/syscalls-ipc/shmctl01
 ltp/syscalls/abort01
+ltp/syscalls/alarm03
+ltp/syscalls/alarm07
+ltp/syscalls/capset04
 ltp/syscalls/clock_nanosleep01
 ltp/syscalls/clone08
 ltp/syscalls/connect01
@@ -260,14 +93,29 @@ ltp/syscalls/execv01
 ltp/syscalls/execve01
 ltp/syscalls/execve06
 ltp/syscalls/execvp01
+ltp/syscalls/exit01
 ltp/syscalls/exit02
 ltp/syscalls/exit_group01
+ltp/syscalls/fcntl07
+ltp/syscalls/fcntl07_64
+ltp/syscalls/fcntl11
+ltp/syscalls/fcntl11_64
 ltp/syscalls/fcntl12
 ltp/syscalls/fcntl12_64
 ltp/syscalls/fcntl14
 ltp/syscalls/fcntl14_64
 ltp/syscalls/fcntl15
 ltp/syscalls/fcntl15_64
+ltp/syscalls/fcntl17
+ltp/syscalls/fcntl17_64
+ltp/syscalls/fcntl19
+ltp/syscalls/fcntl19_64
+ltp/syscalls/fcntl20
+ltp/syscalls/fcntl20_64
+ltp/syscalls/fcntl21
+ltp/syscalls/fcntl21_64
+ltp/syscalls/fcntl22
+ltp/syscalls/fcntl22_64
 ltp/syscalls/flock03
 ltp/syscalls/flock04
 ltp/syscalls/fork01
@@ -298,14 +146,28 @@ ltp/syscalls/getsockopt02
 ltp/syscalls/inotify11
 ltp/syscalls/kcmp01
 ltp/syscalls/keyctl07
+ltp/syscalls/kill02
 ltp/syscalls/kill06
 ltp/syscalls/kill08
+ltp/syscalls/kill10
 ltp/syscalls/kill11
+ltp/syscalls/kill12
 ltp/syscalls/madvise10
 ltp/syscalls/membarrier01
+ltp/syscalls/mincore04
+ltp/syscalls/mmap01
 ltp/syscalls/mmap03
 ltp/syscalls/mmap18
+ltp/syscalls/mmap21_01
+ltp/syscalls/mmap21_02
+ltp/syscalls/mprotect02
+ltp/syscalls/mprotect03
+ltp/syscalls/mq_timedreceive01
+ltp/syscalls/mq_timedsend01
 ltp/syscalls/mseal01
+ltp/syscalls/msgrcv05
+ltp/syscalls/msgrcv06
+ltp/syscalls/munmap01
 ltp/syscalls/nanosleep02
 ltp/syscalls/nice03
 ltp/syscalls/pause01
@@ -313,24 +175,47 @@ ltp/syscalls/pause02
 ltp/syscalls/personality01
 ltp/syscalls/pidfd_open03
 ltp/syscalls/pipe02
+ltp/syscalls/pipe04
+ltp/syscalls/pipe09
 ltp/syscalls/pipe10
 ltp/syscalls/pipe11
 ltp/syscalls/pipe13
+ltp/syscalls/pipeio_1
+ltp/syscalls/pipeio_2
+ltp/syscalls/pipeio_3
+ltp/syscalls/pipeio_4
+ltp/syscalls/pipeio_5
+ltp/syscalls/pipeio_6
+ltp/syscalls/pipeio_7
+ltp/syscalls/pipeio_8
 ltp/syscalls/ppoll01
 ltp/syscalls/prctl03
+ltp/syscalls/recv01
+ltp/syscalls/recvfrom01
 ltp/syscalls/recvmsg01
+ltp/syscalls/rename14
 ltp/syscalls/rt_sigqueueinfo02
 ltp/syscalls/rt_sigtimedwait01
 ltp/syscalls/sched_getparam01
 ltp/syscalls/select03
+ltp/syscalls/semctl01
+ltp/syscalls/semctl06
+ltp/syscalls/semop03
+ltp/syscalls/semop04
+ltp/syscalls/send01
+ltp/syscalls/sendto01
 ltp/syscalls/setitimer01
+ltp/syscalls/setpgid01
 ltp/syscalls/setpgid03
+ltp/syscalls/setpgrp01
 ltp/syscalls/setpgrp02
 ltp/syscalls/setrlimit05
 ltp/syscalls/setrlimit06
+ltp/syscalls/shmctl01
 ltp/syscalls/shutdown01
 ltp/syscalls/sighold02
 ltp/syscalls/signal01
+ltp/syscalls/sigrelse01
 ltp/syscalls/sigtimedwait01
 ltp/syscalls/sigwait01
 ltp/syscalls/sigwaitinfo01
@@ -359,125 +244,92 @@ ltp/syscalls/waitpid11
 ltp/syscalls/waitpid12
 ltp/syscalls/waitpid13
 
-## TBROK: fork() failed: errno=ENOSYS(38): Function not implemented
-ltp/syscalls/exit01
-ltp/syscalls/fcntl07
-ltp/syscalls/fcntl07_64
-ltp/syscalls/sigrelse01
+## ENOSYS: Clone, Clone3
+ltp/syscalls/close_range02
 
-## TBROK: fork() in setup() failed - errno 38
-ltp/syscalls/setpgrp01
+## ENOSYS: Splice
+ltp/cve/cve-2022-0847
+ltp/syscalls/dirtypipe
+ltp/syscalls/splice01
+ltp/syscalls/splice03
+ltp/syscalls/splice04
+ltp/syscalls/splice05
+ltp/syscalls/splice08
+ltp/syscalls/splice09
+ltp/syscalls/tee01
 
-## TBROK: fork() returned -1
-ltp/syscalls/rename14
+## ENOSYS: Tee
+ltp/syscalls/tee02
 
-## TBROK: fork: errno=ENOSYS(38): Function not implemented
-ltp/mm/vma01
+## ENOSYS: Unshare
+ltp/syscalls/statmount03
+
+## ENOSYS: Vmsplice
+ltp/syscalls/vmsplice01
+ltp/syscalls/vmsplice02
+ltp/syscalls/vmsplice03
+ltp/syscalls/vmsplice04
+
+## TBROK: Cannot parse kernel .config
+ltp/syscalls/timer_create02
+
+## TBROK: Expected 1 conversions got 0 FILE '/proc/self/maps'
+ltp/syscalls/mmap04
+
+## TBROK: Failed to copy '/opt/ltp/testcases/bin/creat07_child' to '.'
+ltp/syscalls/creat07
+
+## TBROK: Failed to copy '/opt/ltp/testcases/bin/execve_child' to '.'
+ltp/syscalls/execve04
+ltp/syscalls/execve05
+
+## TBROK: Failed to copy '/opt/ltp/testcases/bin/execveat_child' to '.'
+ltp/syscalls/execveat01
+
+## TBROK: Failed to copy '/opt/ltp/testcases/bin/execveat_errno' to '.'
+ltp/syscalls/execveat02
+
+## TBROK: Failed to copy '/opt/ltp/testcases/bin/getrusage03_child' to '.'
+ltp/syscalls/getrusage03
+
+## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_queued_events' for reading: ENOENT (2)
+ltp/syscalls/inotify05
+
+## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
+ltp/syscalls/pipe15
+
+## TBROK: Failed to open FILE '/proc/sys/kernel/core_pattern' for reading: ENOENT (2)
+ltp/syscalls/waitid10
+
+## TBROK: Failed to open FILE '/proc/sys/kernel/msgmni' for reading: ENOENT (2)
+ltp/syscalls-ipc/msgstress01
+ltp/syscalls/msgstress01
+
+## TBROK: Failed to open FILE '/proc/sys/kernel/shmmax' for reading: ENOENT (2)
+ltp/syscalls-ipc/shmctl03
+ltp/syscalls/shmctl03
+
+## TBROK: Locked memory after mlockall() should be > 0
+ltp/syscalls/munlockall01
+
+## TBROK: fcntl(3,F_SETPIPE_SZ,...) failed: EINVAL (22)
+ltp/syscalls/pipe2_04
+
+## TBROK: fopen(/proc/self/smaps,r) failed: ENOENT (2)
+ltp/syscalls/mlock05
+
+## TBROK: fopen(/proc/sysvipc/shm,r) failed: ENOENT (2)
+ltp/syscalls-ipc/shmget03
+ltp/syscalls/shmget03
 
 ## TBROK: ioctl(3,(( ((2U)<<30) | ((('R'))<<8) | ((0x00)) | ((sizeof(int))<<16) )),...) failed: ENOTTY (25)
 ltp/syscalls/ioctl07
 
-## TBROK: mincore01.c:177: mmap(0,262144,3,1,3,0) failed: errno=ENODEV(19): No such device
-ltp/syscalls/mincore01
-
-## TBROK: mmap failed
-ltp/syscalls/mprotect03
-
-## TBROK: mmap failed: errno=ENODEV(19): No such device
-ltp/syscalls/msync01
-ltp/syscalls/msync02
-
-## TBROK: mmap(0,126350,PROT_READ | PROT_WRITE(3),1,3,262144) failed: ENODEV (19)
-ltp/ltp-aiodio.part3/fsx13
-ltp/ltp-aiodio.part3/fsx14
-ltp/ltp-aiodio.part3/fsx15
-ltp/ltp-aiodio.part3/fsx16
-ltp/ltp-aiodio.part3/fsx17
-ltp/ltp-aiodio.part3/fsx18
-ltp/ltp-aiodio.part3/fsx19
-ltp/ltp-aiodio.part3/fsx20
-ltp/ltp-aiodio.part3/fsx21
-
-## TBROK: mmap(0,133901,PROT_READ(1),1,3,0) failed: ENODEV (19)
-ltp/ltp-aiodio.part3/fsx22
-
-## TBROK: mmap(0,16384,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
-ltp/syscalls/mremap06
-
-## TBROK: mmap(0,196608,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
-ltp/syscalls/munmap01
-
-## TBROK: mmap(0,196608,PROT_READ | PROT_WRITE(3),2,3,0) failed: ENODEV (19)
-ltp/syscalls/mincore04
-
-## TBROK: mmap(0,22,PROT_WRITE(2),2,3,0) failed: ENODEV (19)
-ltp/syscalls/mmap17
-
 ## TBROK: mmap(0,262144,PROT_READ | PROT_WRITE | PROT_EXEC(7),1,3,0) failed: EACCES (13)
 ltp/syscalls/mincore02
 
-## TBROK: mmap(0,327680,PROT_READ(1),1,3,0) failed: ENODEV (19)
-ltp/syscalls/mprotect05
-
-## TBROK: mmap(0,33145,PROT_READ | PROT_WRITE(3),1,3,458752) failed: ENODEV (19)
-ltp/ltp-aiodio.part3/fsx01
-ltp/ltp-aiodio.part3/fsx02
-ltp/ltp-aiodio.part3/fsx03
-
-## TBROK: mmap(0,40960,PROT_WRITE(2),1,3,0) failed: ENODEV (19)
-ltp/syscalls/mlock04
-
-## TBROK: mmap(0,64,PROT_READ(1),2,3,0) failed: ENODEV (19)
-ltp/syscalls/mmap19
-
-## TBROK: mmap(0,65536,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
-ltp/syscalls/futex_wake05
-ltp/syscalls/mmap01
-ltp/syscalls/mmap09
-
-## TBROK: mmap(0,65536,PROT_READ(1),1,3,0) failed: ENODEV (19)
-ltp/syscalls/mmap02
-
-## TBROK: mmap(0,65536,PROT_WRITE(2),1,3,0) failed: ENODEV (19)
-ltp/syscalls/mmap21_01
-
-## TBROK: mmap(0,65536000,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
-ltp/syscalls/mremap01
-
-## TBROK: mmap(0,65536000,PROT_WRITE(2),1,3,0) failed: ENODEV (19)
-ltp/mm/mmap21_02
-ltp/syscalls/mmap21_02
-
-## TBROK: mmap(0,655360000,PROT_WRITE(2),1,3,0) failed: ENODEV (19)
-ltp/mm/mmap21_01
-
-## TBROK: mmap(0,708608,PROT_READ | PROT_WRITE(3),2,5,0) failed: ENODEV (19)
-ltp/mm/mtest06_3
-
-## TBROK: mmap(0,90459,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
-ltp/ltp-aiodio.part3/fsx04
-ltp/ltp-aiodio.part3/fsx05
-ltp/ltp-aiodio.part3/fsx06
-ltp/ltp-aiodio.part3/fsx07
-ltp/ltp-aiodio.part3/fsx08
-ltp/ltp-aiodio.part3/fsx09
-ltp/ltp-aiodio.part3/fsx10
-ltp/ltp-aiodio.part3/fsx12
-
-## TBROK: mmap(0x48000000,65536,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
-ltp/syscalls/remap_file_pages02
-
-## TBROK: mmap(0x870000,65536,PROT_READ(1),18,3,393216) failed: ENODEV (19)
-ltp/mm/mmapstress04
-
-## TBROK: mmap(0x8870000,1024,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
-ltp/mm/mtest06
-
-## TBROK: mprotect02.c:90: mmap(0,27,1,1,3,0) failed: errno=ENODEV(19): No such device
-ltp/syscalls/mprotect02
-
-## TBROK: msync03.c:124: mmap(0,65536,3,8193,3,0) failed: errno=ENODEV(19): No such device
-ltp/syscalls/msync03
+## TBROK: mremap() failed
+ltp/syscalls/mremap06
 
 ## TBROK: open(/bin/cat,0,0000) failed: ENOENT (2)
 ltp/syscalls/posix_fadvise01
@@ -504,12 +356,6 @@ ltp/syscalls/openat03
 ## TBROK: pty creation failed: ENOENT (2)
 ltp/cve/cve-2014-0196
 
-## TBROK: server fork failed: errno=ENOSYS(38): Function not implemented
-ltp/syscalls/recv01
-ltp/syscalls/recvfrom01
-ltp/syscalls/send01
-ltp/syscalls/sendto01
-
 ## TBROK: setsockopt(3, 0, 42, 0x8bff7c, 132) failed: ENOPROTOOPT (92)
 ltp/cve/cve-2017-8890
 ltp/syscalls/accept02
@@ -533,43 +379,22 @@ ltp/syscalls/writev05
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
 
-## TFAIL: Fork failed
-ltp/syscalls/fcntl19
-ltp/syscalls/fcntl19_64
-ltp/syscalls/fcntl21
-ltp/syscalls/fcntl21_64
-
-## TFAIL: Fork failed (may be OK if under stress)
-ltp/syscalls-ipc/semctl06
-ltp/syscalls/semctl06
-
 ## TFAIL: Invalid address expected EFAULT: ENOENT (2)
 ltp/syscalls/mknod06
 
-## TFAIL: Read with Direct IO, Write without
-ltp/dio/dio03
-ltp/dio/dio06
-ltp/dio/dio09
-ltp/dio/dio12
-ltp/dio/dio15
-ltp/dio/dio17
-ltp/dio/dio19
-ltp/dio/dio21
-ltp/dio/dio23
-ltp/dio/dio25
-ltp/dio/dio26
-ltp/dio/dio27
-ltp/dio/dio28
-ltp/dio/dio29
-ltp/dio/dio30
+## TFAIL: Received wrong signal and/or data!
+ltp/syscalls/rt_sigqueueinfo01
 
 ## TFAIL: SAFE_EPOLL_WAIT(epfd, &evt_receive, 1, 0) (1) != 0 (0)
 ltp/syscalls/epoll_wait06
 
-## TFAIL: SA_RESETHAND should not cause SA_SIGINFO to be cleared, but it was.
-ltp/syscalls/sigaction01
+## TFAIL: SIGBUS signal not received
+ltp/syscalls/mmap13
 
-## TFAIL: TEST 1 Failed
+## TFAIL: SIGSEGV signal not received
+ltp/syscalls/mmap05
+
+## TFAIL: TEST 4 Failed
 ltp/mm/mtest05
 
 ## TFAIL: Test failed
@@ -577,14 +402,8 @@ ltp/mm/mmapstress02
 ltp/mm/mmapstress03
 ltp/mm/mmapstress05
 
-## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
-ltp/syscalls/alarm07
-
 ## TFAIL: alarm(10) invalid retval 32: SUCCESS (0)
 ltp/syscalls/alarm05
-
-## TFAIL: alarm(100) invalid retval 30: SUCCESS (0)
-ltp/syscalls/alarm03
 
 ## TFAIL: alarm(2) invalid retval 34: SUCCESS (0)
 ltp/syscalls/alarm06
@@ -595,6 +414,9 @@ ltp/syscalls/alarm02
 ## TFAIL: call succeeded unexpectedly
 ltp/syscalls/mprotect01
 ltp/syscalls/pipe05
+
+## TFAIL: capget() with bad address header expected EFAULT: EINVAL (22)
+ltp/syscalls/capget02
 
 ## TFAIL: chdir() expected EFAULT: ENOENT (2)
 ltp/syscalls/chdir04
@@ -717,27 +539,23 @@ ltp/syscalls/clone03
 ## TFAIL: ltp_clone(SIGCHLD, do_child, NULL, CHILD_STACK_SIZE, child_stack) failed: ENOSYS (38)
 ltp/syscalls/clone07
 
+## TFAIL: memcmp(cp2, tst_rand_data, SHMSIZE) (-1) != 0 (0)
+ltp/mm/shmt03
+
 ## TFAIL: mincore reports resident pages as 3, but expected 0
 ltp/syscalls/mincore03
 
-## TFAIL: mmap Error, errno=19 : No such device
+## TFAIL: mmap Error, errno=22 : Invalid argument
 ltp/syscalls/remap_file_pages01
 
-## TFAIL: mmap of mmapfile failed: ENODEV (19)
-ltp/syscalls/mmap12
-
-## TFAIL: mmap() failed with unexpected errno: ENODEV (19)
+## TFAIL: mmap() into high mem region succeeded unexpectedly
 ltp/syscalls/mmap15
 
-## TFAIL: mmap() failed with unexpected error: ENODEV (19)
-ltp/syscalls/mmap20
+## TFAIL: mprotect failed to exec: EACCES (13)
+ltp/syscalls/mprotect05
 
-## TFAIL: mmap() of mmapfile failed: ENODEV (19)
-ltp/syscalls/mmap05
-ltp/syscalls/mmap13
-
-## TFAIL: mmap(NULL, tc->length, tc->prot, tc->flags, fd, 0) expected EACCES: ENODEV (19)
-ltp/syscalls/mmap06
+## TFAIL: msync succeeded unexpectedly
+ltp/syscalls/msync03
 
 ## TFAIL: name->sysname (wasixv2) != "Linux" (Linux)
 ltp/syscalls/newuname01
@@ -751,6 +569,9 @@ ltp/syscalls/mremap05
 ## TFAIL: open magiclinks: openat2() failed: ENOENT (2)
 ltp/syscalls/openat202
 
+## TFAIL: pen dev pagemap failed: ENOENT (2)
+ltp/syscalls/mmap12
+
 ## TFAIL: pidfd_send_signal() did not fail with EINVAL but: EBADF (9)
 ltp/syscalls/pidfd_send_signal02
 
@@ -762,6 +583,9 @@ ltp/syscalls/poll02
 
 ## TFAIL: prctl() slept for too long
 ltp/syscalls/prctl09
+
+## TFAIL: prctl() succeeded unexpectedly
+ltp/syscalls/prctl02
 
 ## TFAIL: preadv2() failed unexpectedly, expected EFAULT: SUCCESS (0)
 ltp/syscalls/preadv202
@@ -785,7 +609,7 @@ ltp/syscalls/read02
 ## TFAIL: readlinkat(3, symlink_file, NULL, 0) succeeded
 ltp/syscalls/readlinkat02
 
-## TFAIL: readv(3, 0x807b30, 3) succeeded
+## TFAIL: readv(3, 0x808ee0, 3) succeeded
 ltp/syscalls/readv02
 
 ## TFAIL: recv() read 16 bytes, expected 0, step 1
@@ -798,17 +622,21 @@ ltp/syscalls/recvmmsg01
 ltp/cve/cve-2015-0235
 ltp/syscalls/gethostbyname_r01
 
-## TFAIL: rt_sigqueueinfo() failed: ESRCH (3)
-ltp/syscalls/rt_sigqueueinfo01
-
 ## TFAIL: sbrk(8192) returned 0xffffffff failed: ENOMEM (12)
 ltp/syscalls/sbrk01
 
 ## TFAIL: sched_getaffinity() returned 0, expected -1
 ltp/syscalls/sched_getaffinity01
 
+## TFAIL: sched_setattr() with invalid sched_attr address succeeded
+ltp/syscalls/sched_setattr02
+
 ## TFAIL: select() slept for too long
 ltp/syscalls/select02
+
+## TFAIL: semctl() with invalid union arg succeeded
+ltp/syscalls-ipc/semctl03
+ltp/syscalls/semctl03
 
 ## TFAIL: sendfile(..) with pass_mapped_buffer, protection=0 succeeded
 ltp/syscalls/sendfile04
@@ -820,9 +648,6 @@ ltp/syscalls/sendmmsg02
 ## TFAIL: setpgid(0, 1) expected ESRCH: EPERM (1)
 ltp/syscalls/setpgid02
 
-## TFAIL: setpgid(pid, pgid) failed: EPERM (1)
-ltp/syscalls/setpgid01
-
 ## TFAIL: setsockopt() succeeded unexpectedly
 ltp/syscalls/setsockopt01
 
@@ -831,6 +656,9 @@ ltp/syscalls/statvfs02
 
 ## TFAIL: statx() should fail with EFAULT: ENOENT (2)
 ltp/syscalls/statx03
+
+## TFAIL: succeeded unexpectedly
+ltp/syscalls/mincore01
 
 ## TFAIL: sync_file_range(3, 0, 1, 8) succeeded
 ltp/syscalls/sync_file_range01
@@ -870,12 +698,16 @@ ltp/syscalls/futex_wait06
 
 ## TFAIL: uaddr unmapped succeeded
 ltp/syscalls/futex_cmp_requeue03
+ltp/syscalls/futex_wake05
 
 ## TFAIL: ulimit(UL_GETFSIZE, -1) failed: SUCCESS (0)
 ltp/syscalls/ulimit01
 
 ## TFAIL: uname(bad_addr) succeeded
 ltp/syscalls/uname02
+
+## TFAIL: unexpected value in map, i=0,val=0x0
+ltp/mm/mmapstress04
 
 ## TFAIL: value->it_value.tv_sec (29) != 0 (0)
 ltp/syscalls/getitimer01
@@ -1045,31 +877,18 @@ ltp/cve/cve-2017-18344
 ltp/syscalls/timer_create03
 
 ## exit status 1
-ltp/sched/hackbench01
 ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 ltp/syscalls/prctl08
-ltp/syscalls/rt_sigaction01
-
-## exit status 134
-ltp/syscalls/fcntl20
-ltp/syscalls/fcntl20_64
 
 ## exit status 137
 ltp/cve/cve-2018-6927
-ltp/mm/mmapstress09
 ltp/syscalls/futex_cmp_requeue02
 ltp/syscalls/futex_wait01
 ltp/syscalls/futex_wait03
 ltp/syscalls/futex_wait04
 ltp/syscalls/futex_wake01
 ltp/syscalls/sigsuspend02
-
-## exit status 138
-ltp/mm/mmapstress10
-
-## exit status 143
-ltp/sched/time-schedule01
 
 ## exit status 255
 ltp/sched/trace_sched01
@@ -1334,4 +1153,8 @@ ltp/syscalls/ioctl02
 
 ## timeout
 ltp/fcntl-locktests/FCNTL_LOCKTESTS
+ltp/ltp-aiodio.part3/fsx22
 ltp/mm/mallocstress01
+ltp/mm/mtest06
+ltp/mm/mtest06_3
+ltp/mm/shm_test01
