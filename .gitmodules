@@ -2,3 +2,6 @@
 	path = external/ltp
 	url = https://github.com/linux-test-project/ltp.git
 	shallow = true
+[submodule "libc-test"]
+	path = external/libc-test
+	url = https://repo.or.cz/libc-test.git

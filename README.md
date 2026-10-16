@@ -107,6 +107,7 @@ To add a suite, add its submodule and implement `ExternalSuite` and `ExternalTes
 | Submodule | Pinned at | License |
 | --- | --- | --- |
 | `external/ltp` | [LTP](https://github.com/linux-test-project/ltp) `20260930` (`2279d708c817`) | GPL-2.0-or-later |
+| `external/libc-test` | [libc-test](https://repo.or.cz/libc-test.git) `7b95dfa5f5d5` (2026-08-25) | MIT |
 
 ### Open POSIX Test Suite
 
@@ -134,3 +135,27 @@ To add a suite, add its submodule and implement `ExternalSuite` and `ExternalTes
   `PTS_UNRESOLVED` (2) fail with that cause; `PTS_UNSUPPORTED` (4) and `PTS_UNTESTED` (5) are
   unsupported and untested; a guest killed by a signal fails as `killed by SIG...`, and any other
   status as `exit status N`.
+
+### libc-test
+
+`libc-test/...`: musl's libc-test, as its `Makefile` and `src/common/runtest.c` define it.
+
+- **Tests.** Every `.c` under `src/functional`, `src/regression` and `src/math`, named
+  `libc-test/<group>/<test>`, e.g. `libc-test/functional/pthread_cond`. A source whose `.mk` sets
+  an empty `$(N).BINS`, such as `dlopen_dso.c`, is a shared object other tests load, not a test.
+  `src/api` (compile-only header checks) and `src/musl` (musl internals) are not included.
+- **Build.** As the `Makefile` does, with `-Isrc/common` and the `CFLAGS`, `LDFLAGS` and `LDLIBS`
+  of `config.mak.def` before its glibc settings, and the test's `.mk`. `functional` and
+  `regression` run the suite's `bin-static.exe`, linked with `-static`; `math` runs `bin.exe`, the
+  only program the suite builds there. A test whose `.mk` builds only `bin.exe`, because it loads
+  a shared object, builds that and its shared objects (`-fPIC -DSHARED`, `-shared`). Every program
+  links `src/common/libtest.a`, built once per run without `runtest.o`: the runner runs each test
+  in `runtest`'s place, and `runtest`'s `main` would otherwise be linked into tests whose `main`
+  takes no arguments.
+- **Run.** The build directory, laid out like the suite's tree (`src/<group>/<program>`), is
+  mapped at `/t` and is the working directory, as `make run` runs from the top of the tree; a fresh
+  directory is mapped at `/tmp`. The timeout is 60 seconds unless `WASIXV2_TESTS_TIMEOUT_SECS` is
+  set: `runtest`'s 5 seconds, plus room for wasmer compiling the module and for the tests that
+  fill memory.
+- **Results**, as `runtest` reports them: exit status 0 passes; any other fails as
+  `FAIL [status N]`, a guest killed by a signal as `FAIL [signal N]`.

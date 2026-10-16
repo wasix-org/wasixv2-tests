@@ -6,6 +6,7 @@
 //! its name, e.g. `openposix/conformance/interfaces/sem_wait/1-1`, so `FILTER` arguments and
 //! `expected-failures.txt` treat them like any other test.
 
+mod libc_test;
 mod openposix;
 
 use std::path::{Path, PathBuf};
@@ -47,7 +48,7 @@ pub trait ExternalTest: Send + Sync {
 }
 
 /// Every external suite the runner knows.
-pub const SUITES: &[&dyn ExternalSuite] = &[&openposix::OpenPosix];
+pub const SUITES: &[&dyn ExternalSuite] = &[&openposix::OpenPosix, &libc_test::LibcTest];
 
 /// What [`discover`] found.
 pub struct Discovered {
