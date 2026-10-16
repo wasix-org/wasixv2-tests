@@ -1,5 +1,6 @@
 // memfd_create: an unnamed read-write file with a /proc link name, its flags and name checks,
-// and file seals (F_ADD_SEALS, F_GET_SEALS) on writes, size changes, mode changes and mmap.
+// and file seals (F_ADD_SEALS, F_GET_SEALS) on writes, size changes, mode changes and mmap,
+// where a writable shared mapping keeps F_SEAL_WRITE out (EBUSY).
 //#ExpectedStdout: PASS
 #define _GNU_SOURCE
 #include <errno.h>
@@ -72,11 +73,19 @@ int main(void)
 	FAILS(pwrite(fd, "x", 1, 8192), EPERM);
 	FAILS(fallocate(fd, 0, 8000, 1000), EPERM);
 	CHECK(pwrite(fd, "abc", 3, 100) == 3);
+	/* A writable shared mapping keeps the file from being write-sealed. */
+	char *map = mmap(NULL, 8192, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	CHECK(map != MAP_FAILED);
+	FAILS(fcntl(fd, F_ADD_SEALS, F_SEAL_WRITE), EBUSY);
+	OK(munmap(map, 8192));
 	OK(fcntl(fd, F_ADD_SEALS, F_SEAL_WRITE));
 	FAILS(pwrite(fd, "abc", 3, 100), EPERM);
 	FAILS(write(fd, "abc", 3), EPERM);
 	FAILS(fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, 0, 100), EPERM);
 	FAILS((long)mmap(NULL, 8192, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0), EPERM);
+	map = mmap(NULL, 8192, PROT_READ, MAP_SHARED, fd, 0);
+	CHECK(map != MAP_FAILED && memcmp(map + 100, "abc", 3) == 0);
+	OK(munmap(map, 8192));
 	CHECK(pread(fd, buf, 3, 100) == 3 && memcmp(buf, "abc", 3) == 0);
 	OK(fcntl(fd, F_ADD_SEALS, F_SEAL_SEAL));
 	FAILS(fcntl(fd, F_ADD_SEALS, F_SEAL_FUTURE_WRITE), EPERM);
