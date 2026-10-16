@@ -19,6 +19,7 @@ posix/conformance/interfaces/fork/1-1
 posix/conformance/interfaces/fork/11-1
 posix/conformance/interfaces/fork/12-1
 posix/conformance/interfaces/fork/13-1
+posix/conformance/interfaces/fork/18-1
 posix/conformance/interfaces/fork/2-1
 posix/conformance/interfaces/fork/22-1
 posix/conformance/interfaces/fork/3-1
@@ -171,6 +172,7 @@ posix/conformance/interfaces/sigsuspend/3-1
 posix/conformance/interfaces/sigsuspend/4-1
 posix/conformance/interfaces/sigsuspend/6-1
 posix/conformance/interfaces/sigwaitinfo/3-1
+posix/conformance/interfaces/timer_create/8-1
 posix/conformance/interfaces/timer_delete/speculative/5-1
 posix/conformance/interfaces/timer_getoverrun/speculative/6-1
 posix/conformance/interfaces/timer_gettime/speculative/6-1
@@ -316,59 +318,6 @@ posix/conformance/interfaces/mq_unlink/speculative/7-2
 ## ENOSYS: Shmget
 posix/conformance/interfaces/sched_setparam/9-1
 
-## ENOSYS: TimerCreate
-posix/conformance/interfaces/clock_settime/4-2
-posix/conformance/interfaces/clock_settime/speculative/4-3
-posix/conformance/interfaces/clock_settime/speculative/4-4
-posix/conformance/interfaces/fork/18-1
-posix/conformance/interfaces/timer_create/1-1
-posix/conformance/interfaces/timer_create/10-1
-posix/conformance/interfaces/timer_create/11-1
-posix/conformance/interfaces/timer_create/16-1
-posix/conformance/interfaces/timer_create/3-1
-posix/conformance/interfaces/timer_create/7-1
-posix/conformance/interfaces/timer_create/8-1
-posix/conformance/interfaces/timer_create/9-1
-posix/conformance/interfaces/timer_create/speculative/2-1
-posix/conformance/interfaces/timer_create/speculative/5-1
-posix/conformance/interfaces/timer_delete/1-1
-posix/conformance/interfaces/timer_delete/1-2
-posix/conformance/interfaces/timer_delete/speculative/5-2
-posix/conformance/interfaces/timer_getoverrun/1-1
-posix/conformance/interfaces/timer_getoverrun/2-1
-posix/conformance/interfaces/timer_getoverrun/2-2
-posix/conformance/interfaces/timer_getoverrun/2-3
-posix/conformance/interfaces/timer_getoverrun/speculative/6-2
-posix/conformance/interfaces/timer_getoverrun/speculative/6-3
-posix/conformance/interfaces/timer_gettime/1-1
-posix/conformance/interfaces/timer_gettime/1-2
-posix/conformance/interfaces/timer_gettime/1-3
-posix/conformance/interfaces/timer_gettime/1-4
-posix/conformance/interfaces/timer_gettime/2-1
-posix/conformance/interfaces/timer_gettime/2-2
-posix/conformance/interfaces/timer_gettime/3-1
-posix/conformance/interfaces/timer_gettime/speculative/6-2
-posix/conformance/interfaces/timer_gettime/speculative/6-3
-posix/conformance/interfaces/timer_settime/1-1
-posix/conformance/interfaces/timer_settime/1-2
-posix/conformance/interfaces/timer_settime/13-1
-posix/conformance/interfaces/timer_settime/2-1
-posix/conformance/interfaces/timer_settime/3-1
-posix/conformance/interfaces/timer_settime/3-2
-posix/conformance/interfaces/timer_settime/3-3
-posix/conformance/interfaces/timer_settime/5-1
-posix/conformance/interfaces/timer_settime/5-2
-posix/conformance/interfaces/timer_settime/5-3
-posix/conformance/interfaces/timer_settime/6-1
-posix/conformance/interfaces/timer_settime/8-1
-posix/conformance/interfaces/timer_settime/8-2
-posix/conformance/interfaces/timer_settime/8-3
-posix/conformance/interfaces/timer_settime/8-4
-posix/conformance/interfaces/timer_settime/9-1
-posix/conformance/interfaces/timer_settime/9-2
-posix/conformance/interfaces/timer_settime/speculative/12-2
-posix/conformance/interfaces/timer_settime/speculative/12-3
-
 ## FAIL: At least one test FAILED -- see output for status
 posix/conformance/interfaces/kill/2-2
 posix/conformance/interfaces/sigqueue/2-2
@@ -402,6 +351,7 @@ posix/conformance/interfaces/mmap/1-2
 posix/conformance/interfaces/mmap/12-1
 posix/conformance/interfaces/mmap/13-1
 posix/conformance/interfaces/mmap/14-1
+posix/conformance/interfaces/mmap/3-1
 posix/conformance/interfaces/mmap/7-4
 
 ## FAIL: Failed: func: pthread_attr_setschedpolicy() rc: No error information (0)
@@ -438,6 +388,7 @@ posix/conformance/interfaces/sem_unlink/4-1
 posix/conformance/interfaces/mmap/6-4
 posix/conformance/interfaces/mmap/6-6
 posix/conformance/interfaces/sigismember/5-1
+posix/conformance/interfaces/timer_create/9-1
 
 ## FAIL: Test FAILED: EPERM error not received
 posix/conformance/interfaces/sigqueue/3-1
@@ -472,14 +423,11 @@ posix/conformance/interfaces/sched_setscheduler/19-5
 posix/conformance/interfaces/mlock/12-1
 posix/conformance/interfaces/mlock/speculative/12-1
 
-## FAIL: aio_cancel/2-1.c Unexpected aio_cancel() return value: 2
+## FAIL: aio_cancel/2-1.c AIO request 3 was not canceled: No error information
 posix/conformance/interfaces/aio_cancel/2-1
 
 ## FAIL: aio_cancel/3-1.c 0 AIO requests got canceled, expected 5
 posix/conformance/interfaces/aio_cancel/3-1
-
-## FAIL: aio_cancel/4-1.c Bad task #3 result: No error information (expected ECANCELED)
-posix/conformance/interfaces/aio_cancel/4-1
 
 ## FAIL: aio_cancel/5-1.c Unexpected aio_cancel() return value: 2
 posix/conformance/interfaces/aio_cancel/5-1
@@ -495,9 +443,6 @@ posix/conformance/interfaces/aio_read/10-1
 
 ## FAIL: aio_read/11-2.c bad aio_read return value()
 posix/conformance/interfaces/aio_read/11-2
-
-## FAIL: aio_suspend/4-1.c Error : AIOCB 6 already completed before suspend
-posix/conformance/interfaces/aio_suspend/4-1
 
 ## FAIL: aio_write/8-1.c bad aio_write return value()
 posix/conformance/interfaces/aio_write/8-1
@@ -595,12 +540,6 @@ posix/conformance/interfaces/pthread_attr_setinheritsched/2-2
 
 ## UNRESOLVED: Error at setrlimit(): Operation not permitted
 posix/conformance/interfaces/mmap/18-1
-
-## UNRESOLVED: Error at write(), fd: No such file or directory
-posix/conformance/interfaces/mmap/3-1
-
-## UNRESOLVED: Error at write(): 65536 of 655360 written
-posix/conformance/interfaces/aio_suspend/9-1
 
 ## UNRESOLVED: Error calling sched_setscheduler() for SCHED_OTHER policy
 posix/conformance/interfaces/sched_setscheduler/1-1
@@ -747,8 +686,13 @@ posix/conformance/interfaces/clock_settime/17-1
 posix/conformance/interfaces/mlockall/15-1
 posix/conformance/interfaces/mlockall/speculative/15-1
 
-## UNRESOLVED: aio_suspend/1-1.c Error at write(): No such file or directory
+## UNRESOLVED: aio_suspend/1-1.c Error : AIOCB 6 already completed before suspend
 posix/conformance/interfaces/aio_suspend/1-1
+
+## UNRESOLVED: clock_settime() was not successful
+posix/conformance/interfaces/clock_settime/4-2
+posix/conformance/interfaces/clock_settime/speculative/4-3
+posix/conformance/interfaces/clock_settime/speculative/4-4
 
 ## UNRESOLVED: errno is not EPERM: The system allows a non-rootuser to use sched_getparam(): Function not implemented
 posix/conformance/interfaces/sched_getparam/6-1
@@ -909,27 +853,23 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmp5ff4f8/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
-
-## build: wasm-ld: error: /tmp/.tmpja9gsg/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
-
-## build: wasm-ld: error: /tmp/.tmpo1KhR8/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
-
-## build: wasm-ld: error: /tmp/.tmpuCSuby/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
-
-## build: wasm-ld: error: /tmp/.tmpuQaj6v/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
-
-## build: wasm-ld: error: /tmp/.tmpvBIwqv/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpKgKBJx/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
 
-## exit status 101
-posix/conformance/interfaces/pthread_cancel/2-2
-posix/conformance/interfaces/pthread_mutex_init/1-2
+## build: wasm-ld: error: /tmp/.tmpR3xX40/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
+
+## build: wasm-ld: error: /tmp/.tmpWBvIt7/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
+
+## build: wasm-ld: error: /tmp/.tmpgVfAiF/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
+
+## build: wasm-ld: error: /tmp/.tmpoLuykc/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
+
+## build: wasm-ld: error: /tmp/.tmprphTl6/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
 
 ## exit status 139
 posix/conformance/interfaces/pthread_attr_init/2-1
@@ -1006,9 +946,14 @@ posix/conformance/interfaces/sigpause/2-1
 posix/conformance/interfaces/sigpause/3-1
 
 ## timeout
+posix/conformance/interfaces/aio_cancel/4-1
 posix/conformance/interfaces/mmap/24-1
 posix/conformance/interfaces/pthread_create/11-1
+posix/conformance/interfaces/pthread_mutex_init/1-2
 posix/conformance/interfaces/pthread_mutex_init/3-2
 posix/conformance/interfaces/pthread_rwlock_wrlock/3-1
 posix/conformance/interfaces/pthread_spin_lock/1-1
 posix/conformance/interfaces/pthread_spin_lock/3-1
+posix/conformance/interfaces/timer_create/10-1
+posix/conformance/interfaces/timer_create/11-1
+posix/conformance/interfaces/timer_settime/5-3

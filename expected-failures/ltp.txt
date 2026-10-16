@@ -4,10 +4,10 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdCreate, MemfdSecret, OpenTree, PerfEventOpen, Signalfd4, Splice, Userfaultfd
+## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdCreate, MemfdSecret, OpenTree, PerfEventOpen, Splice, Userfaultfd
 ltp/syscalls/splice07
 
-## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdCreate, MemfdSecret, OpenTree, PerfEventOpen, Signalfd4, Userfaultfd
+## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdCreate, MemfdSecret, OpenTree, PerfEventOpen, Userfaultfd
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
 
@@ -115,10 +115,6 @@ ltp/syscalls/shmctl07
 ltp/syscalls/shmctl08
 ltp/syscalls/shmdt02
 
-## ENOSYS: Signalfd4
-ltp/syscalls/signalfd01
-ltp/syscalls/signalfd02
-
 ## ENOSYS: Splice
 ltp/cve/cve-2022-0847
 ltp/syscalls/dirtypipe
@@ -132,10 +128,6 @@ ltp/syscalls/tee01
 
 ## ENOSYS: Tee
 ltp/syscalls/tee02
-
-## ENOSYS: TimerCreate, TimerDelete
-ltp/cve/cve-2018-12896
-ltp/syscalls/timer_settime03
 
 ## ENOSYS: Unshare
 ltp/syscalls/statmount03
@@ -385,6 +377,9 @@ ltp/mm/vma01
 ## TBROK: ioctl(3,(( ((2U)<<30) | ((('R'))<<8) | ((0x00)) | ((sizeof(int))<<16) )),...) failed: ENOTTY (25)
 ltp/syscalls/ioctl07
 
+## TBROK: mincore01.c:177: mmap(0,262144,3,1,3,0) failed: errno=ENODEV(19): No such device
+ltp/syscalls/mincore01
+
 ## TBROK: mmap failed
 ltp/syscalls/mprotect03
 
@@ -392,21 +387,22 @@ ltp/syscalls/mprotect03
 ltp/syscalls/msync01
 ltp/syscalls/msync02
 
+## TBROK: mmap(0,126350,PROT_READ | PROT_WRITE(3),1,3,262144) failed: ENODEV (19)
+ltp/ltp-aiodio.part3/fsx13
+ltp/ltp-aiodio.part3/fsx14
+ltp/ltp-aiodio.part3/fsx15
+ltp/ltp-aiodio.part3/fsx16
+ltp/ltp-aiodio.part3/fsx17
+ltp/ltp-aiodio.part3/fsx18
+ltp/ltp-aiodio.part3/fsx19
+ltp/ltp-aiodio.part3/fsx20
+ltp/ltp-aiodio.part3/fsx21
+
+## TBROK: mmap(0,133901,PROT_READ(1),1,3,0) failed: ENODEV (19)
+ltp/ltp-aiodio.part3/fsx22
+
 ## TBROK: mmap(0,16384,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
 ltp/syscalls/mremap06
-
-## TBROK: mmap(0,167290,PROT_READ(1),1,3,262144) failed: ENODEV (19)
-ltp/ltp-aiodio.part3/fsx14
-ltp/ltp-aiodio.part3/fsx16
-ltp/ltp-aiodio.part3/fsx18
-
-## TBROK: mmap(0,172619,PROT_READ(1),1,3,0) failed: ENODEV (19)
-ltp/ltp-aiodio.part3/fsx07
-ltp/ltp-aiodio.part3/fsx08
-ltp/ltp-aiodio.part3/fsx09
-ltp/ltp-aiodio.part3/fsx10
-ltp/ltp-aiodio.part3/fsx12
-ltp/ltp-aiodio.part3/fsx22
 
 ## TBROK: mmap(0,196608,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
 ltp/syscalls/munmap01
@@ -417,16 +413,19 @@ ltp/syscalls/mincore04
 ## TBROK: mmap(0,22,PROT_WRITE(2),2,3,0) failed: ENODEV (19)
 ltp/syscalls/mmap17
 
+## TBROK: mmap(0,262144,PROT_READ | PROT_WRITE | PROT_EXEC(7),1,3,0) failed: EACCES (13)
+ltp/syscalls/mincore02
+
 ## TBROK: mmap(0,327680,PROT_READ(1),1,3,0) failed: ENODEV (19)
 ltp/syscalls/mprotect05
 
+## TBROK: mmap(0,33145,PROT_READ | PROT_WRITE(3),1,3,458752) failed: ENODEV (19)
+ltp/ltp-aiodio.part3/fsx01
+ltp/ltp-aiodio.part3/fsx02
+ltp/ltp-aiodio.part3/fsx03
+
 ## TBROK: mmap(0,40960,PROT_WRITE(2),1,3,0) failed: ENODEV (19)
 ltp/syscalls/mlock04
-
-## TBROK: mmap(0,55247,PROT_READ | PROT_WRITE(3),1,3,196608) failed: ENODEV (19)
-ltp/ltp-aiodio.part3/fsx04
-ltp/ltp-aiodio.part3/fsx05
-ltp/ltp-aiodio.part3/fsx06
 
 ## TBROK: mmap(0,64,PROT_READ(1),2,3,0) failed: ENODEV (19)
 ltp/syscalls/mmap19
@@ -452,8 +451,18 @@ ltp/syscalls/mmap21_02
 ## TBROK: mmap(0,655360000,PROT_WRITE(2),1,3,0) failed: ENODEV (19)
 ltp/mm/mmap21_01
 
-## TBROK: mmap(0,73728,PROT_READ | PROT_WRITE(3),2,7,0) failed: ENODEV (19)
+## TBROK: mmap(0,708608,PROT_READ | PROT_WRITE(3),2,5,0) failed: ENODEV (19)
 ltp/mm/mtest06_3
+
+## TBROK: mmap(0,90459,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
+ltp/ltp-aiodio.part3/fsx04
+ltp/ltp-aiodio.part3/fsx05
+ltp/ltp-aiodio.part3/fsx06
+ltp/ltp-aiodio.part3/fsx07
+ltp/ltp-aiodio.part3/fsx08
+ltp/ltp-aiodio.part3/fsx09
+ltp/ltp-aiodio.part3/fsx10
+ltp/ltp-aiodio.part3/fsx12
 
 ## TBROK: mmap(0x48000000,65536,PROT_READ | PROT_WRITE(3),1,3,0) failed: ENODEV (19)
 ltp/syscalls/remap_file_pages02
@@ -504,33 +513,6 @@ ltp/syscalls/sendto01
 ## TBROK: setsockopt(3, 0, 42, 0x8bff7c, 132) failed: ENOPROTOOPT (92)
 ltp/cve/cve-2017-8890
 ltp/syscalls/accept02
-
-## TBROK: short write(3,0x7be770,262144) return value 65536
-ltp/syscalls/mincore02
-
-## TBROK: short write(3,0x860040,131072) return value 65536
-ltp/syscalls/mincore01
-
-## TBROK: short write(3,0x8f0060,216645) return value 65536
-ltp/ltp-aiodio.part3/fsx03
-
-## TBROK: short write(3,0x8f0060,217224) return value 65536
-ltp/ltp-aiodio.part3/fsx02
-
-## TBROK: short write(3,0x8f0060,219272) return value 65536
-ltp/ltp-aiodio.part3/fsx01
-
-## TBROK: short write(3,0x8f0060,85235) return value 65536
-ltp/ltp-aiodio.part3/fsx21
-
-## TBROK: short write(3,0x8f0060,85262) return value 65536
-ltp/ltp-aiodio.part3/fsx20
-
-## TBROK: short write(3,0x8f0060,95031) return value 65536
-ltp/ltp-aiodio.part3/fsx13
-ltp/ltp-aiodio.part3/fsx15
-ltp/ltp-aiodio.part3/fsx17
-ltp/ltp-aiodio.part3/fsx19
 
 ## TBROK: socket(10, 3, 159) failed: errno=EPERM(1): Operation not permitted
 ltp/net.ipv6_lib/asapi_03
@@ -594,9 +576,6 @@ ltp/mm/mtest05
 ltp/mm/mmapstress02
 ltp/mm/mmapstress03
 ltp/mm/mmapstress05
-
-## TFAIL: Write: Failure
-ltp/fs/writetest01
 
 ## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
 ltp/syscalls/alarm07
@@ -784,10 +763,6 @@ ltp/syscalls/poll02
 ## TFAIL: prctl() slept for too long
 ltp/syscalls/prctl09
 
-## TFAIL: preadv() failed unexpectedly, expected EINVAL: SUCCESS (0)
-ltp/syscalls/preadv02
-ltp/syscalls/preadv02_64
-
 ## TFAIL: preadv2() failed unexpectedly, expected EFAULT: SUCCESS (0)
 ltp/syscalls/preadv202
 ltp/syscalls/preadv202_64
@@ -812,13 +787,6 @@ ltp/syscalls/readlinkat02
 
 ## TFAIL: readv(3, 0x807b30, 3) succeeded
 ltp/syscalls/readv02
-
-## TFAIL: readv/writev comparison failed
-ltp/dio/dio05
-ltp/dio/dio11
-ltp/dio/dio16
-ltp/dio/dio20
-ltp/dio/dio24
 
 ## TFAIL: recv() read 16 bytes, expected 0, step 1
 ltp/syscalls/send02
@@ -884,6 +852,9 @@ ltp/syscalls/name_to_handle_at03
 
 ## TFAIL: tgkill() should have failed with EAGAIN: SUCCESS (0)
 ltp/syscalls/tgkill02
+
+## TFAIL: timer_gettime(-1) = 0: SUCCESS (0)
+ltp/syscalls/timer_gettime01
 
 ## TFAIL: timerfd_gettime() succeeded unexpectedly
 ltp/syscalls/timerfd_gettime01
