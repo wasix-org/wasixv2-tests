@@ -37,7 +37,7 @@ The runner builds and runs every test. It needs, from the environment:
 | --- | --- |
 | `WASIXV2_TESTS_WASMER` | The `wasmer` binary under test (default: `wasmer` on `PATH`). |
 | `PATH` | Must contain `wasixcc` and `wasix++` with wasixv2 support. The runner sets `WASIXCC_TARGET=wasm32-wasixv2`. |
-| `WASIXCC_*` | wasixcc's own settings, such as `WASIXCC_LLVM_LOCATION` and `WASIXCC_SYSROOT`, apply as usual. Without them, wasixcc uses its downloaded defaults. |
+| `WASIXCC_*` | wasixcc's own settings, such as `WASIXCC_LLVM_LOCATION` and `WASIXCC_SYSROOT_PREFIX`, apply as usual. Without them, wasixcc uses its downloaded defaults. Tests that fork build for the asyncify configuration (`//#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no`), which has its own sysroot, so give libc2's sysroots with `WASIXCC_SYSROOT_PREFIX` (its `build-wasixv2`) rather than one with `WASIXCC_SYSROOT`. |
 | `WASIXV2_TESTS_BUILD_DIR` | Where tests are built (default `target/suite`). |
 | `WASIXV2_TESTS_TIMEOUT_SECS` | Per-test timeout (default 60). |
 | `WASIXV2_TESTS_EXPECTED_FAILURES` | A directory of expected-failures files to use instead of `expected-failures/`. |
