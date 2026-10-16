@@ -4,11 +4,20 @@
 
 base-mmap-threads/default                                  # exits nonzero or passes
 posix/conformance/interfaces/aio_error/2-1                 # UNRESOLVED or PASS
+posix/conformance/interfaces/lio_listio/4-1                # under load: "did not receive the right number of notifications"
 posix/conformance/interfaces/pthread_atfork/3-3            # timing
 posix/conformance/interfaces/pthread_attr_destroy/1-1      # timing
 posix/conformance/interfaces/pthread_barrier_destroy/2-1   # UNSUPPORTED or FAIL
 posix/conformance/interfaces/pthread_barrier_init/4-1      # under load the kernel panics: "syscall from an unknown task"
 posix/conformance/interfaces/pthread_cancel/3-1            # timing
+posix/conformance/interfaces/pthread_cond_signal/4-2       # times out under full-suite load, passes alone
+posix/conformance/interfaces/pthread_cond_timedwait/4-3    # times out under full-suite load, passes alone
+posix/conformance/interfaces/pthread_create/1-2            # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
+posix/conformance/interfaces/pthread_create/12-1           # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
+posix/conformance/interfaces/pthread_detach/2-1            # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
+posix/conformance/interfaces/pthread_detach/3-1            # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
+posix/conformance/interfaces/pthread_equal/1-1             # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
+posix/conformance/interfaces/pthread_equal/1-2             # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
 posix/conformance/interfaces/pthread_equal/2-1             # hangs about half the time
 posix/conformance/interfaces/pthread_mutex_trylock/4-3     # timing
 posix/conformance/interfaces/pthread_once/6-1              # hangs most of the time

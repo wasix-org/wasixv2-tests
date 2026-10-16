@@ -7,9 +7,6 @@
 ## "%s": for "683078400" expected 1991-08-25T00:00:00 but got 1900-01-00T00:00:00
 libc-test/functional/strptime
 
-## (fd = open("/dev/zero", O_RDONLY)) >= 0 failed: No such file or directory
-libc-test/regression/syscall-sign-extend
-
 ## (pid = fork()) >= 0 failed (errno: Function not implemented)
 libc-test/regression/fflush-exit
 
@@ -45,7 +42,7 @@ libc-test/api/sys_wait
 ## build: error: use of undeclared identifier '_PC_TIMESTAMP_RESOLUTION'
 libc-test/api/unistd
 
-## build: wasm-ld: error: /tmp/.tmp00lVX0/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmpkBDlct/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## dlopen failed
@@ -77,21 +74,12 @@ libc-test/regression/tls_get_new-dtv
 ## posix_spawnp(&pid, "echo", &fa, 0, (char *[]){"echo","hello",0}, 0) failed, got 2 want 0
 libc-test/functional/spawn
 
-## res != PTHREAD_CANCELED failed (shm_open, canceled thread exit status)
-libc-test/functional/pthread_cancel-points
-
-## stat("/dev/null",&st)==0 failed: errno = No such file or directory
-libc-test/functional/stat
-
 ## strtold("0x1.111111111111111111111111111281") want 0x1.1111111111111111111111111113p+0 got 0x1.1111111111111111111111111112p+0
 libc-test/functional/strtold
 
 ## timeout
 libc-test/functional/pthread_cancel
 libc-test/functional/sem_open
-
-## utimensat(AT_FDCWD, "/dev/null/invalid", ((struct timespec[2]){{.tv_nsec=UTIME_OMIT},{.tv_nsec=UTIME_OMIT}}), 0)==0 || errno==ENOTDIR failed: No such file or di
-libc-test/functional/utime
 
 ## wordexp("one two three", 0) returned WRDE_NOSPACE, want 0
 libc-test/functional/wordexp
