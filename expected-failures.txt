@@ -3,3 +3,46 @@
 # A listed test that fails passes the run; a listed test that passes fails it, so take it off the
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
+
+## ENOSYS: FutexTime64
+libc-test/functional/pthread_mutex_pi
+libc-test/functional/pthread_robust
+
+## ENOSYS: Msgctl, Msgget
+libc-test/functional/ipc_msg
+
+## ENOSYS: Semctl, Semget
+libc-test/functional/ipc_sem
+
+## ENOSYS: Shmctl, Shmget
+libc-test/functional/ipc_shm
+
+## FAIL [status 1]
+libc-test/functional/popen
+libc-test/functional/pthread_cancel-points
+libc-test/functional/spawn
+libc-test/functional/stat
+libc-test/functional/strptime
+libc-test/functional/strtold
+libc-test/functional/utime
+libc-test/functional/vfork
+libc-test/functional/wordexp
+libc-test/math/fmaf
+libc-test/regression/execle-env
+libc-test/regression/syscall-sign-extend
+
+## FAIL [status 1]: ENOSYS from libc
+libc-test/regression/daemon-failure
+libc-test/regression/fflush-exit
+libc-test/regression/pthread_exit-dtor
+libc-test/regression/raise-race
+
+## build: Error: Dynamic linking is not supported for wasm32-wasixv2 yet (module kind SharedLibrary, from -shared, -pie or MODULE_KIND)
+libc-test/functional/dlopen
+libc-test/functional/tls_align_dlopen
+libc-test/functional/tls_init_dlopen
+libc-test/regression/tls_get_new-dtv
+
+## timeout
+libc-test/functional/pthread_cancel
+libc-test/functional/sem_open
