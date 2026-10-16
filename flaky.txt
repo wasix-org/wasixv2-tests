@@ -22,3 +22,4 @@ posix/conformance/interfaces/pthread_equal/2-1             # hangs about half th
 posix/conformance/interfaces/pthread_mutex_trylock/4-3     # timing
 posix/conformance/interfaces/pthread_once/6-1              # hangs most of the time
 posix/conformance/interfaces/pthread_rwlock_unlock/3-1     # timing
+ltp/syscalls/getrusage04                                   # under load: utime grows more than 5 ms between getrusage calls (host CPU-time granularity)

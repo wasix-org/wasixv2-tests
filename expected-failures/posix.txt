@@ -4,6 +4,194 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
+## ENOSYS: Clone
+posix/conformance/behavior/WIFEXITED/1-1
+posix/conformance/behavior/WIFEXITED/1-2
+posix/conformance/behavior/WIFEXITED/1-3
+posix/conformance/interfaces/clock_nanosleep/1-3
+posix/conformance/interfaces/clock_nanosleep/1-4
+posix/conformance/interfaces/clock_nanosleep/1-5
+posix/conformance/interfaces/clock_nanosleep/10-1
+posix/conformance/interfaces/clock_nanosleep/2-2
+posix/conformance/interfaces/clock_nanosleep/2-3
+posix/conformance/interfaces/clock_nanosleep/9-1
+posix/conformance/interfaces/fork/1-1
+posix/conformance/interfaces/fork/11-1
+posix/conformance/interfaces/fork/12-1
+posix/conformance/interfaces/fork/13-1
+posix/conformance/interfaces/fork/2-1
+posix/conformance/interfaces/fork/22-1
+posix/conformance/interfaces/fork/3-1
+posix/conformance/interfaces/fork/4-1
+posix/conformance/interfaces/fork/6-1
+posix/conformance/interfaces/fork/8-1
+posix/conformance/interfaces/fork/9-1
+posix/conformance/interfaces/kill/1-2
+posix/conformance/interfaces/killpg/1-2
+posix/conformance/interfaces/mmap/11-5
+posix/conformance/interfaces/mmap/11-6
+posix/conformance/interfaces/mmap/6-1
+posix/conformance/interfaces/mmap/6-2
+posix/conformance/interfaces/mmap/6-3
+posix/conformance/interfaces/mq_close/2-1
+posix/conformance/interfaces/mq_unlink/2-1
+posix/conformance/interfaces/mq_unlink/2-2
+posix/conformance/interfaces/nanosleep/1-2
+posix/conformance/interfaces/nanosleep/1-3
+posix/conformance/interfaces/nanosleep/3-1
+posix/conformance/interfaces/nanosleep/3-2
+posix/conformance/interfaces/nanosleep/5-2
+posix/conformance/interfaces/nanosleep/7-1
+posix/conformance/interfaces/nanosleep/7-2
+posix/conformance/interfaces/pthread_atfork/1-1
+posix/conformance/interfaces/pthread_atfork/1-2
+posix/conformance/interfaces/pthread_atfork/2-1
+posix/conformance/interfaces/pthread_atfork/2-2
+posix/conformance/interfaces/pthread_atfork/3-2
+posix/conformance/interfaces/pthread_atfork/4-1
+posix/conformance/interfaces/pthread_cond_init/4-1
+posix/conformance/interfaces/pthread_mutex_init/5-1
+posix/conformance/interfaces/raise/1-2
+posix/conformance/interfaces/sched_getparam/4-1
+posix/conformance/interfaces/sched_getscheduler/5-1
+posix/conformance/interfaces/sched_setparam/1-1
+posix/conformance/interfaces/sched_setscheduler/21-1
+posix/conformance/interfaces/sem_timedwait/9-1
+posix/conformance/interfaces/shm_open/5-1
+posix/conformance/interfaces/sigaction/10-1
+posix/conformance/interfaces/sigaction/11-1
+posix/conformance/interfaces/sigaction/22-1
+posix/conformance/interfaces/sigaction/22-10
+posix/conformance/interfaces/sigaction/22-11
+posix/conformance/interfaces/sigaction/22-12
+posix/conformance/interfaces/sigaction/22-13
+posix/conformance/interfaces/sigaction/22-14
+posix/conformance/interfaces/sigaction/22-15
+posix/conformance/interfaces/sigaction/22-16
+posix/conformance/interfaces/sigaction/22-17
+posix/conformance/interfaces/sigaction/22-18
+posix/conformance/interfaces/sigaction/22-19
+posix/conformance/interfaces/sigaction/22-2
+posix/conformance/interfaces/sigaction/22-20
+posix/conformance/interfaces/sigaction/22-21
+posix/conformance/interfaces/sigaction/22-22
+posix/conformance/interfaces/sigaction/22-23
+posix/conformance/interfaces/sigaction/22-24
+posix/conformance/interfaces/sigaction/22-25
+posix/conformance/interfaces/sigaction/22-26
+posix/conformance/interfaces/sigaction/22-3
+posix/conformance/interfaces/sigaction/22-4
+posix/conformance/interfaces/sigaction/22-5
+posix/conformance/interfaces/sigaction/22-6
+posix/conformance/interfaces/sigaction/22-7
+posix/conformance/interfaces/sigaction/22-8
+posix/conformance/interfaces/sigaction/22-9
+posix/conformance/interfaces/sigaction/25-1
+posix/conformance/interfaces/sigaction/25-10
+posix/conformance/interfaces/sigaction/25-11
+posix/conformance/interfaces/sigaction/25-12
+posix/conformance/interfaces/sigaction/25-13
+posix/conformance/interfaces/sigaction/25-14
+posix/conformance/interfaces/sigaction/25-15
+posix/conformance/interfaces/sigaction/25-16
+posix/conformance/interfaces/sigaction/25-17
+posix/conformance/interfaces/sigaction/25-18
+posix/conformance/interfaces/sigaction/25-19
+posix/conformance/interfaces/sigaction/25-2
+posix/conformance/interfaces/sigaction/25-20
+posix/conformance/interfaces/sigaction/25-21
+posix/conformance/interfaces/sigaction/25-22
+posix/conformance/interfaces/sigaction/25-23
+posix/conformance/interfaces/sigaction/25-24
+posix/conformance/interfaces/sigaction/25-25
+posix/conformance/interfaces/sigaction/25-26
+posix/conformance/interfaces/sigaction/25-3
+posix/conformance/interfaces/sigaction/25-4
+posix/conformance/interfaces/sigaction/25-5
+posix/conformance/interfaces/sigaction/25-6
+posix/conformance/interfaces/sigaction/25-7
+posix/conformance/interfaces/sigaction/25-8
+posix/conformance/interfaces/sigaction/25-9
+posix/conformance/interfaces/sigaction/4-1
+posix/conformance/interfaces/sigaction/4-10
+posix/conformance/interfaces/sigaction/4-11
+posix/conformance/interfaces/sigaction/4-12
+posix/conformance/interfaces/sigaction/4-13
+posix/conformance/interfaces/sigaction/4-14
+posix/conformance/interfaces/sigaction/4-15
+posix/conformance/interfaces/sigaction/4-16
+posix/conformance/interfaces/sigaction/4-17
+posix/conformance/interfaces/sigaction/4-18
+posix/conformance/interfaces/sigaction/4-19
+posix/conformance/interfaces/sigaction/4-2
+posix/conformance/interfaces/sigaction/4-20
+posix/conformance/interfaces/sigaction/4-21
+posix/conformance/interfaces/sigaction/4-22
+posix/conformance/interfaces/sigaction/4-23
+posix/conformance/interfaces/sigaction/4-24
+posix/conformance/interfaces/sigaction/4-25
+posix/conformance/interfaces/sigaction/4-26
+posix/conformance/interfaces/sigaction/4-27
+posix/conformance/interfaces/sigaction/4-28
+posix/conformance/interfaces/sigaction/4-29
+posix/conformance/interfaces/sigaction/4-3
+posix/conformance/interfaces/sigaction/4-30
+posix/conformance/interfaces/sigaction/4-31
+posix/conformance/interfaces/sigaction/4-32
+posix/conformance/interfaces/sigaction/4-33
+posix/conformance/interfaces/sigaction/4-34
+posix/conformance/interfaces/sigaction/4-35
+posix/conformance/interfaces/sigaction/4-36
+posix/conformance/interfaces/sigaction/4-37
+posix/conformance/interfaces/sigaction/4-38
+posix/conformance/interfaces/sigaction/4-39
+posix/conformance/interfaces/sigaction/4-4
+posix/conformance/interfaces/sigaction/4-40
+posix/conformance/interfaces/sigaction/4-41
+posix/conformance/interfaces/sigaction/4-42
+posix/conformance/interfaces/sigaction/4-43
+posix/conformance/interfaces/sigaction/4-44
+posix/conformance/interfaces/sigaction/4-45
+posix/conformance/interfaces/sigaction/4-46
+posix/conformance/interfaces/sigaction/4-47
+posix/conformance/interfaces/sigaction/4-48
+posix/conformance/interfaces/sigaction/4-49
+posix/conformance/interfaces/sigaction/4-5
+posix/conformance/interfaces/sigaction/4-50
+posix/conformance/interfaces/sigaction/4-51
+posix/conformance/interfaces/sigaction/4-52
+posix/conformance/interfaces/sigaction/4-6
+posix/conformance/interfaces/sigaction/4-7
+posix/conformance/interfaces/sigaction/4-8
+posix/conformance/interfaces/sigaction/4-9
+posix/conformance/interfaces/sigaction/9-1
+posix/conformance/interfaces/sigqueue/1-1
+posix/conformance/interfaces/sigsuspend/1-1
+posix/conformance/interfaces/sigsuspend/3-1
+posix/conformance/interfaces/sigsuspend/4-1
+posix/conformance/interfaces/sigsuspend/6-1
+posix/conformance/interfaces/sigwaitinfo/3-1
+posix/conformance/interfaces/timer_delete/speculative/5-1
+posix/conformance/interfaces/timer_getoverrun/speculative/6-1
+posix/conformance/interfaces/timer_gettime/speculative/6-1
+posix/conformance/interfaces/timer_settime/speculative/12-1
+
+## ENOSYS: Clone, MqOpen
+posix/conformance/interfaces/mq_open/2-1
+posix/conformance/interfaces/mq_open/7-2
+posix/conformance/interfaces/mq_open/8-2
+posix/conformance/interfaces/mq_open/9-2
+
+## ENOSYS: Clone, MqOpen, MqTimedreceiveTime64, MqUnlink
+posix/conformance/interfaces/mq_receive/13-1
+posix/conformance/interfaces/mq_receive/5-1
+posix/conformance/interfaces/mq_timedreceive/18-1
+posix/conformance/interfaces/mq_timedreceive/18-2
+posix/conformance/interfaces/mq_timedreceive/5-1
+posix/conformance/interfaces/mq_timedreceive/5-2
+posix/conformance/interfaces/mq_timedreceive/5-3
+posix/conformance/interfaces/mq_timedreceive/8-1
+
 ## ENOSYS: FutexTime64
 posix/conformance/interfaces/pthread_mutexattr_getprotocol/1-2
 posix/conformance/interfaces/pthread_mutexattr_setprotocol/1-1
@@ -33,19 +221,15 @@ posix/conformance/interfaces/mq_open/13-1
 posix/conformance/interfaces/mq_open/15-1
 posix/conformance/interfaces/mq_open/18-1
 posix/conformance/interfaces/mq_open/19-1
-posix/conformance/interfaces/mq_open/2-1
 posix/conformance/interfaces/mq_open/20-1
 posix/conformance/interfaces/mq_open/23-1
 posix/conformance/interfaces/mq_open/25-2
 posix/conformance/interfaces/mq_open/27-1
 posix/conformance/interfaces/mq_open/27-2
 posix/conformance/interfaces/mq_open/7-1
-posix/conformance/interfaces/mq_open/7-2
 posix/conformance/interfaces/mq_open/7-3
 posix/conformance/interfaces/mq_open/8-1
-posix/conformance/interfaces/mq_open/8-2
 posix/conformance/interfaces/mq_open/9-1
-posix/conformance/interfaces/mq_open/9-2
 posix/conformance/interfaces/mq_send/1-1
 posix/conformance/interfaces/mq_send/10-1
 posix/conformance/interfaces/mq_send/11-1
@@ -111,21 +295,13 @@ posix/conformance/interfaces/mq_timedreceive/speculative/10-2
 posix/conformance/interfaces/mq_receive/10-1
 posix/conformance/interfaces/mq_receive/11-1
 posix/conformance/interfaces/mq_receive/11-2
-posix/conformance/interfaces/mq_receive/13-1
-posix/conformance/interfaces/mq_receive/5-1
 posix/conformance/interfaces/mq_receive/7-1
 posix/conformance/interfaces/mq_timedreceive/13-1
 posix/conformance/interfaces/mq_timedreceive/14-1
 posix/conformance/interfaces/mq_timedreceive/17-1
 posix/conformance/interfaces/mq_timedreceive/17-2
 posix/conformance/interfaces/mq_timedreceive/17-3
-posix/conformance/interfaces/mq_timedreceive/18-1
-posix/conformance/interfaces/mq_timedreceive/18-2
-posix/conformance/interfaces/mq_timedreceive/5-1
-posix/conformance/interfaces/mq_timedreceive/5-2
-posix/conformance/interfaces/mq_timedreceive/5-3
 posix/conformance/interfaces/mq_timedreceive/7-1
-posix/conformance/interfaces/mq_timedreceive/8-1
 
 ## ENOSYS: MqOpen, MqUnlink
 posix/conformance/interfaces/mq_notify/5-1
@@ -259,9 +435,6 @@ posix/conformance/interfaces/sem_open/4-1
 posix/conformance/interfaces/sem_unlink/4-1
 
 ## FAIL: Test FAILED
-posix/conformance/behavior/WIFEXITED/1-1
-posix/conformance/behavior/WIFEXITED/1-2
-posix/conformance/behavior/WIFEXITED/1-3
 posix/conformance/interfaces/mmap/6-4
 posix/conformance/interfaces/mmap/6-6
 posix/conformance/interfaces/sigismember/5-1
@@ -323,6 +496,9 @@ posix/conformance/interfaces/aio_read/10-1
 ## FAIL: aio_read/11-2.c bad aio_read return value()
 posix/conformance/interfaces/aio_read/11-2
 
+## FAIL: aio_suspend/4-1.c Error : AIOCB 6 already completed before suspend
+posix/conformance/interfaces/aio_suspend/4-1
+
 ## FAIL: aio_write/8-1.c bad aio_write return value()
 posix/conformance/interfaces/aio_write/8-1
 
@@ -332,67 +508,6 @@ posix/conformance/interfaces/aio_write/9-2
 ## FAIL: errno is not EPERM: Function not implemented
 posix/conformance/interfaces/sched_getscheduler/7-1
 posix/conformance/interfaces/sched_setscheduler/20-1
-
-## FAIL: error: guest trapped: RuntimeError: indirect call type mismatch
-posix/conformance/interfaces/aio_suspend/4-1
-posix/conformance/interfaces/sigaction/18-1
-posix/conformance/interfaces/sigaction/18-10
-posix/conformance/interfaces/sigaction/18-11
-posix/conformance/interfaces/sigaction/18-12
-posix/conformance/interfaces/sigaction/18-13
-posix/conformance/interfaces/sigaction/18-14
-posix/conformance/interfaces/sigaction/18-15
-posix/conformance/interfaces/sigaction/18-16
-posix/conformance/interfaces/sigaction/18-17
-posix/conformance/interfaces/sigaction/18-18
-posix/conformance/interfaces/sigaction/18-19
-posix/conformance/interfaces/sigaction/18-2
-posix/conformance/interfaces/sigaction/18-20
-posix/conformance/interfaces/sigaction/18-21
-posix/conformance/interfaces/sigaction/18-22
-posix/conformance/interfaces/sigaction/18-23
-posix/conformance/interfaces/sigaction/18-24
-posix/conformance/interfaces/sigaction/18-25
-posix/conformance/interfaces/sigaction/18-26
-posix/conformance/interfaces/sigaction/18-3
-posix/conformance/interfaces/sigaction/18-4
-posix/conformance/interfaces/sigaction/18-5
-posix/conformance/interfaces/sigaction/18-6
-posix/conformance/interfaces/sigaction/18-7
-posix/conformance/interfaces/sigaction/18-8
-posix/conformance/interfaces/sigaction/18-9
-posix/conformance/interfaces/sigaction/28-1
-posix/conformance/interfaces/sigaction/28-10
-posix/conformance/interfaces/sigaction/28-11
-posix/conformance/interfaces/sigaction/28-12
-posix/conformance/interfaces/sigaction/28-13
-posix/conformance/interfaces/sigaction/28-14
-posix/conformance/interfaces/sigaction/28-15
-posix/conformance/interfaces/sigaction/28-16
-posix/conformance/interfaces/sigaction/28-17
-posix/conformance/interfaces/sigaction/28-18
-posix/conformance/interfaces/sigaction/28-19
-posix/conformance/interfaces/sigaction/28-2
-posix/conformance/interfaces/sigaction/28-20
-posix/conformance/interfaces/sigaction/28-21
-posix/conformance/interfaces/sigaction/28-22
-posix/conformance/interfaces/sigaction/28-23
-posix/conformance/interfaces/sigaction/28-24
-posix/conformance/interfaces/sigaction/28-25
-posix/conformance/interfaces/sigaction/28-26
-posix/conformance/interfaces/sigaction/28-3
-posix/conformance/interfaces/sigaction/28-4
-posix/conformance/interfaces/sigaction/28-5
-posix/conformance/interfaces/sigaction/28-6
-posix/conformance/interfaces/sigaction/28-7
-posix/conformance/interfaces/sigaction/28-8
-posix/conformance/interfaces/sigaction/28-9
-posix/conformance/interfaces/sigaltstack/1-1
-posix/conformance/interfaces/sigaltstack/2-1
-posix/conformance/interfaces/sigaltstack/3-1
-posix/conformance/interfaces/sigaltstack/6-1
-posix/conformance/interfaces/sigaltstack/7-1
-posix/conformance/interfaces/sigaltstack/8-1
 
 ## FAIL: error: guest trapped: RuntimeError: unreachable
 posix/conformance/interfaces/pthread_attr_setdetachstate/2-1
@@ -433,11 +548,6 @@ posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-1
 ## FAIL: unexpected error: pthread_attr_setschedparam 3-2: pthread_attr_setschedparam did not fail
 posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-2
 
-## UNRESOLVED: An error occurs when calling fork(): Function not implemented
-posix/conformance/interfaces/sched_setparam/1-1
-posix/conformance/interfaces/sched_setscheduler/21-1
-posix/conformance/interfaces/shm_open/5-1
-
 ## UNRESOLVED: An error occurs when calling mmap(): No such device
 posix/conformance/interfaces/mlockall/3-6
 posix/conformance/interfaces/mlockall/3-7
@@ -468,36 +578,14 @@ posix/conformance/interfaces/sched_setscheduler/16-1
 posix/conformance/interfaces/sched_setparam/2-1
 posix/conformance/interfaces/sched_setparam/2-2
 
-## UNRESOLVED: Could not get pgid of child
-posix/conformance/interfaces/killpg/1-2
-
 ## UNRESOLVED: Could not raise signal being tested
-posix/conformance/interfaces/clock_nanosleep/1-3
-posix/conformance/interfaces/clock_nanosleep/1-4
-posix/conformance/interfaces/clock_nanosleep/10-1
-posix/conformance/interfaces/clock_nanosleep/2-2
-posix/conformance/interfaces/clock_nanosleep/2-3
-posix/conformance/interfaces/clock_nanosleep/9-1
 posix/conformance/interfaces/killpg/1-1
-posix/conformance/interfaces/nanosleep/1-2
-posix/conformance/interfaces/nanosleep/1-3
-posix/conformance/interfaces/nanosleep/3-1
-posix/conformance/interfaces/nanosleep/5-2
-posix/conformance/interfaces/nanosleep/7-1
-posix/conformance/interfaces/nanosleep/7-2
-posix/conformance/interfaces/sigqueue/1-1
 
 ## UNRESOLVED: Error at first mmap(): No such device
 posix/conformance/interfaces/pthread_barrierattr_getpshared/2-1
 posix/conformance/interfaces/pthread_rwlockattr_getpshared/2-1
 posix/conformance/interfaces/pthread_spin_init/2-1
 posix/conformance/interfaces/pthread_spin_init/2-2
-
-## UNRESOLVED: Error at fork(): Function not implemented
-posix/conformance/interfaces/mmap/11-5
-posix/conformance/interfaces/mmap/11-6
-posix/conformance/interfaces/mmap/6-1
-posix/conformance/interfaces/mmap/6-2
 
 ## UNRESOLVED: Error at mmap(): No such device
 posix/conformance/interfaces/mmap/27-1
@@ -517,30 +605,14 @@ posix/conformance/interfaces/aio_suspend/9-1
 ## UNRESOLVED: Error calling sched_setscheduler() for SCHED_OTHER policy
 posix/conformance/interfaces/sched_setscheduler/1-1
 
-## UNRESOLVED: Error fork() a child
-posix/conformance/interfaces/kill/1-2
-
-## UNRESOLVED: Error in fork()
-posix/conformance/interfaces/pthread_atfork/1-1
-posix/conformance/interfaces/pthread_atfork/2-1
-
-## UNRESOLVED: Error waiting for child to exit
-posix/conformance/interfaces/raise/1-2
-
 ## UNRESOLVED: Failed to map memory: No such device (19)
 posix/conformance/interfaces/munmap/2-1
-
-## UNRESOLVED: Failed to open '/proc/-1/stat': No such file or directory
-posix/conformance/interfaces/sem_timedwait/9-1
 
 ## UNRESOLVED: Failed: execl() errno: No such file or directory
 posix/conformance/interfaces/sigaltstack/9-1
 
 ## UNRESOLVED: Failed: func pthread_setschedparam() rc: No such process (3)
 posix/conformance/interfaces/pthread_getschedparam/1-2
-
-## UNRESOLVED: Failed: func: fork() rc: Function not implemented (38)
-posix/conformance/interfaces/pthread_cond_init/4-1
 
 ## UNRESOLVED: Failed: function: pthread_setschedparam() status: Operation not permitted(1)
 posix/conformance/interfaces/pthread_attr_setschedpolicy/2-1
@@ -556,9 +628,6 @@ posix/conformance/interfaces/sched_setscheduler/17-5
 
 ## UNRESOLVED: Failed: sched_setscheduler rc: -1 errno: Function not implemented
 posix/conformance/interfaces/sched_yield/1-1
-
-## UNRESOLVED: Fork failed: Function not implemented (38)
-posix/conformance/interfaces/fork/11-1
 
 ## UNRESOLVED: INFO: Testing SCHED_FIFO prio 1
 posix/conformance/interfaces/pthread_create/1-6
@@ -582,15 +651,6 @@ posix/conformance/interfaces/munmap/9-1
 posix/conformance/interfaces/clock_settime/17-2
 posix/conformance/interfaces/clock_settime/20-1
 
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/1-1.c unresolved: got 38 (Function not implemented) on line 74 (Failed
-posix/conformance/interfaces/fork/1-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/12-1.c unresolved: got 38 (Function not implemented) on line 135 (Fail
-posix/conformance/interfaces/fork/12-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/13-1.c unresolved: got 38 (Function not implemented) on line 95 (Faile
-posix/conformance/interfaces/fork/13-1
-
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/14-1.c unresolved: got 19 (No such device) on line 64 (Failed to creat
 posix/conformance/interfaces/fork/14-1
 
@@ -606,41 +666,11 @@ posix/conformance/interfaces/fork/17-2
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/21-1.c unresolved: got 19 (No such device) on line 82 (Failed to open 
 posix/conformance/interfaces/fork/21-1
 
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/22-1.c unresolved: got 38 (Function not implemented) on line 118 (Fail
-posix/conformance/interfaces/fork/22-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/3-1.c unresolved: got 38 (Function not implemented) on line 60 (Failed
-posix/conformance/interfaces/fork/3-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/4-1.c unresolved: got 38 (Function not implemented) on line 59 (Failed
-posix/conformance/interfaces/fork/4-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/6-1.c unresolved: got 38 (Function not implemented) on line 105 (Faile
-posix/conformance/interfaces/fork/6-1
-
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
 
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/8-1.c unresolved: got 38 (Function not implemented) on line 97 (Failed
-posix/conformance/interfaces/fork/8-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/fork/9-1.c unresolved: got 38 (Function not implemented) on line 69 (Failed
-posix/conformance/interfaces/fork/9-1
-
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/getpid/1-1.c unresolved: got 19 (No such device) on line 143 (mmap failed)
 posix/conformance/interfaces/getpid/1-1
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_atfork/1-2.c unresolved: got 38 (Function not implemented) on line 
-posix/conformance/interfaces/pthread_atfork/1-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_atfork/2-2.c unresolved: got 38 (Function not implemented) on line 
-posix/conformance/interfaces/pthread_atfork/2-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_atfork/3-2.c unresolved: got 38 (Function not implemented) on line 
-posix/conformance/interfaces/pthread_atfork/3-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_atfork/4-1.c unresolved: got 38 (Function not implemented) on line 
-posix/conformance/interfaces/pthread_atfork/4-1
 
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_broadcast/2-3.c unresolved: got 19 (No such device) on line 33
 posix/conformance/interfaces/pthread_cond_broadcast/2-3
@@ -662,9 +692,6 @@ posix/conformance/interfaces/pthread_cond_timedwait/4-2
 
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_cond_wait/2-2.c unresolved: got 19 (No such device) on line 352 (mm
 posix/conformance/interfaces/pthread_cond_wait/2-2
-
-## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_init/5-1.c unresolved: got 38 (Function not implemented) on l
-posix/conformance/interfaces/pthread_mutex_init/5-1
 
 ## UNRESOLVED: Test upstream/ltp-759bb31bfa64/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/1-2.c unresolved: got 19 (No such device) on line 242
 posix/conformance/interfaces/pthread_mutex_trylock/1-2
@@ -716,112 +743,6 @@ posix/conformance/interfaces/shm_unlink/9-1
 ## UNRESOLVED: This test must be run as superuser
 posix/conformance/interfaces/clock_settime/17-1
 
-## UNRESOLVED: Unexpected error while setting up test pre-conditions: No child process
-posix/conformance/interfaces/sigaction/22-1
-posix/conformance/interfaces/sigaction/22-10
-posix/conformance/interfaces/sigaction/22-11
-posix/conformance/interfaces/sigaction/22-12
-posix/conformance/interfaces/sigaction/22-13
-posix/conformance/interfaces/sigaction/22-14
-posix/conformance/interfaces/sigaction/22-15
-posix/conformance/interfaces/sigaction/22-16
-posix/conformance/interfaces/sigaction/22-17
-posix/conformance/interfaces/sigaction/22-18
-posix/conformance/interfaces/sigaction/22-19
-posix/conformance/interfaces/sigaction/22-2
-posix/conformance/interfaces/sigaction/22-20
-posix/conformance/interfaces/sigaction/22-21
-posix/conformance/interfaces/sigaction/22-22
-posix/conformance/interfaces/sigaction/22-23
-posix/conformance/interfaces/sigaction/22-24
-posix/conformance/interfaces/sigaction/22-25
-posix/conformance/interfaces/sigaction/22-26
-posix/conformance/interfaces/sigaction/22-3
-posix/conformance/interfaces/sigaction/22-4
-posix/conformance/interfaces/sigaction/22-5
-posix/conformance/interfaces/sigaction/22-6
-posix/conformance/interfaces/sigaction/22-7
-posix/conformance/interfaces/sigaction/22-8
-posix/conformance/interfaces/sigaction/22-9
-posix/conformance/interfaces/sigaction/25-1
-posix/conformance/interfaces/sigaction/25-10
-posix/conformance/interfaces/sigaction/25-11
-posix/conformance/interfaces/sigaction/25-12
-posix/conformance/interfaces/sigaction/25-13
-posix/conformance/interfaces/sigaction/25-14
-posix/conformance/interfaces/sigaction/25-15
-posix/conformance/interfaces/sigaction/25-16
-posix/conformance/interfaces/sigaction/25-17
-posix/conformance/interfaces/sigaction/25-18
-posix/conformance/interfaces/sigaction/25-19
-posix/conformance/interfaces/sigaction/25-2
-posix/conformance/interfaces/sigaction/25-20
-posix/conformance/interfaces/sigaction/25-21
-posix/conformance/interfaces/sigaction/25-22
-posix/conformance/interfaces/sigaction/25-23
-posix/conformance/interfaces/sigaction/25-24
-posix/conformance/interfaces/sigaction/25-25
-posix/conformance/interfaces/sigaction/25-26
-posix/conformance/interfaces/sigaction/25-3
-posix/conformance/interfaces/sigaction/25-4
-posix/conformance/interfaces/sigaction/25-5
-posix/conformance/interfaces/sigaction/25-6
-posix/conformance/interfaces/sigaction/25-7
-posix/conformance/interfaces/sigaction/25-8
-posix/conformance/interfaces/sigaction/25-9
-posix/conformance/interfaces/sigaction/4-1
-posix/conformance/interfaces/sigaction/4-10
-posix/conformance/interfaces/sigaction/4-11
-posix/conformance/interfaces/sigaction/4-12
-posix/conformance/interfaces/sigaction/4-13
-posix/conformance/interfaces/sigaction/4-14
-posix/conformance/interfaces/sigaction/4-15
-posix/conformance/interfaces/sigaction/4-16
-posix/conformance/interfaces/sigaction/4-17
-posix/conformance/interfaces/sigaction/4-18
-posix/conformance/interfaces/sigaction/4-19
-posix/conformance/interfaces/sigaction/4-2
-posix/conformance/interfaces/sigaction/4-20
-posix/conformance/interfaces/sigaction/4-21
-posix/conformance/interfaces/sigaction/4-22
-posix/conformance/interfaces/sigaction/4-23
-posix/conformance/interfaces/sigaction/4-24
-posix/conformance/interfaces/sigaction/4-25
-posix/conformance/interfaces/sigaction/4-26
-posix/conformance/interfaces/sigaction/4-27
-posix/conformance/interfaces/sigaction/4-28
-posix/conformance/interfaces/sigaction/4-29
-posix/conformance/interfaces/sigaction/4-3
-posix/conformance/interfaces/sigaction/4-30
-posix/conformance/interfaces/sigaction/4-31
-posix/conformance/interfaces/sigaction/4-32
-posix/conformance/interfaces/sigaction/4-33
-posix/conformance/interfaces/sigaction/4-34
-posix/conformance/interfaces/sigaction/4-35
-posix/conformance/interfaces/sigaction/4-36
-posix/conformance/interfaces/sigaction/4-37
-posix/conformance/interfaces/sigaction/4-38
-posix/conformance/interfaces/sigaction/4-39
-posix/conformance/interfaces/sigaction/4-4
-posix/conformance/interfaces/sigaction/4-40
-posix/conformance/interfaces/sigaction/4-41
-posix/conformance/interfaces/sigaction/4-42
-posix/conformance/interfaces/sigaction/4-43
-posix/conformance/interfaces/sigaction/4-44
-posix/conformance/interfaces/sigaction/4-45
-posix/conformance/interfaces/sigaction/4-46
-posix/conformance/interfaces/sigaction/4-47
-posix/conformance/interfaces/sigaction/4-48
-posix/conformance/interfaces/sigaction/4-49
-posix/conformance/interfaces/sigaction/4-5
-posix/conformance/interfaces/sigaction/4-50
-posix/conformance/interfaces/sigaction/4-51
-posix/conformance/interfaces/sigaction/4-52
-posix/conformance/interfaces/sigaction/4-6
-posix/conformance/interfaces/sigaction/4-7
-posix/conformance/interfaces/sigaction/4-8
-posix/conformance/interfaces/sigaction/4-9
-
 ## UNRESOLVED: You have the right to call mlockall
 posix/conformance/interfaces/mlockall/15-1
 posix/conformance/interfaces/mlockall/speculative/15-1
@@ -835,40 +756,8 @@ posix/conformance/interfaces/sched_getparam/6-1
 ## UNRESOLVED: error at sem_open: No such device
 posix/conformance/interfaces/shm_open/23-1
 
-## UNRESOLVED: fork failed: Function not implemented
-posix/conformance/interfaces/sched_getparam/4-1
-posix/conformance/interfaces/sched_getscheduler/5-1
-
-## UNRESOLVED: fork() did not return success
-posix/conformance/interfaces/clock_nanosleep/1-5
-posix/conformance/interfaces/nanosleep/3-2
-posix/conformance/interfaces/sigaction/10-1
-posix/conformance/interfaces/sigaction/11-1
-posix/conformance/interfaces/sigaction/9-1
-
-## UNRESOLVED: fork() failed: Function not implemented
-posix/conformance/interfaces/fork/2-1
-
-## UNRESOLVED: fork(): Function not implemented
-posix/conformance/interfaces/mmap/6-3
-
-## UNRESOLVED: fork: Function not implemented
-posix/conformance/interfaces/timer_delete/speculative/5-1
-posix/conformance/interfaces/timer_getoverrun/speculative/6-1
-posix/conformance/interfaces/timer_gettime/speculative/6-1
-posix/conformance/interfaces/timer_settime/speculative/12-1
-
 ## UNRESOLVED: killpg did not return success.
 posix/conformance/interfaces/killpg/4-1
-
-## UNRESOLVED: parent sending child a SIGABRT signal
-posix/conformance/interfaces/sigsuspend/3-1
-
-## UNRESOLVED: parent sending child a SIGUSR1 signal
-posix/conformance/interfaces/sigsuspend/1-1
-posix/conformance/interfaces/sigsuspend/4-1
-posix/conformance/interfaces/sigsuspend/6-1
-posix/conformance/interfaces/sigwaitinfo/3-1
 
 ## UNRESOLVED: pthread_create(&high_id, &high_attr, hi_prio_thread, NULL)
 posix/functional/threads/schedule/1-1
@@ -889,15 +778,6 @@ posix/conformance/interfaces/sched_rr_get_interval/3-1
 
 ## UNRESOLVED: unexpected errno: sem_trywait 5-1: sem_open: No such device
 posix/conformance/interfaces/sem_wait/5-1
-
-## UNRESOLVED: unexpected error: mq_close 2-1: fork: Function not implemented
-posix/conformance/interfaces/mq_close/2-1
-
-## UNRESOLVED: unexpected error: mq_unlink 2-1: fork: Function not implemented
-posix/conformance/interfaces/mq_unlink/2-1
-
-## UNRESOLVED: unexpected error: mq_unlink 2-2: fork: Function not implemented
-posix/conformance/interfaces/mq_unlink/2-2
 
 ## UNRESOLVED: unexpected error: pthread_attr_getstack 1-1: pthread_attr_getstack: No error information
 posix/conformance/interfaces/pthread_attr_getstack/1-1
@@ -1029,27 +909,27 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmp37jJRg/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
-
-## build: wasm-ld: error: /tmp/.tmpYQIgEb/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmp5ff4f8/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmpcq1fHI/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
-
-## build: wasm-ld: error: /tmp/.tmpiBkilX/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+## build: wasm-ld: error: /tmp/.tmpja9gsg/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmpshq8dR/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpo1KhR8/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
+
+## build: wasm-ld: error: /tmp/.tmpuCSuby/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
 
-## build: wasm-ld: error: /tmp/.tmpwR7WAx/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpuQaj6v/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
+
+## build: wasm-ld: error: /tmp/.tmpvBIwqv/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
 
 ## exit status 101
 posix/conformance/interfaces/pthread_cancel/2-2
-posix/conformance/interfaces/pthread_mutex_init/3-2
+posix/conformance/interfaces/pthread_mutex_init/1-2
 
 ## exit status 139
 posix/conformance/interfaces/pthread_attr_init/2-1
@@ -1059,8 +939,6 @@ posix/conformance/interfaces/pthread_attr_setschedparam/1-2
 posix/conformance/interfaces/pthread_attr_setscope/1-1
 posix/conformance/interfaces/pthread_attr_setstacksize/1-1
 posix/conformance/interfaces/pthread_attr_setstacksize/2-1
-posix/conformance/interfaces/pthread_barrier_wait/3-1
-posix/conformance/interfaces/pthread_barrier_wait/3-2
 posix/conformance/interfaces/pthread_cancel/1-1
 posix/conformance/interfaces/pthread_cancel/1-2
 posix/conformance/interfaces/pthread_cancel/1-3
@@ -1097,12 +975,6 @@ posix/conformance/interfaces/pthread_key_delete/2-1
 posix/conformance/interfaces/pthread_kill/1-1
 posix/conformance/interfaces/pthread_mutexattr_settype/3-2
 posix/conformance/interfaces/pthread_once/3-1
-posix/conformance/interfaces/pthread_rwlock_rdlock/4-1
-posix/conformance/interfaces/pthread_rwlock_timedrdlock/6-1
-posix/conformance/interfaces/pthread_rwlock_timedrdlock/6-2
-posix/conformance/interfaces/pthread_rwlock_timedwrlock/6-1
-posix/conformance/interfaces/pthread_rwlock_timedwrlock/6-2
-posix/conformance/interfaces/pthread_rwlock_wrlock/2-1
 posix/conformance/interfaces/pthread_self/1-1
 posix/conformance/interfaces/pthread_setcancelstate/1-1
 posix/conformance/interfaces/pthread_setcancelstate/1-2
@@ -1136,7 +1008,7 @@ posix/conformance/interfaces/sigpause/3-1
 ## timeout
 posix/conformance/interfaces/mmap/24-1
 posix/conformance/interfaces/pthread_create/11-1
-posix/conformance/interfaces/pthread_mutex_init/1-2
+posix/conformance/interfaces/pthread_mutex_init/3-2
 posix/conformance/interfaces/pthread_rwlock_wrlock/3-1
 posix/conformance/interfaces/pthread_spin_lock/1-1
 posix/conformance/interfaces/pthread_spin_lock/3-1

@@ -7,8 +7,12 @@
 ## "%s": for "683078400" expected 1991-08-25T00:00:00 but got 1900-01-00T00:00:00
 libc-test/functional/strptime
 
-## (pid = fork()) >= 0 failed (errno: Function not implemented)
+## ENOSYS: Clone
+libc-test/functional/wordexp
+libc-test/regression/daemon-failure
 libc-test/regression/fflush-exit
+libc-test/regression/pthread_exit-dtor
+libc-test/regression/raise-race
 
 ## ENOSYS: FutexTime64
 libc-test/functional/pthread_mutex_pi
@@ -42,7 +46,7 @@ libc-test/api/sys_wait
 ## build: error: use of undeclared identifier '_PC_TIMESTAMP_RESOLUTION'
 libc-test/api/unistd
 
-## build: wasm-ld: error: /tmp/.tmpkBDlct/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmpe6BifV/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## dlopen failed
@@ -63,11 +67,6 @@ libc-test/regression/execle-env
 ## f = popen("echo hello", "r") failed (errno = 2)
 libc-test/functional/popen
 
-## fork failed: Function not implemented
-libc-test/regression/daemon-failure
-libc-test/regression/pthread_exit-dtor
-libc-test/regression/raise-race
-
 ## mod = dlopen("tls_get_new-dtv_dso.so", RTLD_NOW) failed
 libc-test/regression/tls_get_new-dtv
 
@@ -80,6 +79,3 @@ libc-test/functional/strtold
 ## timeout
 libc-test/functional/pthread_cancel
 libc-test/functional/sem_open
-
-## wordexp("one two three", 0) returned WRDE_NOSPACE, want 0
-libc-test/functional/wordexp
