@@ -4,6 +4,7 @@
 
 base-mmap-threads/default                                  # exits nonzero or passes
 posix/conformance/interfaces/aio_error/2-1                 # UNRESOLVED or PASS
+posix/conformance/interfaces/aio_fsync/5-1                 # UNTESTED or PASS: passes only if the fsync is still in progress at the first aio_error
 posix/conformance/interfaces/lio_listio/4-1                # under load: "did not receive the right number of notifications"
 posix/conformance/interfaces/pthread_atfork/3-3            # timing
 posix/conformance/interfaces/pthread_attr_destroy/1-1      # timing
@@ -12,16 +13,18 @@ posix/conformance/interfaces/pthread_barrier_init/4-1      # under load the kern
 posix/conformance/interfaces/pthread_cancel/3-1            # timing
 posix/conformance/interfaces/pthread_cond_signal/4-2       # times out under full-suite load, passes alone
 posix/conformance/interfaces/pthread_cond_timedwait/4-3    # times out under full-suite load, passes alone
-posix/conformance/interfaces/pthread_create/1-2            # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
-posix/conformance/interfaces/pthread_create/12-1           # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
-posix/conformance/interfaces/pthread_detach/2-1            # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
-posix/conformance/interfaces/pthread_detach/3-1            # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
-posix/conformance/interfaces/pthread_equal/1-1             # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
-posix/conformance/interfaces/pthread_equal/1-2             # exit 139 after PASSED: trap during process exit with live threads; tracked by fix-exec
+posix/conformance/interfaces/pthread_create/1-2            # exit 139 after PASSED when the thread starts before the exit: a_thread_func() has no parameters, so musl's call through void *(*)(void *) is an indirect call type mismatch in wasm
+posix/conformance/interfaces/pthread_create/12-1           # exit 139 after PASSED when the thread starts before the exit: a_thread_func() has no parameters, so musl's call through void *(*)(void *) is an indirect call type mismatch in wasm
+posix/conformance/interfaces/pthread_detach/2-1            # exit 139 after PASSED when the thread starts before the exit: a_thread_func() has no parameters, so musl's call through void *(*)(void *) is an indirect call type mismatch in wasm
+posix/conformance/interfaces/pthread_detach/3-1            # exit 139 after PASSED when the thread starts before the exit: a_thread_func() has no parameters, so musl's call through void *(*)(void *) is an indirect call type mismatch in wasm
+posix/conformance/interfaces/pthread_equal/1-1             # exit 139 after PASSED when the thread starts before the exit: a_thread_func() has no parameters, so musl's call through void *(*)(void *) is an indirect call type mismatch in wasm
+posix/conformance/interfaces/pthread_equal/1-2             # exit 139 after PASSED when the thread starts before the exit: a_thread_func() has no parameters, so musl's call through void *(*)(void *) is an indirect call type mismatch in wasm
 posix/conformance/interfaces/pthread_equal/2-1             # hangs about half the time
+posix/conformance/interfaces/pthread_mutex_init/1-2        # times out or passes
 posix/conformance/interfaces/pthread_mutex_trylock/4-3     # timing
-posix/conformance/interfaces/pthread_once/6-1              # hangs most of the time
 posix/conformance/interfaces/pthread_rwlock_unlock/3-1     # timing
 ltp/syscalls/getrusage04                                   # under load: utime grows more than 5 ms between getrusage calls (host CPU-time granularity)
 ltp/syscalls/clock_gettime04                               # under load: successive CLOCK_REALTIME readings more than 5 ms apart
 ltp/syscalls/inotify09                                     # times out under full-suite load (inotify vs. concurrent writers stress); passes alone
+ltp/mm/mallocstress01                                      # stress test near the timeout: times out or passes from run to run
+ltp/mm/shm_test01                                          # stress test near the timeout: times out or passes from run to run

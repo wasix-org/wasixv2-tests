@@ -345,12 +345,6 @@ posix/conformance/interfaces/aio_write/9-2
 posix/conformance/interfaces/sched_getscheduler/7-1
 posix/conformance/interfaces/sched_setscheduler/20-1
 
-## FAIL: error: guest trapped: RuntimeError: unreachable
-posix/conformance/interfaces/pthread_attr_setdetachstate/2-1
-posix/conformance/interfaces/pthread_detach/1-1
-posix/conformance/interfaces/pthread_detach/4-1
-posix/conformance/interfaces/pthread_join/speculative/6-1
-
 ## runs as pid 1 (kill(-1) semantics): killpg(getpgrp()) is kill(-1), which spares init and finds no target (ESRCH before EINVAL)
 posix/conformance/interfaces/killpg/6-1
 
@@ -588,23 +582,29 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmp6k2sSS/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
-
-## build: wasm-ld: error: /tmp/.tmpP37ulM/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
-
-## build: wasm-ld: error: /tmp/.tmpgALjMP/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmp2W9AXe/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
 
-## build: wasm-ld: error: /tmp/.tmphWNT88/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+## build: wasm-ld: error: /tmp/.tmp6QpC8j/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmpqZ0w1C/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpDqSyO2/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
+
+## build: wasm-ld: error: /tmp/.tmpFTDV5t/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
+
+## build: wasm-ld: error: /tmp/.tmps8aKsK/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
+
+## build: wasm-ld: error: /tmp/.tmpvmjG1E/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmpxEnsoG/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
+## exit status 132
+posix/conformance/interfaces/pthread_attr_setdetachstate/2-1
+posix/conformance/interfaces/pthread_detach/1-1
+posix/conformance/interfaces/pthread_detach/4-1
+posix/conformance/interfaces/pthread_join/speculative/6-1
 
 ## exit status 139
 posix/conformance/interfaces/pthread_attr_init/2-1
@@ -683,11 +683,6 @@ posix/conformance/interfaces/sigpause/3-1
 ## timeout
 posix/conformance/interfaces/mq_timedsend/5-1
 posix/conformance/interfaces/pthread_create/11-1
-posix/conformance/interfaces/pthread_mutex_init/1-2
 posix/conformance/interfaces/pthread_mutex_init/3-2
 posix/conformance/interfaces/pthread_rwlock_wrlock/3-1
-posix/conformance/interfaces/pthread_spin_lock/1-1
-posix/conformance/interfaces/pthread_spin_lock/3-1
-posix/conformance/interfaces/timer_create/10-1
-posix/conformance/interfaces/timer_create/11-1
 posix/conformance/interfaces/timer_settime/5-3

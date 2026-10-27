@@ -879,7 +879,6 @@ ltp/syscalls/timer_create03
 ## exit status 1
 ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
-ltp/syscalls/prctl08
 
 ## exit status 137
 ltp/cve/cve-2018-6927
@@ -889,6 +888,9 @@ ltp/syscalls/futex_wait03
 ltp/syscalls/futex_wait04
 ltp/syscalls/futex_wake01
 ltp/syscalls/sigsuspend02
+
+## exit status 139
+ltp/syscalls/prctl08
 
 ## exit status 255
 ltp/sched/trace_sched01
@@ -1153,8 +1155,5 @@ ltp/syscalls/ioctl02
 
 ## timeout
 ltp/fcntl-locktests/FCNTL_LOCKTESTS
-ltp/ltp-aiodio.part3/fsx22
-ltp/mm/mallocstress01
 ltp/mm/mtest06
 ltp/mm/mtest06_3
-ltp/mm/shm_test01

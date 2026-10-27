@@ -36,7 +36,7 @@ libc-test/api/sys_wait
 ## build: error: use of undeclared identifier '_PC_TIMESTAMP_RESOLUTION'
 libc-test/api/unistd
 
-## build: wasm-ld: error: /tmp/.tmpSF6GI2/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmprDS7LM/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## dlopen failed
@@ -65,6 +65,3 @@ libc-test/functional/spawn
 
 ## strtold("0x1.111111111111111111111111111281") want 0x1.1111111111111111111111111113p+0 got 0x1.1111111111111111111111111112p+0
 libc-test/functional/strtold
-
-## timeout
-libc-test/functional/pthread_cancel
