@@ -1,5 +1,6 @@
 // inotify: watches on a directory and a file, the events for create/modify/attrib/move/
-// delete, IN_IGNORED on removal of a watch, non-blocking reads and argument errors.
+// delete, IN_IGNORED on removal of a watch, non-blocking reads, argument errors, and events of
+// an unlinked file with and without IN_EXCL_UNLINK.
 //#ExpectedStdout: PASS
 #define _GNU_SOURCE
 #include <errno.h>
@@ -109,7 +110,26 @@ int main(void)
 	CHECK(inotify_add_watch(in, "/tmp/d/sub", IN_ONLYDIR | IN_CREATE) >= 1);
 	close(open("/tmp/d/file", O_CREAT | O_WRONLY, 0644));
 	FAILS(inotify_add_watch(in, "/tmp/d/file", IN_ONLYDIR | IN_CREATE), ENOTDIR);
+	/* A mask of flags alone is a watch; a bit outside inotify's is EINVAL. */
+	CHECK(inotify_add_watch(in, "/tmp/d/file", IN_DONT_FOLLOW) >= 1);
+	FAILS(inotify_add_watch(in, "/tmp/d", IN_MODIFY | 0x08000000), EINVAL);
 	close(in);
+
+	/* A file written after its unlink: the directory it was in still hears of it, except
+	 * through an IN_EXCL_UNLINK watch. */
+	in = inotify_init1(IN_NONBLOCK);
+	int excl = inotify_init1(IN_NONBLOCK);
+	int gone = open("/tmp/d/gone", O_CREAT | O_WRONLY, 0644);
+	wd = inotify_add_watch(in, "/tmp/d", IN_MODIFY);
+	CHECK(inotify_add_watch(excl, "/tmp/d", IN_MODIFY | IN_EXCL_UNLINK) >= 1);
+	OK(unlink("/tmp/d/gone"));
+	CHECK(write(gone, "x", 1) == 1);
+	drain(in);
+	CHECK(has(wd, IN_MODIFY, "gone"));
+	FAILS(read(excl, tmp, sizeof tmp), EAGAIN);
+	close(gone);
+	close(in);
+	close(excl);
 
 	if (fails)
 		return 1;
