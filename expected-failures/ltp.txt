@@ -563,9 +563,6 @@ ltp/syscalls/newuname01
 ## TFAIL: nanosleep() slept for too long
 ltp/syscalls/nanosleep01
 
-## TFAIL: old/new area must not overlap succeeded
-ltp/syscalls/mremap05
-
 ## TFAIL: open magiclinks: openat2() failed: ENOENT (2)
 ltp/syscalls/openat202
 
@@ -677,9 +674,6 @@ ltp/syscalls/mprotect04
 
 ## TFAIL: test-file: name_to_handle_at() failed: EOPNOTSUPP (95)
 ltp/syscalls/name_to_handle_at03
-
-## TFAIL: tgkill() should have failed with EAGAIN: SUCCESS (0)
-ltp/syscalls/tgkill02
 
 ## TFAIL: timer_gettime(-1) = 0: SUCCESS (0)
 ltp/syscalls/timer_gettime01
