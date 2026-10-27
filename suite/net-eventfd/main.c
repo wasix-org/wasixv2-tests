@@ -1,5 +1,5 @@
-// eventfd: counter semantics, EFD_SEMAPHORE, non-blocking EAGAIN, overflow, short buffers and
-// poll readiness.
+// eventfd: counter semantics, EFD_SEMAPHORE, non-blocking EAGAIN, overflow, buffers that are not
+// 8 bytes and poll readiness.
 //#ExpectedStdout: ok
 #include <errno.h>
 #include <fcntl.h>
@@ -37,9 +37,12 @@ int main(void)
 	eventfd_t got;
 	CHECK(eventfd_read(e, &got) == 0 && got == 5);
 
-	// Buffers shorter than 8 bytes are EINVAL.
+	// Buffers shorter than 8 bytes are EINVAL, and so is a write of more than 8.
 	CHECK(read(e, &v, 4) == -1 && errno == EINVAL);
 	CHECK(write(e, &v, 4) == -1 && errno == EINVAL);
+	uint64_t two[2] = { 1, 1 };
+	CHECK(write(e, two, sizeof two) == -1 && errno == EINVAL);
+	CHECK(read(e, &v, sizeof v) == -1 && errno == EAGAIN);
 
 	// 2^64-1 is never a valid increment.
 	v = UINT64_MAX;
