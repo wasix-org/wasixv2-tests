@@ -92,6 +92,11 @@ const EXCLUDED_LISTS: &[(&str, &str)] = &[
 /// another version, is built again. 2: trunk directories too.
 const BUILD_VERSION: u32 = 2;
 
+/// The version of which programs `links_fork` finds forking. An install prepared with another
+/// version is completed in place: the programs it finds now are built for asyncify too. 2: raw
+/// `clone`/`clone3` syscalls.
+const FORK_DETECTION: u32 = 2;
+
 /// Linux release whose UAPI headers LTP builds against, the newest release covering wasixv2's
 /// syscall table but for `fchroot`.
 const LINUX_UAPI_TAG: &str = "v7.2";
@@ -541,8 +546,12 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
     // The exception-handling build of everything, then the asyncify build of the programs that
     // fork, which replaces theirs in the install.
     let built = tree.join(format!(".wasixv2-ltp-built-{BUILD_VERSION}"));
-    let forking_list = tree.join(format!("wasixv2-forking-{BUILD_VERSION}.txt"));
-    let ready = tree.join(format!(".wasixv2-ltp-ready-{BUILD_VERSION}"));
+    let forking_list = tree.join(format!(
+        "wasixv2-forking-{BUILD_VERSION}.{FORK_DETECTION}.txt"
+    ));
+    let ready = tree.join(format!(
+        ".wasixv2-ltp-ready-{BUILD_VERSION}.{FORK_DETECTION}"
+    ));
     if !ready.exists() {
         if !built.exists() {
             build_tree(
@@ -555,7 +564,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
             std::fs::write(&built, "")?;
         }
         if !forking_list.exists() {
-            let forking = forking_programs(&tree, &ltproot)?;
+            let forking = forking_programs(&tree, &ltproot, earlier_forking(&tree)?)?;
             let text: String = forking
                 .iter()
                 .map(|(program, leaf)| format!("{program} {leaf}\n"))
@@ -728,8 +737,14 @@ fn is_trunk(dir: &Path) -> bool {
 }
 
 /// The installed programs that fork (`links_fork`), each under `ltproot` with the directory that
-/// built it, relative to `tree`, or `-` when no directory has the same program.
-fn forking_programs(tree: &Path, ltproot: &Path) -> Result<Vec<(String, String)>> {
+/// built it, relative to `tree`, or `-` when no directory has the same program. `earlier`, the
+/// programs an earlier detection found, are installed from their asyncify builds already, and
+/// stay.
+fn forking_programs(
+    tree: &Path,
+    ltproot: &Path,
+    earlier: BTreeMap<String, String>,
+) -> Result<Vec<(String, String)>> {
     let mut forking = Vec::new();
     let mut unnamed = Vec::new();
     for entry in WalkDir::new(ltproot.join("testcases/bin"))
@@ -737,11 +752,14 @@ fn forking_programs(tree: &Path, ltproot: &Path) -> Result<Vec<(String, String)>
         .filter_map(Result::ok)
         .filter(|e| e.file_type().is_file())
     {
+        let program = entry.path().strip_prefix(ltproot)?.to_owned();
+        if earlier.contains_key(&program.display().to_string()) {
+            continue;
+        }
         let wasm = std::fs::read(entry.path())?;
         if !wasm.starts_with(b"\0asm") {
             continue;
         }
-        let program = entry.path().strip_prefix(ltproot)?.to_owned();
         match super::links_fork(&wasm) {
             Some(true) => forking.push((program, wasm)),
             Some(false) => {}
@@ -754,20 +772,37 @@ fn forking_programs(tree: &Path, ltproot: &Path) -> Result<Vec<(String, String)>
     );
     // Installed programs are copies of what a directory built.
     let leaves = program_dirs(tree);
-    Ok(forking
-        .into_iter()
-        .map(|(program, wasm)| {
-            let name = program.file_name().unwrap();
-            let leaf = leaves
-                .iter()
-                .find(|leaf| std::fs::read(leaf.join(name)).is_ok_and(|built| built == wasm))
-                .map_or_else(
-                    || "-".to_owned(),
-                    |leaf| leaf.strip_prefix(tree).unwrap().display().to_string(),
-                );
-            (program.display().to_string(), leaf)
-        })
-        .collect())
+    let found = forking.into_iter().map(|(program, wasm)| {
+        let name = program.file_name().unwrap();
+        let leaf = leaves
+            .iter()
+            .find(|leaf| std::fs::read(leaf.join(name)).is_ok_and(|built| built == wasm))
+            .map_or_else(
+                || "-".to_owned(),
+                |leaf| leaf.strip_prefix(tree).unwrap().display().to_string(),
+            );
+        (program.display().to_string(), leaf)
+    });
+    let mut all: Vec<_> = earlier.into_iter().chain(found).collect();
+    all.sort();
+    Ok(all)
+}
+
+/// The forking programs that earlier detections listed for this build of `tree`
+/// (`FORK_DETECTION`), whose asyncify builds are installed.
+fn earlier_forking(tree: &Path) -> Result<BTreeMap<String, String>> {
+    let mut earlier = BTreeMap::new();
+    for entry in std::fs::read_dir(tree)? {
+        let name = entry?.file_name();
+        let name = name.to_string_lossy();
+        let Some(rest) = name.strip_prefix(&format!("wasixv2-forking-{BUILD_VERSION}")) else {
+            continue;
+        };
+        if rest == ".txt" || (rest.starts_with('.') && rest.ends_with(".txt")) {
+            earlier.extend(read_forking_list(&tree.join(&*name))?);
+        }
+    }
+    Ok(earlier)
 }
 
 /// `wasixv2-forking.txt`: `program leaf` lines, as `forking_programs` finds them.
@@ -816,7 +851,11 @@ fn build_asyncify(
         let installed = ltproot.join(program);
         match std::fs::read(tree.join(leaf).join(name)) {
             Ok(built) => std::fs::write(&installed, built)?,
-            Err(_) => std::fs::remove_file(&installed)?,
+            // Gone already when an earlier detection's asyncify build failed too.
+            Err(_) => match std::fs::remove_file(&installed) {
+                Err(e) if e.kind() != std::io::ErrorKind::NotFound => return Err(e.into()),
+                _ => {}
+            },
         }
     }
     Ok(())
