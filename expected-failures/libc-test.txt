@@ -8,13 +8,6 @@
 libc-test/functional/strptime
 
 ## ENOSYS: Clone
-libc-test/functional/ipc_msg
-libc-test/functional/ipc_sem
-libc-test/functional/ipc_shm
-libc-test/functional/wordexp
-libc-test/regression/daemon-failure
-libc-test/regression/fflush-exit
-libc-test/regression/pthread_exit-dtor
 libc-test/regression/raise-race
 
 ## RN fmaf(-0x1.001p-81,0x1.ffe002p-70,0x1.0002p-133) want 0x1.0001p-133 got 0x1.0002p-133 ulperr 0.500 = 0x1p+0 + -0x1p-1
@@ -36,7 +29,7 @@ libc-test/api/sys_wait
 ## build: error: use of undeclared identifier '_PC_TIMESTAMP_RESOLUTION'
 libc-test/api/unistd
 
-## build: wasm-ld: error: /tmp/.tmprDS7LM/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmpZ057JQ/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## dlopen failed
@@ -65,3 +58,6 @@ libc-test/functional/spawn
 
 ## strtold("0x1.111111111111111111111111111281") want 0x1.1111111111111111111111111113p+0 got 0x1.1111111111111111111111111112p+0
 libc-test/functional/strtold
+
+## wordexp("one two three", 0) returned WRDE_SYNTAX, want 0
+libc-test/functional/wordexp

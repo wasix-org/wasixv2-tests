@@ -13,244 +13,58 @@ ltp/syscalls/epoll_ctl06
 
 ## ENOSYS: ClockAdjtime64
 ltp/cve/cve-2018-11508
+ltp/syscalls/adjtimex01
+ltp/syscalls/adjtimex02
 ltp/syscalls/adjtimex03
-
-## ENOSYS: Clone
-ltp/containers/utsname01
-ltp/cve/cve-2017-12192
-ltp/cve/cve-2017-17052
-ltp/cve/cve-2021-4034
-ltp/dio/dio03
-ltp/dio/dio06
-ltp/dio/dio09
-ltp/dio/dio12
-ltp/dio/dio15
-ltp/dio/dio17
-ltp/dio/dio19
-ltp/dio/dio21
-ltp/dio/dio23
-ltp/dio/dio25
-ltp/dio/dio26
-ltp/dio/dio27
-ltp/dio/dio28
-ltp/dio/dio29
-ltp/dio/dio30
-ltp/fs/ftest01
-ltp/fs/ftest02
-ltp/fs/ftest03
-ltp/fs/ftest04
-ltp/fs/ftest05
-ltp/fs/ftest06
-ltp/fs/ftest07
-ltp/fs/ftest08
-ltp/fs/read_all_dev
-ltp/fs/read_all_proc
-ltp/fs/read_all_sys
-ltp/mm/data_space
-ltp/mm/mmap21_01
-ltp/mm/mmap21_02
-ltp/mm/mmapstress01
-ltp/mm/mmapstress09
-ltp/mm/mmapstress10
-ltp/mm/mtest01
-ltp/mm/mtest01w
-ltp/mm/page01
-ltp/mm/page02
-ltp/mm/shmt02
-ltp/mm/shmt04
-ltp/mm/shmt07
-ltp/mm/shmt10
-ltp/mm/stack_space
-ltp/mm/vma01
-ltp/sched/hackbench01
-ltp/sched/starvation
-ltp/sched/time-schedule01
-ltp/syscalls-ipc/msgrcv05
-ltp/syscalls-ipc/msgrcv06
-ltp/syscalls-ipc/semctl01
-ltp/syscalls-ipc/semctl06
-ltp/syscalls-ipc/semop03
-ltp/syscalls-ipc/shmctl01
-ltp/syscalls/abort01
-ltp/syscalls/alarm03
-ltp/syscalls/alarm07
-ltp/syscalls/capset04
-ltp/syscalls/clock_nanosleep01
-ltp/syscalls/clone08
-ltp/syscalls/connect01
-ltp/syscalls/epoll_pwait01
-ltp/syscalls/epoll_wait05
-ltp/syscalls/epoll_wait08
-ltp/syscalls/epoll_wait11
-ltp/syscalls/epoll_wait12
-ltp/syscalls/epoll_wait15
-ltp/syscalls/epoll_wait16
-ltp/syscalls/eventfd2_03
-ltp/syscalls/execl01
-ltp/syscalls/execle01
-ltp/syscalls/execlp01
-ltp/syscalls/execv01
-ltp/syscalls/execve01
-ltp/syscalls/execve06
-ltp/syscalls/execvp01
-ltp/syscalls/exit01
-ltp/syscalls/exit02
-ltp/syscalls/exit_group01
-ltp/syscalls/fcntl07
-ltp/syscalls/fcntl07_64
-ltp/syscalls/fcntl11
-ltp/syscalls/fcntl11_64
-ltp/syscalls/fcntl12
-ltp/syscalls/fcntl12_64
-ltp/syscalls/fcntl14
-ltp/syscalls/fcntl14_64
-ltp/syscalls/fcntl15
-ltp/syscalls/fcntl15_64
-ltp/syscalls/fcntl17
-ltp/syscalls/fcntl17_64
-ltp/syscalls/fcntl19
-ltp/syscalls/fcntl19_64
-ltp/syscalls/fcntl20
-ltp/syscalls/fcntl20_64
-ltp/syscalls/fcntl21
-ltp/syscalls/fcntl21_64
-ltp/syscalls/fcntl22
-ltp/syscalls/fcntl22_64
-ltp/syscalls/flock03
-ltp/syscalls/flock04
-ltp/syscalls/fork01
-ltp/syscalls/fork03
-ltp/syscalls/fork04
-ltp/syscalls/fork06
-ltp/syscalls/fork07
-ltp/syscalls/fork08
-ltp/syscalls/fork09
-ltp/syscalls/fork10
-ltp/syscalls/fork11
-ltp/syscalls/fstat03
-ltp/syscalls/fstat03_64
-ltp/syscalls/fstatfs02
-ltp/syscalls/fstatfs02_64
-ltp/syscalls/futex_cmp_requeue01
-ltp/syscalls/futex_wait02
-ltp/syscalls/futex_wait07
-ltp/syscalls/futex_wake02
-ltp/syscalls/futex_wake03
-ltp/syscalls/getcpu02
-ltp/syscalls/getcwd04
-ltp/syscalls/getpgid01
-ltp/syscalls/getpid01
-ltp/syscalls/getppid02
-ltp/syscalls/getsid01
-ltp/syscalls/getsockopt02
-ltp/syscalls/inotify11
-ltp/syscalls/kcmp01
-ltp/syscalls/keyctl07
-ltp/syscalls/kill02
-ltp/syscalls/kill06
-ltp/syscalls/kill08
-ltp/syscalls/kill10
-ltp/syscalls/kill11
-ltp/syscalls/kill12
-ltp/syscalls/madvise10
-ltp/syscalls/membarrier01
-ltp/syscalls/mincore04
-ltp/syscalls/mmap01
-ltp/syscalls/mmap03
-ltp/syscalls/mmap18
-ltp/syscalls/mmap21_01
-ltp/syscalls/mmap21_02
-ltp/syscalls/mprotect02
-ltp/syscalls/mprotect03
-ltp/syscalls/mq_timedreceive01
-ltp/syscalls/mq_timedsend01
-ltp/syscalls/mseal01
-ltp/syscalls/msgrcv05
-ltp/syscalls/msgrcv06
-ltp/syscalls/munmap01
-ltp/syscalls/nanosleep02
-ltp/syscalls/nice03
-ltp/syscalls/pause01
-ltp/syscalls/pause02
-ltp/syscalls/personality01
-ltp/syscalls/pidfd_open03
-ltp/syscalls/pipe02
-ltp/syscalls/pipe04
-ltp/syscalls/pipe09
-ltp/syscalls/pipe10
-ltp/syscalls/pipe11
-ltp/syscalls/pipe13
-ltp/syscalls/pipeio_1
-ltp/syscalls/pipeio_2
-ltp/syscalls/pipeio_3
-ltp/syscalls/pipeio_4
-ltp/syscalls/pipeio_5
-ltp/syscalls/pipeio_6
-ltp/syscalls/pipeio_7
-ltp/syscalls/pipeio_8
-ltp/syscalls/ppoll01
-ltp/syscalls/prctl03
-ltp/syscalls/recv01
-ltp/syscalls/recvfrom01
-ltp/syscalls/recvmsg01
-ltp/syscalls/rename14
-ltp/syscalls/rt_sigqueueinfo02
-ltp/syscalls/rt_sigtimedwait01
-ltp/syscalls/sched_getparam01
-ltp/syscalls/select03
-ltp/syscalls/semctl01
-ltp/syscalls/semctl06
-ltp/syscalls/semop03
-ltp/syscalls/semop04
-ltp/syscalls/send01
-ltp/syscalls/sendto01
-ltp/syscalls/setitimer01
-ltp/syscalls/setpgid01
-ltp/syscalls/setpgid03
-ltp/syscalls/setpgrp01
-ltp/syscalls/setpgrp02
-ltp/syscalls/setrlimit05
-ltp/syscalls/setrlimit06
-ltp/syscalls/shmctl01
-ltp/syscalls/shutdown01
-ltp/syscalls/sighold02
-ltp/syscalls/signal01
-ltp/syscalls/sigrelse01
-ltp/syscalls/sigtimedwait01
-ltp/syscalls/sigwait01
-ltp/syscalls/sigwaitinfo01
-ltp/syscalls/splice02
-ltp/syscalls/statfs02
-ltp/syscalls/statfs02_64
-ltp/syscalls/times03
-ltp/syscalls/wait02
-ltp/syscalls/wait401
-ltp/syscalls/waitid01
-ltp/syscalls/waitid04
-ltp/syscalls/waitid05
-ltp/syscalls/waitid06
-ltp/syscalls/waitid07
-ltp/syscalls/waitid08
-ltp/syscalls/waitid09
-ltp/syscalls/waitid11
-ltp/syscalls/waitpid01
-ltp/syscalls/waitpid03
-ltp/syscalls/waitpid06
-ltp/syscalls/waitpid07
-ltp/syscalls/waitpid08
-ltp/syscalls/waitpid09
-ltp/syscalls/waitpid10
-ltp/syscalls/waitpid11
-ltp/syscalls/waitpid12
-ltp/syscalls/waitpid13
+ltp/syscalls/clock_adjtime01
+ltp/syscalls/clock_adjtime02
 
 ## ENOSYS: Clone, Clone3
 ltp/syscalls/close_range02
+ltp/syscalls/unshare03
+ltp/syscalls/unshare04
+
+## ENOSYS: Clone3
+ltp/containers/mesgq_nstest_clone
+ltp/containers/msg_comm
+ltp/containers/sem_comm
+ltp/containers/sem_nstest_clone
+ltp/containers/semtest_2ns_clone
+ltp/containers/shm_comm
+ltp/containers/shmem_2nstest_clone
+ltp/containers/shmnstest_clone
+ltp/containers/utsname03_clone
+
+## ENOSYS: Kcmp
+ltp/syscalls/kcmp01
+
+## ENOSYS: Listmount
+ltp/syscalls/listmount03
+
+## ENOSYS: Mount
+ltp/syscalls/mount08
+ltp/syscalls/move_mount03
+
+## ENOSYS: Mount, Umount2
+ltp/cve/cve-2022-2590
+ltp/syscalls/dirtyc0w_shmem
+ltp/syscalls/madvise01
+
+## ENOSYS: Mseal
+ltp/syscalls/mseal01
+
+## ENOSYS: Reboot
+ltp/syscalls/reboot01
+ltp/syscalls/reboot02
+
+## ENOSYS: Setns
+ltp/syscalls/setns02
 
 ## ENOSYS: Splice
 ltp/cve/cve-2022-0847
 ltp/syscalls/dirtypipe
 ltp/syscalls/splice01
+ltp/syscalls/splice02
 ltp/syscalls/splice03
 ltp/syscalls/splice04
 ltp/syscalls/splice05
@@ -258,11 +72,29 @@ ltp/syscalls/splice08
 ltp/syscalls/splice09
 ltp/syscalls/tee01
 
+## ENOSYS: Statmount
+ltp/syscalls/statmount08
+
 ## ENOSYS: Tee
 ltp/syscalls/tee02
 
 ## ENOSYS: Unshare
+ltp/containers/mesgq_nstest_unshare
+ltp/containers/sem_nstest_unshare
+ltp/containers/semtest_2ns_unshare
+ltp/containers/shmem_2nstest_unshare
+ltp/containers/shmnstest_unshare
+ltp/containers/utsname03_unshare
+ltp/containers/utsname04_unshare
+ltp/syscalls/mount_setattr02
+ltp/syscalls/pivot_root01
 ltp/syscalls/statmount03
+ltp/syscalls/unshare01
+ltp/syscalls/unshare02
+
+## ENOSYS: Vhangup
+ltp/syscalls/vhangup01
+ltp/syscalls/vhangup02
 
 ## ENOSYS: Vmsplice
 ltp/syscalls/vmsplice01
@@ -270,16 +102,45 @@ ltp/syscalls/vmsplice02
 ltp/syscalls/vmsplice03
 ltp/syscalls/vmsplice04
 
+## TBROK: CLONE_PARENT clone() failed: ENOSYS (38)
+ltp/syscalls/clone08
+
 ## TBROK: Cannot parse kernel .config
+ltp/syscalls/clock_gettime02
+ltp/syscalls/clock_settime02
+ltp/syscalls/seccomp01
 ltp/syscalls/timer_create02
+
+## TBROK: Child (3) killed by signal SIGHUP
+ltp/syscalls-ipc/msgsnd05
+ltp/syscalls/msgsnd05
+
+## TBROK: Could not find path to sh in $PATH.
+ltp/fs_perms_simple/fs_perms01
+ltp/fs_perms_simple/fs_perms02
+ltp/fs_perms_simple/fs_perms03
+ltp/fs_perms_simple/fs_perms12
+ltp/fs_perms_simple/fs_perms13
+ltp/fs_perms_simple/fs_perms14
 
 ## TBROK: Expected 1 conversions got 0 FILE '/proc/self/maps'
 ltp/syscalls/mmap04
+
+## TBROK: Failed to acquire device
+ltp/syscalls/linkat02
+ltp/syscalls/mknodat02
+ltp/syscalls/rename11
+ltp/syscalls/renameat01
+ltp/syscalls/umount2_01
+
+## TBROK: Failed to copy '/etc/hosts' to 'hosts'
+ltp/net.ipv6_lib/getaddrinfo_01
 
 ## TBROK: Failed to copy '/opt/ltp/testcases/bin/creat07_child' to '.'
 ltp/syscalls/creat07
 
 ## TBROK: Failed to copy '/opt/ltp/testcases/bin/execve_child' to '.'
+ltp/syscalls/execve02
 ltp/syscalls/execve04
 ltp/syscalls/execve05
 
@@ -289,17 +150,40 @@ ltp/syscalls/execveat01
 ## TBROK: Failed to copy '/opt/ltp/testcases/bin/execveat_errno' to '.'
 ltp/syscalls/execveat02
 
+## TBROK: Failed to copy '/opt/ltp/testcases/bin/fanotify_child' to '.'
+ltp/syscalls/fanotify12
+
 ## TBROK: Failed to copy '/opt/ltp/testcases/bin/getrusage03_child' to '.'
 ltp/syscalls/getrusage03
 
+## TBROK: Failed to copy '/opt/ltp/testcases/bin/pipe2_02_child' to '.'
+ltp/syscalls/pipe2_02
+
+## TBROK: Failed to open '/proc/sys/kernel/pid_max' for writing: EPERM (1)
+ltp/syscalls/fork13
+
+## TBROK: Failed to open '/proc/sys/vm/overcommit_memory' for writing: EPERM (1)
+ltp/mm/max_map_count
+
 ## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_queued_events' for reading: ENOENT (2)
 ltp/syscalls/inotify05
+
+## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_user_instances' for reading: ENOENT (2)
+ltp/syscalls/inotify06
+
+## TBROK: Failed to open FILE '/proc/sys/fs/pipe-max-size' for writing: EPERM (1)
+ltp/syscalls/fcntl35
+ltp/syscalls/fcntl35_64
 
 ## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
 ltp/syscalls/pipe15
 
 ## TBROK: Failed to open FILE '/proc/sys/kernel/core_pattern' for reading: ENOENT (2)
 ltp/syscalls/waitid10
+
+## TBROK: Failed to open FILE '/proc/sys/kernel/keys/root_maxkeys' for reading: ENOENT (2)
+ltp/cve/cve-2015-7550
+ltp/syscalls/keyctl02
 
 ## TBROK: Failed to open FILE '/proc/sys/kernel/msgmni' for reading: ENOENT (2)
 ltp/syscalls-ipc/msgstress01
@@ -309,24 +193,160 @@ ltp/syscalls/msgstress01
 ltp/syscalls-ipc/shmctl03
 ltp/syscalls/shmctl03
 
+## TBROK: Failed to open FILE '/proc/sys/net/ipv4/conf/lo/tag' for reading: ENOENT (2)
+ltp/syscalls/clone09
+
+## TBROK: Failed to open FILE '/proc/sys/vm/overcommit_memory' for writing: EPERM (1)
+ltp/mm/oom01
+
+## TBROK: Failed to open FILE '/sys/class/net/lo/mtu' for reading: ENOENT (2)
+ltp/cve/cve-2018-5803
+
+## TBROK: Failed to run cmd: useradd hsym
+ltp/syscalls/prot_hsymlinks
+
+## TBROK: Invalid child (3) exit value 32
+ltp/cve/cve-2021-4034
+ltp/syscalls/execl01
+ltp/syscalls/execle01
+ltp/syscalls/execlp01
+ltp/syscalls/execv01
+ltp/syscalls/execve01
+ltp/syscalls/execve06
+ltp/syscalls/execvp01
+
 ## TBROK: Locked memory after mlockall() should be > 0
 ltp/syscalls/munlockall01
 
+## TBROK: Path not found: /proc/sys/kernel/printk: ENOENT (2)
+ltp/syscalls/syslog11
+
+## TBROK: Path not found: /proc/sys/vm/min_free_kbytes: ENOENT (2)
+ltp/mm/min_free_kbytes
+
+## TBROK: Path not found: /proc/sys/vm/overcommit_ratio: ENOENT (2)
+ltp/mm/overcommit_memory01
+ltp/mm/overcommit_memory02
+ltp/mm/overcommit_memory03
+ltp/mm/overcommit_memory04
+ltp/mm/overcommit_memory05
+ltp/mm/overcommit_memory06
+
+## TBROK: Set setxattr03immutable immutable failed: ENOTTY (25)
+ltp/syscalls/setxattr03
+
+## TBROK: Test 0 haven't reported results!
+ltp/syscalls-ipc/msgrcv02
+ltp/syscalls-ipc/msgsnd02
+ltp/syscalls-ipc/semget02
+ltp/syscalls/creat04
+ltp/syscalls/fstat03
+ltp/syscalls/fstat03_64
+ltp/syscalls/fstatfs02
+ltp/syscalls/fstatfs02_64
+ltp/syscalls/membarrier01
+ltp/syscalls/msgrcv02
+ltp/syscalls/msgsnd02
+ltp/syscalls/personality01
+ltp/syscalls/pipe11
+ltp/syscalls/sched_getparam01
+ltp/syscalls/select03
+ltp/syscalls/semget02
+ltp/syscalls/signal01
+ltp/syscalls/statfs02
+ltp/syscalls/statfs02_64
+ltp/syscalls/unlink08
+
+## TBROK: Test 1 haven't reported results!
+ltp/syscalls/readlink01
+
+## TBROK: Test 12 haven't reported results!
+ltp/syscalls/access01
+
+## TBROK: Test 2 haven't reported results!
+ltp/syscalls-ipc/shmat02
+ltp/syscalls/shmat02
+
+## TBROK: Test 3 haven't reported results!
+ltp/syscalls-ipc/msgget02
+ltp/syscalls/msgget02
+
+## TBROK: Test 4 haven't reported results!
+ltp/syscalls/setpriority02
+
+## TBROK: Test haven't reported results!
+ltp/containers/mesgq_nstest_none
+ltp/containers/sem_nstest_none
+ltp/containers/shmnstest_none
+ltp/mm/shmt07
+ltp/syscalls-ipc/semctl04
+ltp/syscalls/chroot02
+ltp/syscalls/epoll_wait11
+ltp/syscalls/epoll_wait12
+ltp/syscalls/eventfd2_03
+ltp/syscalls/fcntl12
+ltp/syscalls/fcntl12_64
+ltp/syscalls/futex_wake02
+ltp/syscalls/getpgid01
+ltp/syscalls/getpid01
+ltp/syscalls/getsid01
+ltp/syscalls/mmap01
+ltp/syscalls/nanosleep02
+ltp/syscalls/nice03
+ltp/syscalls/pipe10
+ltp/syscalls/sched_setparam05
+ltp/syscalls/sched_setscheduler02
+ltp/syscalls/semctl04
+ltp/syscalls/setpgrp02
+ltp/syscalls/setregid03
+ltp/syscalls/setreuid04
+ltp/syscalls/setreuid05
+
+## TBROK: clock_gettime(CLOCK_REALTIME) failed: EPERM (1)
+ltp/syscalls/clock_settime04
+ltp/syscalls/leapsec01
+
+## TBROK: clock_gettime(INVALID/UNKNOWN CLOCK) failed: EINVAL (22)
+ltp/syscalls/nice05
+
+## TBROK: clock_settime() failed: EPERM (1)
+ltp/syscalls/clock_settime03
+
+## TBROK: execlp(/bin/true, /bin/true, ...) failed: ENOENT (2)
+ltp/syscalls/setrlimit04
+
 ## TBROK: fcntl(3,F_SETPIPE_SZ,...) failed: EINVAL (22)
 ltp/syscalls/pipe2_04
+
+## TBROK: fgets: ENOENT (2)
+ltp/cve/cve-2017-1000364
 
 ## TBROK: fopen(/proc/self/smaps,r) failed: ENOENT (2)
 ltp/syscalls/mlock05
 
 ## TBROK: fopen(/proc/sysvipc/shm,r) failed: ENOENT (2)
+ltp/syscalls-ipc/shmctl04
 ltp/syscalls-ipc/shmget03
+ltp/syscalls/shmctl04
 ltp/syscalls/shmget03
+
+## TBROK: got unexpected signal: 65280
+ltp/syscalls/mprotect02
 
 ## TBROK: ioctl(3,(( ((2U)<<30) | ((('R'))<<8) | ((0x00)) | ((sizeof(int))<<16) )),...) failed: ENOTTY (25)
 ltp/syscalls/ioctl07
 
+## TBROK: ip/ifconfig failed to bring up loop back device
+ltp/syscalls/sendmsg01
+
+## TBROK: ltp_clone failed: ENOSYS (38)
+ltp/syscalls/ioctl_ns06
+
 ## TBROK: mmap(0,262144,PROT_READ | PROT_WRITE | PROT_EXEC(7),1,3,0) failed: EACCES (13)
 ltp/syscalls/mincore02
+
+## TBROK: mmap(0,65536,PROT_EXEC(4),1,3,0) failed: EACCES (13)
+ltp/syscalls/mmap03
 
 ## TBROK: mremap() failed
 ltp/syscalls/mremap06
@@ -340,8 +360,15 @@ ltp/syscalls/posix_fadvise03_64
 ## TBROK: open(/dev/ptmx,1,0000) failed: ENOENT (2)
 ltp/pty/pty02
 
+## TBROK: open(/dev/ptmx,2,0000) failed: ENOENT (2)
+ltp/cve/cve-2020-11494
+ltp/pty/pty04
+
 ## TBROK: open(/dev/ptmx,2,0000) failed: errno=ENOENT(2): No such file or directory
 ltp/pty/hangup01
+
+## TBROK: open(/proc/self/ns/pid,0,0000) failed: ENOENT (2)
+ltp/syscalls/ioctl_ns01
 
 ## TBROK: open(/proc/self/ns/user,0,0000) failed: ENOENT (2)
 ltp/syscalls/ioctl_ns04
@@ -360,8 +387,54 @@ ltp/cve/cve-2014-0196
 ltp/cve/cve-2017-8890
 ltp/syscalls/accept02
 
+## TBROK: setsockopt(3, 1, 32, 0x7fe9bc, 4) failed: EPERM (1)
+ltp/cve/cve-2016-9793
+ltp/syscalls/setsockopt04
+
 ## TBROK: socket(10, 3, 159) failed: errno=EPERM(1): Operation not permitted
 ltp/net.ipv6_lib/asapi_03
+
+## TBROK: tst_checkpoint_wait(0, 10000) failed: ETIMEDOUT (110)
+ltp/containers/semtest_2ns_none
+ltp/containers/shmem_2nstest_none
+ltp/containers/utsname02
+ltp/cve/cve-2016-5195
+ltp/mm/shmt02
+ltp/mm/shmt04
+ltp/sched/starvation
+ltp/syscalls/dirtyc0w
+ltp/syscalls/epoll_wait05
+ltp/syscalls/epoll_wait15
+ltp/syscalls/epoll_wait16
+ltp/syscalls/fcntl15
+ltp/syscalls/fcntl15_64
+ltp/syscalls/flock03
+ltp/syscalls/fork04
+ltp/syscalls/getsockopt02
+ltp/syscalls/mincore04
+ltp/syscalls/pause01
+ltp/syscalls/pause02
+ltp/syscalls/pidfd_open03
+ltp/syscalls/pidfd_open04
+ltp/syscalls/pipe02
+ltp/syscalls/pipe13
+ltp/syscalls/prctl03
+ltp/syscalls/rt_sigqueueinfo02
+ltp/syscalls/setpgid03
+ltp/syscalls/setpriority01
+ltp/syscalls/shutdown01
+ltp/syscalls/sighold02
+ltp/syscalls/waitid04
+ltp/syscalls/waitid07
+ltp/syscalls/waitid08
+ltp/syscalls/waitpid06
+ltp/syscalls/waitpid07
+ltp/syscalls/waitpid08
+ltp/syscalls/waitpid09
+ltp/syscalls/waitpid10
+ltp/syscalls/waitpid11
+ltp/syscalls/waitpid12
+ltp/syscalls/waitpid13
 
 ## TBROK: unable to open pty: ENOENT (2)
 ltp/syscalls/ioctl01
@@ -369,8 +442,32 @@ ltp/syscalls/ioctl01
 ## TFAIL: "hopopt" protocols entry
 ltp/net.ipv6_lib/asapi_01
 
+## TFAIL: *child_pid (0) != pid (3)
+ltp/syscalls/getppid02
+
+## TFAIL: A single 6*ps VMA found.
+ltp/mm/vma01
+
+## TFAIL: Aborting test - timer_create(CLOCK_BOOTTIME_ALARM) failed: EPERM (1)
+ltp/syscalls/timer_delete01
+
+## TFAIL: Child did not dump core when expected
+ltp/syscalls/waitpid01
+
+## TFAIL: Child succeeds to refer unmapped memory region
+ltp/syscalls/munmap01
+
+## TFAIL: Child: exited with 0
+ltp/syscalls/madvise12
+
+## TFAIL: Child: killed by SIGSEGV
+ltp/syscalls/mmap18
+
 ## TFAIL: Could not parse inotify fdinfo
 ltp/syscalls/inotify12
+
+## TFAIL: Could not poison memory: EPERM (1)
+ltp/syscalls/madvise07
 
 ## TFAIL: Error writev returned a positive value
 ltp/syscalls/writev02
@@ -379,8 +476,17 @@ ltp/syscalls/writev05
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
 
+## TFAIL: Expected 1024K locked, get 0K locked
+ltp/syscalls/mmap14
+
 ## TFAIL: Invalid address expected EFAULT: ENOENT (2)
 ltp/syscalls/mknod06
+
+## TFAIL: NORMAL expected errno: 13: EACCES (13)
+ltp/syscalls/mq_open01
+
+## TFAIL: O_CREAT expected EFAULT: ENOENT (2)
+ltp/syscalls/open08
 
 ## TFAIL: Received wrong signal and/or data!
 ltp/syscalls/rt_sigqueueinfo01
@@ -401,9 +507,35 @@ ltp/mm/mtest05
 ltp/mm/mmapstress02
 ltp/mm/mmapstress03
 ltp/mm/mmapstress05
+ltp/syscalls/nftw01
+ltp/syscalls/nftw6401
+
+## TFAIL: Test{3} failed, expected 0 exit.
+ltp/fs/ftest06
+
+## TFAIL: Test{5} failed, expected 0 exit.
+ltp/fs/ftest02
+
+## TFAIL: VmLck showed wrong 0 pages, expected 1
+ltp/syscalls/mlock201
+
+## TFAIL: abort() failed to dump core
+ltp/syscalls/abort01
+
+## TFAIL: after child shmat() shm_nattcg=0 expected 20
+ltp/syscalls-ipc/shmctl01
+
+## TFAIL: after child shmat() shm_nattcg=4 expected 20
+ltp/syscalls/shmctl01
+
+## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
+ltp/syscalls/alarm07
 
 ## TFAIL: alarm(10) invalid retval 32: SUCCESS (0)
 ltp/syscalls/alarm05
+
+## TFAIL: alarm(100) invalid retval 30: SUCCESS (0)
+ltp/syscalls/alarm03
 
 ## TFAIL: alarm(2) invalid retval 34: SUCCESS (0)
 ltp/syscalls/alarm06
@@ -411,21 +543,32 @@ ltp/syscalls/alarm06
 ## TFAIL: alarm(2147483647) invalid retval 30: SUCCESS (0)
 ltp/syscalls/alarm02
 
+## TFAIL: buf2.tms_stime = 0
+ltp/syscalls/times03
+
 ## TFAIL: call succeeded unexpectedly
 ltp/syscalls/mprotect01
-ltp/syscalls/pipe05
 
-## TFAIL: capget() with bad address header expected EFAULT: EINVAL (22)
+## TFAIL: capget() with bad address data succeeded
 ltp/syscalls/capget02
+
+## TFAIL: capset() with bad address header expected EFAULT: EINVAL (22)
+ltp/syscalls/capset02
 
 ## TFAIL: chdir() expected EFAULT: ENOENT (2)
 ltp/syscalls/chdir04
+
+## TFAIL: child returned unexpected status
+ltp/syscalls/mprotect03
 
 ## TFAIL: chroot(an invalid address) expected EFAULT: ENOENT (2)
 ltp/syscalls/chroot03
 
 ## TFAIL: clock_nanosleep() slept for too long
 ltp/syscalls/clock_nanosleep02
+
+## TFAIL: clock_settime(2) failed for clock CLOCK_REALTIME: EPERM (1)
+ltp/syscalls/clock_settime01
 
 ## TFAIL: clone() Failed: ENOSYS (38)
 ltp/syscalls/kcmp03
@@ -435,6 +578,9 @@ ltp/syscalls/clone01
 
 ## TFAIL: clone() failed: TEST_ERRNO=ENOSYS(38): Function not implemented
 ltp/syscalls/clone02
+
+## TFAIL: core dump bit not set for SIGQUIT
+ltp/syscalls/kill11
 
 ## TFAIL: do_epoll_pwait() slept for too long
 ltp/syscalls/epoll_pwait03
@@ -448,11 +594,20 @@ ltp/syscalls/epoll_wait03
 ## TFAIL: epoll_wait() slept for too long
 ltp/syscalls/epoll_wait02
 
+## TFAIL: execute file_x as root failed: ENOENT (2)
+ltp/syscalls/access02
+
+## TFAIL: execve failed unexpectedly; expected Bad address: ENOENT (2)
+ltp/syscalls/execve03
+
 ## TFAIL: expected EPROTONOSUPPORT(93): EOPNOTSUPP (95)
 ltp/syscalls/socketpair01
 
 ## TFAIL: expected EPROTONOSUPPORT(93): EPERM (1)
 ltp/syscalls/socket01
+
+## TFAIL: faccessat2() with invalid address expected EFAULT: ENOENT (2)
+ltp/syscalls/faccessat202
 
 ## TFAIL: fchmod() on original FD succeeded
 ltp/syscalls/open13
@@ -476,7 +631,7 @@ ltp/syscalls/fcntl40_64
 ltp/syscalls/fcntl27
 ltp/syscalls/fcntl27_64
 
-## TFAIL: fcntl(tfile_1, F_SETLEASE, F_RDLCK) Failed, errno=22 : Invalid argument
+## TFAIL: fcntl(tfile_2, F_SETLEASE, F_RDLCK) Failed, errno=22 : Invalid argument
 ltp/syscalls/fcntl23
 ltp/syscalls/fcntl23_64
 
@@ -484,14 +639,27 @@ ltp/syscalls/fcntl23_64
 ltp/syscalls/pwrite04
 ltp/syscalls/pwrite04_64
 
+## TFAIL: first semop() failed errno 13
+ltp/syscalls-ipc/semctl06
+ltp/syscalls/semctl06
+
 ## TFAIL: futex_wait() slept for too long
 ltp/syscalls/futex_wait05
+
+## TFAIL: futex_wait(tv->fntype, futex, *futex, &timeout, 0) expected EINTR: ETIMEDOUT (110)
+ltp/syscalls/futex_wait07
+
+## TFAIL: futex_wake() failed: ENOENT (2)
+ltp/syscalls/futex_wait02
+
+## TFAIL: futex_wake() woken up 0 children, expected 1: SUCCESS (0)
+ltp/syscalls/futex_wake03
 
 ## TFAIL: get event: wd=1 mask=00000004 (expected 40000004) cookie=0     len=0  name="" (expected "") -1
 ltp/syscalls/inotify02
 
-## TFAIL: getpeername(sockfd, tc->sockaddr, tc->addrlen) succeeded
-ltp/syscalls/getpeername01
+## TFAIL: getcpu(tc->cpu_id, tc->node_id) succeeded
+ltp/syscalls/getcpu02
 
 ## TFAIL: getpgid(-99) expected ESRCH: EINVAL (22)
 ltp/syscalls/getpgid02
@@ -505,14 +673,14 @@ ltp/syscalls/inotify04
 ## TFAIL: invalid address expected EFAULT: ENOENT (2)
 ltp/syscalls/unlink07
 
-## TFAIL: invalid option buffer ; returned -1 (expected -1), errno 25 (expected 14)
-ltp/syscalls/sockioctl01
+## TFAIL: invalid iovec buffer: expected -1, returned 0: SUCCESS (0)
+ltp/syscalls/recvmsg01
 
-## TFAIL: invalid option buffer succeeded
+## TFAIL: invalid level expected EOPNOTSUPP: ENOPROTOOPT (92)
 ltp/syscalls/getsockopt01
 
-## TFAIL: invalid socket buffer succeeded
-ltp/syscalls/getsockname01
+## TFAIL: invalid option buffer ; returned -1 (expected -1), errno 25 (expected 14)
+ltp/syscalls/sockioctl01
 
 ## TFAIL: invalid-dfd: name_to_handle_at() should fail with EBADF: EOPNOTSUPP (95)
 ltp/syscalls/name_to_handle_at02
@@ -525,6 +693,17 @@ ltp/syscalls/ioctl10
 
 ## TFAIL: len is smaller than the actual size succeeded
 ltp/syscalls/gethostname02
+
+## TFAIL: link(<invalid address>, <nefile>) Failed expected errno: 14: ENOENT (2)
+ltp/syscalls/link04
+
+## TFAIL: lock type is wrong should be F_RDLCK is F_WRLCK
+ltp/syscalls/fcntl11
+ltp/syscalls/fcntl11_64
+
+## TFAIL: lock type is wrong should be F_WRLCK is F_RDLCK
+ltp/syscalls/fcntl21
+ltp/syscalls/fcntl21_64
 
 ## TFAIL: lstat() failed unexpectedly; expected: EFAULT - got: ENOENT (2)
 ltp/syscalls/lstat02
@@ -539,11 +718,23 @@ ltp/syscalls/clone03
 ## TFAIL: ltp_clone(SIGCHLD, do_child, NULL, CHILD_STACK_SIZE, child_stack) failed: ENOSYS (38)
 ltp/syscalls/clone07
 
+## TFAIL: madvise succeeded unexpectedly
+ltp/syscalls/madvise02
+
 ## TFAIL: memcmp(cp2, tst_rand_data, SHMSIZE) (-1) != 0 (0)
 ltp/mm/shmt03
 
 ## TFAIL: mincore reports resident pages as 3, but expected 0
 ltp/syscalls/mincore03
+
+## TFAIL: mlock(0x870000, 65536) succeeded
+ltp/syscalls/mlock02
+
+## TFAIL: mlock2() succeeded
+ltp/syscalls/mlock202
+
+## TFAIL: mlock2(MLOCK_ONFAULT) locked 0 size, expected 65536
+ltp/syscalls/mlock203
 
 ## TFAIL: mmap Error, errno=22 : Invalid argument
 ltp/syscalls/remap_file_pages01
@@ -554,17 +745,53 @@ ltp/syscalls/mmap15
 ## TFAIL: mprotect failed to exec: EACCES (13)
 ltp/syscalls/mprotect05
 
+## TFAIL: mq_timedreceive() failed unexpectedly, expected EFAULT: ETIMEDOUT (110)
+ltp/syscalls/mq_timedreceive01
+
+## TFAIL: mq_timedreceive() wrong data 0 in 15, expected 1
+ltp/syscalls/mq_timedsend01
+
+## TFAIL: msgctl(4, 258, 0x825048) expected EACCES: EINVAL (22)
+ltp/syscalls-ipc/msgctl04
+ltp/syscalls/msgctl04
+
+## TFAIL: msgrcv(0, 0x808f78, 1024, 1, 0) expected EIDRM: EINVAL (22)
+ltp/syscalls-ipc/msgrcv06
+ltp/syscalls/msgrcv06
+
+## TFAIL: msgsnd(0, 0x808f68, 1024, 0) expected EIDRM: EINVAL (22)
+ltp/syscalls-ipc/msgsnd06
+ltp/syscalls/msgsnd06
+
 ## TFAIL: msync succeeded unexpectedly
 ltp/syscalls/msync03
+
+## TFAIL: munmap(maps[2] + page_sz, page_sz) succeeded
+ltp/syscalls/munmap04
 
 ## TFAIL: name->sysname (wasixv2) != "Linux" (Linux)
 ltp/syscalls/newuname01
 
+## TFAIL: name_to_handle_at() should fail with EOVERFLOW: EOPNOTSUPP (95)
+ltp/syscalls/name_to_handle_at01
+ltp/syscalls/open_by_handle_at01
+ltp/syscalls/open_by_handle_at02
+
 ## TFAIL: nanosleep() slept for too long
 ltp/syscalls/nanosleep01
 
+## TFAIL: number of sleeping processes is not correct
+ltp/syscalls-ipc/semctl01
+ltp/syscalls/semctl01
+
 ## TFAIL: open magiclinks: openat2() failed: ENOENT (2)
 ltp/syscalls/openat202
+
+## TFAIL: ovalue->it_interval.tv_sec (0) != time_sec (13)
+ltp/syscalls/setitimer01
+
+## TFAIL: pathconf() fail with path prefix is not a directory invalid retval 8: SUCCESS (0)
+ltp/syscalls/pathconf02
 
 ## TFAIL: pen dev pagemap failed: ENOENT (2)
 ltp/syscalls/mmap12
@@ -588,6 +815,9 @@ ltp/syscalls/prctl02
 ltp/syscalls/preadv202
 ltp/syscalls/preadv202_64
 
+## TFAIL: process 3 wasn't woken up: ETIMEDOUT (110)
+ltp/syscalls/futex_cmp_requeue01
+
 ## TFAIL: pselect() slept for too long
 ltp/syscalls/pselect01
 ltp/syscalls/pselect01_64
@@ -603,10 +833,13 @@ ltp/syscalls/pwritev202_64
 ## TFAIL: read() succeeded unexpectedly
 ltp/syscalls/read02
 
+## TFAIL: readlink() sueeeeded unexpectedly
+ltp/syscalls/readlink03
+
 ## TFAIL: readlinkat(3, symlink_file, NULL, 0) succeeded
 ltp/syscalls/readlinkat02
 
-## TFAIL: readv(3, 0x808ee0, 3) succeeded
+## TFAIL: readv(3, 0x808eb0, 3) succeeded
 ltp/syscalls/readv02
 
 ## TFAIL: recv() read 16 bytes, expected 0, step 1
@@ -614,6 +847,9 @@ ltp/syscalls/send02
 
 ## TFAIL: recvmmsg() bad message vector address succeeded
 ltp/syscalls/recvmmsg01
+
+## TFAIL: returned 0, expected -1, expected errno: EFAULT (14): SUCCESS (0)
+ltp/syscalls/clock_nanosleep01
 
 ## TFAIL: retval (0) != ERANGE (34)
 ltp/cve/cve-2015-0235
@@ -624,6 +860,12 @@ ltp/syscalls/sbrk01
 
 ## TFAIL: sched_getaffinity() returned 0, expected -1
 ltp/syscalls/sched_getaffinity01
+
+## TFAIL: sched_rr_get_interval(0, 0x880000) succeeded
+ltp/syscalls/sched_rr_get_interval03
+
+## TFAIL: sched_setaffinity() should fail with EFAULT, got: EINVAL (22)
+ltp/syscalls/sched_setaffinity01
 
 ## TFAIL: sched_setattr() with invalid sched_attr address succeeded
 ltp/syscalls/sched_setattr02
@@ -642,11 +884,45 @@ ltp/syscalls/sendfile04_64
 ## TFAIL: sendmmsg() invalid msgvec address expected EFAULT: EDESTADDRREQ (89)
 ltp/syscalls/sendmmsg02
 
-## TFAIL: setpgid(0, 1) expected ESRCH: EPERM (1)
-ltp/syscalls/setpgid02
+## TFAIL: setgroups(33, groups_list) succeeded
+ltp/syscalls/setgroups03
+
+## TFAIL: setpgid(pid, pgid) failed: EPERM (1)
+ltp/syscalls/setpgid01
+
+## TFAIL: setrlimit failed, expected 10 got 26
+ltp/syscalls/setrlimit01
+
+## TFAIL: setrlimit()  succeeded unexpectedly
+ltp/syscalls/setrlimit05
 
 ## TFAIL: setsockopt() succeeded unexpectedly
 ltp/syscalls/setsockopt01
+
+## TFAIL: settimeofday(&tv1, NULL) failed: EPERM (1)
+ltp/syscalls/settimeofday01
+
+## TFAIL: setxattr(2) on sock failed with -1: EPERM (1)
+ltp/syscalls/setxattr02
+
+## TFAIL: shared memory was not detached correctly
+ltp/syscalls-ipc/shmdt01
+ltp/syscalls/shmdt01
+
+## TFAIL: shmat() failed to attach aligned address with SHM_READONLY, and got SIGSEGV on write
+ltp/syscalls-ipc/shmat01
+ltp/syscalls/shmat01
+
+## TFAIL: shmctl(5, 258, 0x8250a0) expected EACCES: EINVAL (22)
+ltp/syscalls-ipc/shmctl02
+ltp/syscalls/shmctl02
+
+## TFAIL: socket structure address is outside the user's address space succeeded
+ltp/syscalls/connect01
+
+## TFAIL: stat(tc->pathname, &stat_buf) expected EFAULT: ENOENT (2)
+ltp/syscalls/stat03
+ltp/syscalls/stat03_64
 
 ## TFAIL: statvfs(tc->path, tc->buf) expected EFAULT: ENOENT (2)
 ltp/syscalls/statvfs02
@@ -654,8 +930,14 @@ ltp/syscalls/statvfs02
 ## TFAIL: statx() should fail with EFAULT: ENOENT (2)
 ltp/syscalls/statx03
 
+## TFAIL: stime(1793191168) failed: EPERM (1)
+ltp/syscalls/stime01
+
 ## TFAIL: succeeded unexpectedly
 ltp/syscalls/mincore01
+
+## TFAIL: symlink() Fails, Invalid address, errno=2, expected errno=14
+ltp/syscalls/symlink03
 
 ## TFAIL: sync_file_range(3, 0, 1, 8) succeeded
 ltp/syscalls/sync_file_range01
@@ -675,8 +957,9 @@ ltp/syscalls/mprotect04
 ## TFAIL: test-file: name_to_handle_at() failed: EOPNOTSUPP (95)
 ltp/syscalls/name_to_handle_at03
 
-## TFAIL: timer_gettime(-1) = 0: SUCCESS (0)
-ltp/syscalls/timer_gettime01
+## TFAIL: timer_create(CLOCK_BOOTTIME_ALARM) failed: EPERM (1)
+ltp/syscalls/timer_settime01
+ltp/syscalls/timer_settime02
 
 ## TFAIL: timerfd_gettime() succeeded unexpectedly
 ltp/syscalls/timerfd_gettime01
@@ -684,8 +967,9 @@ ltp/syscalls/timerfd_gettime01
 ## TFAIL: timerfd_settime() succeeded unexpectedly
 ltp/syscalls/timerfd_settime01
 
-## TFAIL: tst_syscall(__NR_getcwd, tc->buf, tc->size) succeeded
-ltp/syscalls/getcwd01
+## TFAIL: truncate(tc->pathname, tc->length) expected EFAULT: ENOENT (2)
+ltp/syscalls/truncate03
+ltp/syscalls/truncate03_64
 
 ## TFAIL: uaddr points to unmapped memory expected EFAULT: ETIMEDOUT (110)
 ltp/syscalls/futex_wait06
@@ -699,6 +983,13 @@ ltp/syscalls/ulimit01
 
 ## TFAIL: uname(bad_addr) succeeded
 ltp/syscalls/uname02
+
+## TFAIL: unexpected exit code: 0
+ltp/syscalls/setdomainname02
+
+## TFAIL: unexpected failure: EINVAL (22)
+ltp/syscalls-ipc/semop03
+ltp/syscalls/semop03
 
 ## TFAIL: unexpected value in map, i=0,val=0x0
 ltp/mm/mmapstress04
@@ -870,24 +1161,45 @@ ltp/dio/dio10
 ltp/cve/cve-2017-18344
 ltp/syscalls/timer_create03
 
-## exit status 1
-ltp/syscalls/nftw01
-ltp/syscalls/nftw6401
+## build: wasm-ld: error: unable to find library -lrealtime
+ltp/sched/sched_football
+
+## exit status -1
+ltp/cve/cve-2017-17052
+ltp/sched/hackbench01
 
 ## exit status 137
 ltp/cve/cve-2018-6927
+ltp/syscalls-ipc/msgrcv05
+ltp/syscalls-ipc/semop02
+ltp/syscalls/epoll_wait08
+ltp/syscalls/fcntl14
+ltp/syscalls/fcntl14_64
 ltp/syscalls/futex_cmp_requeue02
 ltp/syscalls/futex_wait01
 ltp/syscalls/futex_wait03
 ltp/syscalls/futex_wait04
 ltp/syscalls/futex_wake01
+ltp/syscalls/kill05
+ltp/syscalls/msgrcv05
+ltp/syscalls/semop02
+ltp/syscalls/setrlimit06
 ltp/syscalls/sigsuspend02
 
 ## exit status 139
+ltp/mm/data_space
+ltp/mm/page02
+ltp/syscalls-ipc/msgctl06
+ltp/syscalls/msgctl06
 ltp/syscalls/prctl08
+ltp/syscalls/rename14
 
 ## exit status 255
 ltp/sched/trace_sched01
+
+## exit status 36
+ltp/syscalls/fcntl33
+ltp/syscalls/fcntl33_64
 
 ## runner: a shell command; needs a shell in the guest
 ltp/capability/cap_bounds
@@ -909,6 +1221,7 @@ ltp/containers/netns_comm_ns_exec_ipv4_netlink
 ltp/containers/netns_comm_ns_exec_ipv6_ioctl
 ltp/containers/netns_comm_ns_exec_ipv6_netlink
 ltp/containers/netns_sysfs
+ltp/cve/cve-2016-4470
 ltp/fs/binfmt_misc01
 ltp/fs/binfmt_misc02
 ltp/fs/fs_di
@@ -1049,6 +1362,7 @@ ltp/fs_bind/fs_bind_rbind38_sh
 ltp/fs_bind/fs_bind_rbind39_sh
 ltp/fs_bind/fs_bind_regression_sh
 ltp/mm/mmapstress07
+ltp/mm/vma05
 ltp/net.features/bbr01
 ltp/net.features/bbr01_ipv6
 ltp/net.features/bbr02
@@ -1148,6 +1462,24 @@ ltp/sched/sched_stress
 ltp/syscalls/ioctl02
 
 ## timeout
-ltp/fcntl-locktests/FCNTL_LOCKTESTS
+ltp/cve/cve-2011-0999
+ltp/dma_thread_diotest/dma_thread_diotest1
+ltp/dma_thread_diotest/dma_thread_diotest2
+ltp/dma_thread_diotest/dma_thread_diotest3
+ltp/dma_thread_diotest/dma_thread_diotest4
+ltp/dma_thread_diotest/dma_thread_diotest5
+ltp/dma_thread_diotest/dma_thread_diotest6
+ltp/dma_thread_diotest/dma_thread_diotest7
+ltp/fs/read_all_dev
+ltp/fs/read_all_proc
+ltp/fs/read_all_sys
+ltp/mm/mtest01
+ltp/mm/mtest01w
 ltp/mm/mtest06
 ltp/mm/mtest06_3
+ltp/mm/thp01
+ltp/syscalls/recv01
+ltp/syscalls/recvfrom01
+ltp/syscalls/rt_sigtimedwait01
+ltp/syscalls/sigtimedwait01
+ltp/syscalls/sigwaitinfo01
