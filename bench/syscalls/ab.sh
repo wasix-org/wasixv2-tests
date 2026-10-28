@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ab.sh <wasmer-a> <wasmer-b> <abi> <call> [N] [RUNS]: runs one call type (getpid, read, write,
-# clock_gettime, dup_close, thread, spawn) of one ABI (v2 or v1) with two wasmer binaries
+# clock_gettime, dup_close, stat_tmp, open_tmp, stat_host, open_host, thread, spawn) of one ABI (v2 or v1) with two wasmer binaries
 # alternately, RUNS times each (default 11), pinned like run.sh, and prints the medians.
 # Interleaving keeps drifting machine load out of the comparison.
 set -eu

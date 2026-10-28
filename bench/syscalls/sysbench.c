@@ -1,7 +1,10 @@
 /* Syscall hot-path microbenchmark: N getpid, N 1-byte reads from /dev/zero, N 1-byte writes
- * to /dev/null, N clock_gettime, N dup+close, N/1000 pthread_create+join,
+ * to /dev/null, N clock_gettime, N dup+close, N/20 stat and N/20 open+close of a file six path
+ * components deep, on /tmp (a memory filesystem) and under /bench (the --volume host directory,
+ * when mapped), N/1000 pthread_create+join,
  * N/1000 posix_spawn+waitpid of itself (argv[3]) doing nothing. Prints ns per call for each. Builds unchanged against libc2
  * (WASIX v2) and wasix-libc (WASIX v1). */
+#include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <spawn.h>
@@ -9,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -29,6 +33,68 @@ static void report(const char *name, long n, long long t0, long long t1) {
 }
 
 extern char **environ;
+
+/* Makes <base>/sysbench-path/a/b/c/file and returns its path, six components below / for a
+ * one-component base; NULL if base is not there. */
+static const char *deep_file(const char *base, char *path, size_t size) {
+    struct stat st;
+    if (stat(base, &st) != 0)
+        return NULL;
+    const char *dirs[] = {"/sysbench-path", "/a", "/b", "/c"};
+    snprintf(path, size, "%s", base);
+    for (size_t i = 0; i < sizeof dirs / sizeof *dirs; i++) {
+        strncat(path, dirs[i], size - strlen(path) - 1);
+        if (mkdir(path, 0755) != 0 && errno != EEXIST)
+            return NULL;
+    }
+    strncat(path, "/file", size - strlen(path) - 1);
+    int fd = open(path, O_CREAT | O_WRONLY, 0644);
+    if (fd < 0)
+        return NULL;
+    close(fd);
+    return path;
+}
+
+/* N/20 stat and N/20 open+close of the deep file under base, reported as stat_<name> and
+ * open_<name>: the path walk, with its per-component lookups and permission checks. */
+static int path_walks(const char *only, long n, const char *base, const char *name) {
+    char stat_name[32], open_name[32], path[256];
+    snprintf(stat_name, sizeof stat_name, "stat_%s", name);
+    snprintf(open_name, sizeof open_name, "open_%s", name);
+    int want_stat = !only || !strcmp(only, stat_name);
+    int want_open = !only || !strcmp(only, open_name);
+    if (!want_stat && !want_open)
+        return 0;
+    const char *file = deep_file(base, path, sizeof path);
+    if (!file)
+        return 0;
+    long walks = n / 20 > 0 ? n / 20 : 1;
+    long long t0, t1;
+    if (want_stat) {
+        struct stat st;
+        t0 = now_ns();
+        for (long i = 0; i < walks; i++)
+            if (stat(file, &st) != 0) {
+                perror("stat");
+                return 1;
+            }
+        t1 = now_ns();
+        report(stat_name, walks, t0, t1);
+    }
+    if (want_open) {
+        t0 = now_ns();
+        for (long i = 0; i < walks; i++) {
+            int fd = open(file, O_RDONLY);
+            if (fd < 0 || close(fd) != 0) {
+                perror("open/close");
+                return 1;
+            }
+        }
+        t1 = now_ns();
+        report(open_name, walks, t0, t1);
+    }
+    return 0;
+}
 
 int main(int argc, char **argv) {
     long n = argc > 1 ? atol(argv[1]) : 100000;
@@ -91,6 +157,8 @@ int main(int argc, char **argv) {
         t1 = now_ns();
         report("dup_close", n, t0, t1);
     }
+    if (path_walks(only, n, "/tmp", "tmp") || path_walks(only, n, "/bench", "host"))
+        return 1;
     if (!only || !strcmp(only, "thread")) {
         /* Instantiation dominates: one instance per thread. */
         long threads = n / 1000 > 0 ? n / 1000 : 1;
