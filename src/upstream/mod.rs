@@ -299,7 +299,7 @@ impl Ran {
 }
 
 pub fn run_wasm(suite: &Suite, inv: &Invocation, dir: &Path) -> Result<Ran, Failure> {
-    let mut cmd = Command::new(&suite.wasmer);
+    let mut cmd = suite.wasmer_command();
     cmd.arg("run");
     for (host, guest) in &inv.volumes {
         cmd.arg("--volume")

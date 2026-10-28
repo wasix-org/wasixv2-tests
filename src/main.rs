@@ -44,6 +44,8 @@ const DEFAULT_TIMEOUT_SECS: u64 = 60;
 /// Everything a test needs from the environment.
 pub struct Suite {
     pub wasmer: PathBuf,
+    /// A command line every `wasmer` run goes through, such as one that caps its memory.
+    pub(crate) wrapper: Vec<String>,
     pub cc: String,
     pub cxx: String,
     pub(crate) build_root: PathBuf,
@@ -105,8 +107,14 @@ impl Suite {
             Ok(secs) => secs.parse().context("WASIXV2_TESTS_TIMEOUT_SECS")?,
             Err(_) => DEFAULT_TIMEOUT_SECS,
         };
+        let wrapper = std::env::var("WASIXV2_TESTS_WRAPPER")
+            .unwrap_or_default()
+            .split_whitespace()
+            .map(str::to_owned)
+            .collect();
         let suite = Self {
             wasmer,
+            wrapper,
             cc: "wasixcc".to_owned(),
             cxx: "wasix++".to_owned(),
             build_root: build_root(),
@@ -121,6 +129,16 @@ impl Suite {
             suite.cc
         );
         Ok(suite)
+    }
+
+    /// `wasmer`, through the wrapper if there is one.
+    pub(crate) fn wasmer_command(&self) -> std::process::Command {
+        let Some((program, args)) = self.wrapper.split_first() else {
+            return std::process::Command::new(&self.wasmer);
+        };
+        let mut cmd = std::process::Command::new(program);
+        cmd.args(args).arg(&self.wasmer);
+        cmd
     }
 
     fn run(&self, test: &Test) -> Result<Completion, Failure> {

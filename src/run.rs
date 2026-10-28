@@ -72,7 +72,7 @@ pub fn run_and_check(
     }
     // Kept alive until the run is over.
     let mut temp_dirs = Vec::new();
-    let mut cmd = Command::new(&suite.wasmer);
+    let mut cmd = suite.wasmer_command();
     cmd.arg("run");
     for (host, guest) in &config.mapped_directories {
         let host = match host {

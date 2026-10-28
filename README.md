@@ -40,6 +40,7 @@ The runner builds and runs every test. It needs, from the environment:
 | `WASIXCC_*` | wasixcc's own settings, such as `WASIXCC_LLVM_LOCATION` and `WASIXCC_SYSROOT_PREFIX`, apply as usual. Without them, wasixcc uses its downloaded defaults. Tests that fork build for the asyncify configuration (`WASIXCC_WASM_EXCEPTIONS=no`; see [Tests that fork](#tests-that-fork)), which has its own sysroot, so give libc2's sysroots with `WASIXCC_SYSROOT_PREFIX` (its `build-wasixv2`) rather than one with `WASIXCC_SYSROOT`. |
 | `WASIXV2_TESTS_BUILD_DIR` | Where tests are built (default `target/suite`). |
 | `WASIXV2_TESTS_TIMEOUT_SECS` | Per-test timeout (default 60). |
+| `WASIXV2_TESTS_WRAPPER` | A command line, split at whitespace, that every `wasmer` run goes through, e.g. `systemd-run --user --scope --quiet -p MemoryMax=4G` to cap each run's memory. Fork copies a process's whole linear memory, so tests that fork hundreds of processes (hackbench, `shm_open/23-1`) need many gigabytes; without a cap three of them at once can exhaust the host. |
 | `WASIXV2_TESTS_EXPECTED_FAILURES` | A directory of expected-failures files to use instead of `expected-failures/`. |
 | `WASIXV2_TESTS_BLESS` | Rewrite the expected-failures files from this run's results. |
 | `HOSTCC` | The host C compiler that builds LTP's metadata parser (default `cc`). |
