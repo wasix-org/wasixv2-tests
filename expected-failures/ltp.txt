@@ -4,7 +4,7 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdSecret, OpenTree, PerfEventOpen, Userfaultfd
+## ENOSYS: Bpf, FanotifyInit, IoUringSetup, MemfdSecret, PerfEventOpen, Userfaultfd
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
 
@@ -15,23 +15,6 @@ ltp/syscalls/adjtimex02
 ltp/syscalls/adjtimex03
 ltp/syscalls/clock_adjtime01
 ltp/syscalls/clock_adjtime02
-
-## ENOSYS: Clone, Clone3
-ltp/containers/msg_comm
-ltp/containers/sem_comm
-ltp/containers/shm_comm
-ltp/syscalls/close_range02
-ltp/syscalls/unshare03
-ltp/syscalls/unshare04
-
-## ENOSYS: Mount
-ltp/syscalls/mount08
-ltp/syscalls/move_mount03
-
-## ENOSYS: Mount, Umount2
-ltp/cve/cve-2022-2590
-ltp/syscalls/dirtyc0w_shmem
-ltp/syscalls/madvise01
 
 ## ENOSYS: Reboot
 ltp/syscalls/reboot01
@@ -60,6 +43,9 @@ ltp/fs_perms_simple/fs_perms03
 ltp/fs_perms_simple/fs_perms12
 ltp/fs_perms_simple/fs_perms13
 ltp/fs_perms_simple/fs_perms14
+
+## TBROK: Could not lock memory using mlockall(): ENOMEM (12)
+ltp/syscalls/munlockall01
 
 ## TBROK: Expected 1 conversions got 0 FILE '/proc/self/maps'
 ltp/syscalls/mmap04
@@ -109,6 +95,9 @@ ltp/syscalls/inotify05
 ## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_user_instances' for reading: ENOENT (2)
 ltp/syscalls/inotify06
 
+## TBROK: Failed to open FILE '/proc/sys/fs/nr_open' for writing: EPERM (1)
+ltp/syscalls/unshare03
+
 ## TBROK: Failed to open FILE '/proc/sys/fs/pipe-max-size' for writing: EPERM (1)
 ltp/syscalls/fcntl35
 ltp/syscalls/fcntl35_64
@@ -143,9 +132,6 @@ ltp/cve/cve-2018-5803
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
 
-## TBROK: Locked memory after mlockall() should be > 0
-ltp/syscalls/munlockall01
-
 ## TBROK: Path not found: /proc/sys/kernel/printk: ENOENT (2)
 ltp/syscalls/syslog11
 
@@ -163,20 +149,15 @@ ltp/mm/overcommit_memory06
 ## TBROK: Set setxattr03immutable immutable failed: ENOTTY (25)
 ltp/syscalls/setxattr03
 
+## TBROK: Test haven't reported results!
+ltp/syscalls/futex_wait07
+
 ## TBROK: clock_gettime(CLOCK_REALTIME) failed: EPERM (1)
 ltp/syscalls/clock_settime04
 ltp/syscalls/leapsec01
 
 ## TBROK: clock_settime() failed: EPERM (1)
 ltp/syscalls/clock_settime03
-
-## TBROK: clone3 failed: EPERM (1)
-ltp/containers/mesgq_nstest_clone
-ltp/containers/sem_nstest_clone
-ltp/containers/semtest_2ns_clone
-ltp/containers/shmem_2nstest_clone
-ltp/containers/shmnstest_clone
-ltp/containers/utsname03_clone
 
 ## TBROK: execlp(/bin/true, /bin/true, ...) failed: ENOENT (2)
 ltp/syscalls/setrlimit04
@@ -222,6 +203,10 @@ ltp/syscalls/mincore02
 ## TBROK: mmap(0,65536,PROT_EXEC(4),1,3,0) failed: EACCES (13)
 ltp/syscalls/mmap03
 
+## TBROK: mmap(0,8,PROT_EXEC(4),34,-1,0) failed: EACCES (13)
+ltp/syscalls/sendfile04
+ltp/syscalls/sendfile04_64
+
 ## TBROK: mremap() failed
 ltp/syscalls/mremap06
 
@@ -233,7 +218,9 @@ ltp/syscalls/posix_fadvise03_64
 
 ## TBROK: open(/proc/self/mem,2,0000) failed: errno=ENOENT(2): No such file or directory
 ltp/cve/cve-2016-5195
+ltp/cve/cve-2022-2590
 ltp/syscalls/dirtyc0w
+ltp/syscalls/dirtyc0w_shmem
 
 ## TBROK: openat() failed: errno=EACCES(13): Permission denied
 ltp/syscalls/openat03
@@ -253,18 +240,7 @@ ltp/net.ipv6_lib/asapi_03
 ltp/syscalls/pidfd_open04
 
 ## TBROK: unshare(131072) failed: EPERM (1)
-ltp/syscalls/mount_setattr02
 ltp/syscalls/statmount03
-
-## TBROK: unshare(134217728) failed: EPERM (1)
-ltp/containers/mesgq_nstest_unshare
-ltp/containers/sem_nstest_unshare
-ltp/containers/semtest_2ns_unshare
-ltp/containers/shmem_2nstest_unshare
-ltp/containers/shmnstest_unshare
-
-## TBROK: unshare(67108864) failed: EPERM (1)
-ltp/containers/utsname03_unshare
 
 ## TFAIL: "hopopt" protocols entry
 ltp/net.ipv6_lib/asapi_01
@@ -290,23 +266,13 @@ ltp/syscalls/mmap18
 ## TFAIL: Could not parse inotify fdinfo
 ltp/syscalls/inotify12
 
-## TFAIL: Could not poison memory: EPERM (1)
-ltp/syscalls/madvise07
-
-## TFAIL: Error writev returned a positive value
-ltp/syscalls/writev02
-ltp/syscalls/writev05
-
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
 
 ## TFAIL: Expect: final_ball == 0
 ltp/sched/sched_football
 
-## TFAIL: Expected 1024K locked, get 0K locked
-ltp/syscalls/mmap14
-
-## TFAIL: Faulty readfds: select() passed unexpectedly with 1
+## TFAIL: Faulty timeout: select() passed unexpectedly with 1
 ltp/syscalls/select03
 
 ## TFAIL: Invalid address expected EFAULT: ENOENT (2)
@@ -314,12 +280,6 @@ ltp/syscalls/mknod06
 
 ## TFAIL: NORMAL expected errno: 13: EACCES (13)
 ltp/syscalls/mq_open01
-
-## TFAIL: O_CREAT expected EFAULT: ENOENT (2)
-ltp/syscalls/open08
-
-## TFAIL: Received wrong signal and/or data!
-ltp/syscalls/rt_sigqueueinfo01
 
 ## TFAIL: SAFE_EPOLL_WAIT(epfd, &evt_receive, 1, 0) (1) != 0 (0)
 ltp/syscalls/epoll_wait06
@@ -340,23 +300,22 @@ ltp/mm/mmapstress05
 ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 
-## TFAIL: Test{5} failed, expected 0 exit.
-ltp/fs/ftest02
+## TFAIL: Test{4} failed, expected 0 exit.
 ltp/fs/ftest06
+
+## TFAIL: Test{6} failed, expected 0 exit.
+ltp/fs/ftest02
 
 ## TFAIL: Timer CLOCK_THREAD_CPUTIME_ID expired too early
 ltp/syscalls/timer_settime01
 
-## TFAIL: VmLck showed wrong 0 pages, expected 1
-ltp/syscalls/mlock201
-
 ## TFAIL: abort() failed to dump core
 ltp/syscalls/abort01
 
-## TFAIL: after child shmat() shm_nattcg=13 expected 20
+## TFAIL: after child shmat() shm_nattcg=3 expected 20
 ltp/syscalls-ipc/shmctl01
 
-## TFAIL: after child shmat() shm_nattcg=7 expected 20
+## TFAIL: after child shmat() shm_nattcg=5 expected 20
 ltp/syscalls/shmctl01
 
 ## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
@@ -377,20 +336,8 @@ ltp/syscalls/alarm02
 ## TFAIL: call succeeded unexpectedly
 ltp/syscalls/mprotect01
 
-## TFAIL: capget() with bad address data succeeded
-ltp/syscalls/capget02
-
-## TFAIL: capset() with bad address header expected EFAULT: EINVAL (22)
-ltp/syscalls/capset02
-
-## TFAIL: chdir() expected EFAULT: ENOENT (2)
-ltp/syscalls/chdir04
-
 ## TFAIL: child returned unexpected status
 ltp/syscalls/mprotect03
-
-## TFAIL: chroot(an invalid address) expected EFAULT: ENOENT (2)
-ltp/syscalls/chroot03
 
 ## TFAIL: clock_nanosleep() slept for too long
 ltp/syscalls/clock_nanosleep02
@@ -416,17 +363,11 @@ ltp/syscalls/epoll_pwait03
 ## TFAIL: epoll_ctl(...) if events is NULL succeeded
 ltp/syscalls/epoll_ctl02
 
-## TFAIL: epoll_wait() events has no write permissions invalid retval 1: SUCCESS (0)
-ltp/syscalls/epoll_wait03
-
 ## TFAIL: epoll_wait() slept for too long
 ltp/syscalls/epoll_wait02
 
 ## TFAIL: execute file_x as root failed: ENOENT (2)
 ltp/syscalls/access02
-
-## TFAIL: execve failed unexpectedly; expected Bad address: ENOENT (2)
-ltp/syscalls/execve03
 
 ## TFAIL: expected EPROTONOSUPPORT(93): EOPNOTSUPP (95)
 ltp/syscalls/socketpair01
@@ -434,20 +375,14 @@ ltp/syscalls/socketpair01
 ## TFAIL: expected EPROTONOSUPPORT(93): EPERM (1)
 ltp/syscalls/socket01
 
-## TFAIL: faccessat2() with invalid address expected EFAULT: ENOENT (2)
-ltp/syscalls/faccessat202
-
 ## TFAIL: fchmod() on original FD succeeded
 ltp/syscalls/open13
-
-## TFAIL: fchmodat() with invalid address expected EFAULT: ENOENT (2)
-ltp/syscalls/fchmodat02
 
 ## TFAIL: fcntl get original f_owner_ex info failed: TEST_ERRNO=EINVAL(22): Invalid argument
 ltp/syscalls/fcntl31
 ltp/syscalls/fcntl31_64
 
-## TFAIL: fcntl(1, F_SETLK, flock) expected EFAULT: EBADF (9)
+## TFAIL: fcntl(1, F_SETLK, flock) expected EINVAL: EBADF (9)
 ltp/syscalls/fcntl13
 ltp/syscalls/fcntl13_64
 
@@ -474,23 +409,14 @@ ltp/syscalls/semctl06
 ## TFAIL: futex_wait() slept for too long
 ltp/syscalls/futex_wait05
 
-## TFAIL: futex_wait(tv->fntype, futex, *futex, &timeout, 0) expected EINTR: ETIMEDOUT (110)
-ltp/syscalls/futex_wait07
-
 ## TFAIL: get event: wd=1 mask=00000004 (expected 40000004) cookie=0     len=0  name="" (expected "") -1
 ltp/syscalls/inotify02
-
-## TFAIL: getcpu(tc->cpu_id, tc->node_id) succeeded
-ltp/syscalls/getcpu02
 
 ## TFAIL: got event: wd=2 (expected 1) mask=0004 (expected 40000004) len=0 name="" (expected "test_dir")
 ltp/syscalls/inotify10
 
 ## TFAIL: got event: wd=2 mask=0400 (expected 4) cookie=0 len=0 name="" (expected "") 0
 ltp/syscalls/inotify04
-
-## TFAIL: invalid address expected EFAULT: ENOENT (2)
-ltp/syscalls/unlink07
 
 ## TFAIL: invalid iovec buffer: expected -1, returned 0: SUCCESS (0)
 ltp/syscalls/recvmsg01
@@ -512,9 +438,6 @@ ltp/syscalls/ioctl10
 
 ## TFAIL: len is smaller than the actual size succeeded
 ltp/syscalls/gethostname02
-
-## TFAIL: link(<invalid address>, <nefile>) Failed expected errno: 14: ENOENT (2)
-ltp/syscalls/link04
 
 ## TFAIL: lock type is wrong should be F_RDLCK is F_WRLCK
 ltp/syscalls/fcntl11
@@ -543,14 +466,8 @@ ltp/syscalls/madvise02
 ## TFAIL: mincore reports resident pages as 3, but expected 0
 ltp/syscalls/mincore03
 
-## TFAIL: mlock(0x870000, 65536) succeeded
-ltp/syscalls/mlock02
-
-## TFAIL: mlock2() succeeded
-ltp/syscalls/mlock202
-
-## TFAIL: mlock2(MLOCK_ONFAULT) locked 0 size, expected 65536
-ltp/syscalls/mlock203
+## TFAIL: mlock2(0) locked 8 pages, expected 1
+ltp/syscalls/mlock201
 
 ## TFAIL: mmap Error, errno=22 : Invalid argument
 ltp/syscalls/remap_file_pages01
@@ -564,10 +481,7 @@ ltp/syscalls/mprotect05
 ## TFAIL: mq_timedreceive() failed unexpectedly, expected EFAULT: ETIMEDOUT (110)
 ltp/syscalls/mq_timedreceive01
 
-## TFAIL: mq_timedreceive() wrong data 0 in 15, expected 1
-ltp/syscalls/mq_timedsend01
-
-## TFAIL: msgctl(4, 258, 0x825510) expected EACCES: EINVAL (22)
+## TFAIL: msgctl(4, 258, 0x825520) expected EACCES: EINVAL (22)
 ltp/syscalls-ipc/msgctl04
 ltp/syscalls/msgctl04
 
@@ -610,11 +524,8 @@ ltp/syscalls/pathconf02
 ## TFAIL: pen dev pagemap failed: ENOENT (2)
 ltp/syscalls/mmap12
 
-## TFAIL: pidfd_send_signal() did not fail with EINVAL but: EBADF (9)
+## TFAIL: pidfd_send_signal() did not fail with EPERM but: SUCCESS (0)
 ltp/syscalls/pidfd_send_signal02
-
-## TFAIL: pidfd_send_signal() failed: EBADF (9)
-ltp/syscalls/pidfd_send_signal01
 
 ## TFAIL: poll() slept for too long
 ltp/syscalls/poll02
@@ -625,11 +536,7 @@ ltp/syscalls/prctl09
 ## TFAIL: prctl() succeeded unexpectedly
 ltp/syscalls/prctl02
 
-## TFAIL: preadv2() failed unexpectedly, expected EFAULT: SUCCESS (0)
-ltp/syscalls/preadv202
-ltp/syscalls/preadv202_64
-
-## TFAIL: process 11 wasn't woken up: ETIMEDOUT (110)
+## TFAIL: process 12 wasn't woken up: ETIMEDOUT (110)
 ltp/syscalls/futex_cmp_requeue01
 
 ## TFAIL: pselect() slept for too long
@@ -640,12 +547,9 @@ ltp/syscalls/pselect01_64
 ltp/syscalls/pwrite02
 ltp/syscalls/pwrite02_64
 
-## TFAIL: pwritev2() failed unexpectedly, expected EFAULT: SUCCESS (0)
+## TFAIL: pwritev2() failed unexpectedly, expected ESPIPE: EBADF (9)
 ltp/syscalls/pwritev202
 ltp/syscalls/pwritev202_64
-
-## TFAIL: read() succeeded unexpectedly
-ltp/syscalls/read02
 
 ## TFAIL: readlink() sueeeeded unexpectedly
 ltp/syscalls/readlink03
@@ -653,16 +557,13 @@ ltp/syscalls/readlink03
 ## TFAIL: readlinkat(3, symlink_file, NULL, 0) succeeded
 ltp/syscalls/readlinkat02
 
-## TFAIL: readv(3, 0x808f50, 3) succeeded
-ltp/syscalls/readv02
-
 ## TFAIL: recv() read 16 bytes, expected 0, step 1
 ltp/syscalls/send02
 
-## TFAIL: recvmmsg() bad message vector address succeeded
+## TFAIL: recvmmsg() negative seconds in timeout succeeded
 ltp/syscalls/recvmmsg01
 
-## TFAIL: returned -1, expected -1, expected errno: EINVAL (22): EOPNOTSUPP (95)
+## TFAIL: returned -1, expected -1, expected errno: EINVAL (22): EFAULT (14)
 ltp/syscalls/clock_nanosleep01
 
 ## TFAIL: retval (0) != ERANGE (34)
@@ -672,17 +573,8 @@ ltp/syscalls/gethostbyname_r01
 ## TFAIL: sbrk(8192) returned 0xffffffff failed: ENOMEM (12)
 ltp/syscalls/sbrk01
 
-## TFAIL: sched_getaffinity() returned 0, expected -1
-ltp/syscalls/sched_getaffinity01
-
-## TFAIL: sched_rr_get_interval(0, 0x880000) succeeded
-ltp/syscalls/sched_rr_get_interval03
-
-## TFAIL: sched_setaffinity() should fail with EFAULT, got: EINVAL (22)
+## TFAIL: sched_setaffinity() succeded unexpectedly
 ltp/syscalls/sched_setaffinity01
-
-## TFAIL: sched_setattr() with invalid sched_attr address succeeded
-ltp/syscalls/sched_setattr02
 
 ## TFAIL: select() slept for too long
 ltp/syscalls/select02
@@ -690,10 +582,6 @@ ltp/syscalls/select02
 ## TFAIL: semctl() with invalid union arg succeeded
 ltp/syscalls-ipc/semctl03
 ltp/syscalls/semctl03
-
-## TFAIL: sendfile(..) with pass_mapped_buffer, protection=0 succeeded
-ltp/syscalls/sendfile04
-ltp/syscalls/sendfile04_64
 
 ## TFAIL: sendmmsg() invalid msgvec address expected EFAULT: EDESTADDRREQ (89)
 ltp/syscalls/sendmmsg02
@@ -703,9 +591,6 @@ ltp/syscalls/setgroups03
 
 ## TFAIL: setrlimit failed, expected 10 got 26
 ltp/syscalls/setrlimit01
-
-## TFAIL: setrlimit()  succeeded unexpectedly
-ltp/syscalls/setrlimit05
 
 ## TFAIL: setsockopt() succeeded unexpectedly
 ltp/syscalls/setsockopt01
@@ -720,44 +605,15 @@ ltp/syscalls/setxattr02
 ltp/syscalls-ipc/shmdt01
 ltp/syscalls/shmdt01
 
-## TFAIL: shmctl(5, 258, 0x825568) expected EACCES: EINVAL (22)
+## TFAIL: shmctl(5, 258, 0x825570) expected EACCES: EINVAL (22)
 ltp/syscalls-ipc/shmctl02
 ltp/syscalls/shmctl02
 
-## TFAIL: socket structure address is outside the user's address space succeeded
-ltp/syscalls/connect01
-
-## TFAIL: stat(tc->pathname, &stat_buf) expected EFAULT: ENOENT (2)
-ltp/syscalls/stat03
-ltp/syscalls/stat03_64
-
-## TFAIL: statfs() expected EFAULT: ENOENT (2)
-ltp/syscalls/statfs02
-ltp/syscalls/statfs02_64
-
-## TFAIL: statvfs(tc->path, tc->buf) expected EFAULT: ENOENT (2)
-ltp/syscalls/statvfs02
-
-## TFAIL: statx() should fail with EFAULT: ENOENT (2)
-ltp/syscalls/statx03
-
-## TFAIL: stime(1793213621) failed: EPERM (1)
+## TFAIL: stime(1793230501) failed: EPERM (1)
 ltp/syscalls/stime01
-
-## TFAIL: succeeded unexpectedly
-ltp/syscalls/mincore01
-
-## TFAIL: symlink() Fails, Invalid address, errno=2, expected errno=14
-ltp/syscalls/symlink03
 
 ## TFAIL: sync_file_range(3, 0, 1, 8) succeeded
 ltp/syscalls/sync_file_range01
-
-## TFAIL: syscall failed, expected return value=-1, got 0
-ltp/syscalls/sigpending02
-
-## TFAIL: sysinfo(bad_info) succeeded
-ltp/syscalls/sysinfo02
 
 ## TFAIL: sysname is not Linux
 ltp/syscalls/uname01
@@ -786,28 +642,18 @@ ltp/math/float_bessel
 ## TFAIL: timer_create(CLOCK_BOOTTIME_ALARM) failed: EPERM (1)
 ltp/syscalls/timer_settime02
 
-## TFAIL: timerfd_gettime() succeeded unexpectedly
-ltp/syscalls/timerfd_gettime01
-
-## TFAIL: timerfd_settime() succeeded unexpectedly
-ltp/syscalls/timerfd_settime01
-
-## TFAIL: truncate(tc->pathname, tc->length) expected EFAULT: ENOENT (2)
+## TFAIL: truncate(tc->pathname, tc->length) succeeded
 ltp/syscalls/truncate03
 ltp/syscalls/truncate03_64
 
-## TFAIL: uaddr points to unmapped memory expected EFAULT: ETIMEDOUT (110)
-ltp/syscalls/futex_wait06
-
 ## TFAIL: uaddr unmapped succeeded
-ltp/syscalls/futex_cmp_requeue03
 ltp/syscalls/futex_wake05
+
+## TFAIL: uaddr2 unmapped succeeded
+ltp/syscalls/futex_cmp_requeue03
 
 ## TFAIL: ulimit(UL_GETFSIZE, -1) failed: SUCCESS (0)
 ltp/syscalls/ulimit01
-
-## TFAIL: uname(bad_addr) succeeded
-ltp/syscalls/uname02
 
 ## TFAIL: unexpected exit code: 0
 ltp/syscalls/setdomainname02
@@ -819,33 +665,11 @@ ltp/syscalls/semop03
 ## TFAIL: unexpected value in map, i=0,val=0x0
 ltp/mm/mmapstress04
 
-## TFAIL: unshare failed: EPERM (1)
-ltp/syscalls/pivot_root01
-
-## TFAIL: unshare(CLONE_NEWNS) failed: EPERM (1)
-ltp/syscalls/unshare01
-
 ## TFAIL: waipid(-2147483648, NULL, 0x0) expected ESRCH: EINVAL (22)
 ltp/syscalls/waitpid04
 
-## TFAIL: with an invalid sigmask pointer invalid retval 1: SUCCESS (0)
-ltp/syscalls/epoll_pwait04
-
 ## TFAIL: write successful after file size limit
 ltp/syscalls/llseek01
-
-## TFAIL: write() failed to fail
-ltp/syscalls/write03
-
-## TFAIL: write(*tc->fd, *tc->buf, tc->size) succeeded
-ltp/syscalls/write05
-
-## TFAIL: writev wrote more than expected
-ltp/syscalls/writev07
-
-## build: : 40error: :6no member named '_sigev_un' in 'struct sigevent':
-ltp/cve/cve-2017-18344
-ltp/syscalls/timer_create03
 
 ## build: `test_1_to_1_accept_close` is not built by LTP's makefiles
 ltp/net.sctp/test_1_to_1_accept_close
@@ -974,20 +798,21 @@ ltp/net.sctp/test_timetolive
 ltp/dio/dio04
 ltp/dio/dio10
 
-## exit status 1
-ltp/sched/sched_cli_serv
+## build: error: no member named '_sigev_un' in 'struct sigevent'
+ltp/cve/cve-2017-18344
+ltp/syscalls/timer_create03
+
+## exit status -1
+ltp/fs/rwtest03
 
 ## exit status 127
 ltp/syscalls/ioctl02
 
 ## exit status 137
 ltp/syscalls-ipc/msgrcv05
-ltp/syscalls-ipc/semop02
 ltp/syscalls/epoll_wait08
 ltp/syscalls/futex_wait01
 ltp/syscalls/msgrcv05
-ltp/syscalls/semop02
-ltp/syscalls/sigsuspend02
 
 ## exit status 139
 ltp/mm/data_space
@@ -1004,8 +829,8 @@ ltp/sched/trace_sched01
 ltp/syscalls/fcntl33
 ltp/syscalls/fcntl33_64
 
-## mlockall(MCL_CURRENT) with a non-zero RLIMIT_MEMLOCK below the process's size succeeds; Linux fails with ENOMEM (locked memory is not charged to RLIMIT_MEMLOCK)
-ltp/syscalls/mlockall03
+## listmount checks mnt_id_req's contents before it can read it (EINVAL for an unreadable request instead of EFAULT) and accepts unknown flags
+ltp/syscalls/listmount04
 
 ## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
 ltp/commands/ldd01_sh
@@ -1024,7 +849,6 @@ ltp/fs/gf29
 ltp/fs/iogen01
 ltp/fs/rwtest01
 ltp/fs/rwtest02
-ltp/fs/rwtest03
 ltp/fs/rwtest04
 ltp/mm/mtest06
 ltp/mm/mtest06_3
@@ -1032,3 +856,14 @@ ltp/sched/sched_stress
 ltp/syscalls/rt_sigtimedwait01
 ltp/syscalls/sigtimedwait01
 ltp/syscalls/sigwaitinfo01
+
+## timeout: umounting a mount that propagation or an rbind copied into its own subtree fails with EBUSY ("target is busy"), and the test's cleanup then never ends
+ltp/fs_bind/fs_bind_cloneNS05_sh
+ltp/fs_bind/fs_bind_cloneNS07_sh
+ltp/fs_bind/fs_bind_move21_sh
+ltp/fs_bind/fs_bind_move22_sh
+ltp/fs_bind/fs_bind_rbind34_sh
+ltp/fs_bind/fs_bind_rbind36_sh
+
+## unshare --mount --propagation shared: a bind mount made in the new namespace does not propagate back to the original one (the copies of shared mounts are not peers of their originals)
+ltp/commands/unshare01_sh

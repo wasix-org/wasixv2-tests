@@ -40,7 +40,6 @@ posix/conformance/interfaces/mq_close/2-1
 posix/conformance/interfaces/mq_receive/1-1
 posix/conformance/interfaces/mq_receive/10-1
 posix/conformance/interfaces/mq_receive/12-1
-posix/conformance/interfaces/mq_receive/13-1
 posix/conformance/interfaces/mq_receive/5-1
 posix/conformance/interfaces/mq_receive/8-1
 posix/conformance/interfaces/mq_timedreceive/1-1
@@ -76,32 +75,26 @@ posix/conformance/interfaces/kill/3-1
 ## FAIL: Test FAILED: sigqueue() succeeded even though this program's user id did not match the recieving process's user id
 posix/conformance/interfaces/sigqueue/3-1
 
-## FAIL: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/fork/1-1.c FAILED: The new process does not execute
+## FAIL: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/fork/1-1.c FAILED: The new process does not execute
 posix/conformance/interfaces/fork/1-1
 
-## FAIL: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/getpid/1-1.c FAILED: getpid() in the child returned a different value than 
+## FAIL: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/getpid/1-1.c FAILED: getpid() in the child returned a different value than 
 posix/conformance/interfaces/getpid/1-1
 
-## FAIL: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/1-2.c FAILED: pthread_mutex_trylock() did not return 
+## FAIL: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/1-2.c FAILED: pthread_mutex_trylock() did not return 
 posix/conformance/interfaces/pthread_mutex_trylock/1-2
 
-## FAIL: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/2-1.c FAILED: pthread_mutex_trylock() did not return 
+## FAIL: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/2-1.c FAILED: pthread_mutex_trylock() did not return 
 posix/conformance/interfaces/pthread_mutex_trylock/2-1
 
-## FAIL: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/4-2.c FAILED: pthread_mutex_trylock() did not return 
+## FAIL: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/4-2.c FAILED: pthread_mutex_trylock() did not return 
 posix/conformance/interfaces/pthread_mutex_trylock/4-2
 
-## FAIL: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/sem_init/7-1.c FAILED: We were able to sem_init more than SEM_NSEMS_MAX sem
+## FAIL: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/sem_init/7-1.c FAILED: We were able to sem_init more than SEM_NSEMS_MAX sem
 posix/conformance/interfaces/sem_init/7-1
 
-## FAIL: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/2-2.c FAILED: Child 'exec' exited abnormally
+## FAIL: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/2-2.c FAILED: Child 'exec' exited abnormally
 posix/conformance/interfaces/sem_unlink/2-2
-
-## FAIL: The mapped files pages of the process are not locked.
-posix/conformance/interfaces/mlockall/3-7
-
-## FAIL: The shared memory pages of the process are not locked.
-posix/conformance/interfaces/mlockall/3-6
 
 ## FAIL: Unexpected error: Function not implemented
 posix/conformance/interfaces/sched_getparam/3-1
@@ -176,6 +169,10 @@ posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-1
 
 ## FAIL: unexpected error: pthread_attr_setschedparam 3-2: pthread_attr_setschedparam did not fail
 posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-2
+
+## UNRESOLVED: An error occurs when calling mlockall(): Out of memory
+posix/conformance/interfaces/mlockall/3-6
+posix/conformance/interfaces/mlockall/3-7
 
 ## UNRESOLVED: An error occurs when calling sched_getparam(): Function not implemented
 posix/conformance/interfaces/sched_setparam/1-1
@@ -256,6 +253,7 @@ posix/conformance/interfaces/mq_open/9-1
 posix/conformance/interfaces/mq_open/9-2
 posix/conformance/interfaces/mq_receive/11-1
 posix/conformance/interfaces/mq_receive/11-2
+posix/conformance/interfaces/mq_receive/13-1
 posix/conformance/interfaces/mq_receive/2-1
 posix/conformance/interfaces/mq_receive/7-1
 posix/conformance/interfaces/mq_timedreceive/14-1
@@ -270,22 +268,22 @@ posix/conformance/interfaces/mq_timedreceive/speculative/10-2
 posix/conformance/interfaces/clock_settime/17-2
 posix/conformance/interfaces/clock_settime/20-1
 
-## UNRESOLVED: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/fork/17-1.c unresolved: got 38 (Function not implemented) on line 73 (Faile
+## UNRESOLVED: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/fork/17-1.c unresolved: got 38 (Function not implemented) on line 73 (Faile
 posix/conformance/interfaces/fork/17-1
 
-## UNRESOLVED: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/fork/17-2.c unresolved: got 38 (Function not implemented) on line 104 (Fail
+## UNRESOLVED: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/fork/17-2.c unresolved: got 38 (Function not implemented) on line 104 (Fail
 posix/conformance/interfaces/fork/17-2
 
-## UNRESOLVED: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
+## UNRESOLVED: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
 
-## UNRESOLVED: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/1-2.c unresolved: got 1 (Operation not permitted) on 
+## UNRESOLVED: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/1-2.c unresolved: got 1 (Operation not permitted) on 
 posix/conformance/interfaces/pthread_setschedparam/1-2
 
-## UNRESOLVED: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/4-1.c unresolved: got 1 (Operation not permitted) on 
+## UNRESOLVED: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/4-1.c unresolved: got 1 (Operation not permitted) on 
 posix/conformance/interfaces/pthread_setschedparam/4-1
 
-## UNRESOLVED: Test upstream/ltp-8f263af76912/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c unresolved: got 0 (No error information) on line 205 (An e
+## UNRESOLVED: Test upstream/ltp-4f386da559ea/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c unresolved: got 0 (No error information) on line 205 (An e
 posix/conformance/interfaces/sem_unlink/3-1
 
 ## UNRESOLVED: This test must be run as superuser
@@ -296,7 +294,7 @@ posix/conformance/interfaces/shm_open/26-2
 posix/conformance/interfaces/shm_unlink/8-1
 posix/conformance/interfaces/shm_unlink/9-1
 
-## UNRESOLVED: You have the right to call mlockall
+## UNRESOLVED: Unexpected error: Out of memory
 posix/conformance/interfaces/mlockall/15-1
 posix/conformance/interfaces/mlockall/speculative/15-1
 
@@ -386,23 +384,23 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmp1evkFb/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmp4kDWXe/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
 
-## build: wasm-ld: error: /tmp/.tmp9UJ8cX/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
-
-## build: wasm-ld: error: /tmp/.tmpeNuS2U/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
-
-## build: wasm-ld: error: /tmp/.tmpfI9Cm8/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+## build: wasm-ld: error: /tmp/.tmpCRjJTo/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmplkBE6r/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpOc68tj/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
 
-## build: wasm-ld: error: /tmp/.tmpwL82eE/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpSu2Ue0/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
+
+## build: wasm-ld: error: /tmp/.tmpgHrYWN/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
+
+## build: wasm-ld: error: /tmp/.tmplbi8Lp/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
 
 ## exit status 132
 posix/conformance/interfaces/pthread_attr_setdetachstate/2-1
