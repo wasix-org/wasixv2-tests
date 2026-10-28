@@ -9,6 +9,10 @@
 //! Shell tests (LTP's shell scripts, and runtest lines that need a shell) run as
 //! `bash -c '<line>'` with a v2 userland at `/bin`, from `WASIXV2_TESTS_USERLAND`; without one
 //! they are skipped.
+//!
+//! Other tests run as a child of `ltp-launch.c`, in a process group of its own, as LTP's own
+//! runners run them: the program `wasmer run` starts leads a session, which a test must not (see
+//! there).
 
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
@@ -19,7 +23,8 @@ use anyhow::{Context, Result, bail, ensure};
 use walkdir::WalkDir;
 
 use super::{
-    BuildConfig, Case, ExcludeList, Excluded, Invocation, Outcome, run_wasm, wasixcc_env_for,
+    BuildConfig, Case, ExcludeList, Excluded, Invocation, Outcome, run_wasm, wasixcc_env,
+    wasixcc_env_for,
 };
 use crate::{Failure, Suite};
 
@@ -110,6 +115,8 @@ pub struct Test {
 struct Prepared {
     /// `opt/ltp` of the installed build.
     ltproot: PathBuf,
+    /// `ltp-launch.c`, built.
+    launcher: PathBuf,
     /// Leaf directory of each source file stem, and its build log.
     logs: HashMap<String, PathBuf>,
 }
@@ -524,7 +531,30 @@ fn uapi_headers(build_root: &Path) -> Result<PathBuf> {
     Ok(out.join("include"))
 }
 
+/// Builds `ltp-launch.c`, the program each test runs under, for this run.
+fn launcher(suite: &Suite) -> Result<PathBuf> {
+    let dir = suite.build_root.join("ltp-launch");
+    std::fs::create_dir_all(&dir)?;
+    let out = dir.join("ltp-launch.wasm");
+    let partial = dir.join(format!("ltp-launch.{}.wasm", std::process::id()));
+    let mut cc = Command::new(&suite.cc);
+    wasixcc_env(&mut cc)
+        .arg("-O2")
+        .arg(crate::root().join("src/upstream/ltp-launch.c"))
+        .arg("-o")
+        .arg(&partial);
+    let built = cc.output().context("building ltp-launch")?;
+    ensure!(
+        built.status.success(),
+        "building ltp-launch failed:\n{}",
+        String::from_utf8_lossy(&built.stderr)
+    );
+    std::fs::rename(&partial, &out)?;
+    Ok(out)
+}
+
 fn prepare(suite: &Suite) -> Result<Prepared> {
+    let launcher = launcher(suite)?;
     let tree = super::source_copy(suite, "ltp")?;
     let ltproot = tree.join("install/opt/ltp");
     let logs_dir = tree.join("wasixv2-build-logs");
@@ -576,7 +606,11 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         let log = leaf_log(&logs_dir, Path::new(&leaf), BuildConfig::Asyncify);
         logs.insert(metadata_key(name).to_owned(), log);
     }
-    Ok(Prepared { ltproot, logs })
+    Ok(Prepared {
+        ltproot,
+        launcher,
+        logs,
+    })
 }
 
 /// The build log of a directory of `program_dirs`, given relative to the tree.
@@ -894,6 +928,8 @@ impl Test {
                 ));
             };
             self.in_shell(userland, &mut invocation);
+        } else {
+            self.launched(&prepared.launcher, &mut invocation);
         }
         let dir = suite.build_root.join(&self.name);
         std::fs::create_dir_all(&dir).map_err(|e| Failure::harness(e.to_string()))?;
@@ -930,6 +966,14 @@ impl Test {
         invocation
             .volumes
             .push((userland.to_owned(), "/bin".to_owned()));
+    }
+
+    /// Runs the test under `launcher` (`ltp-launch.c`), which starts it from `PATH` in a process
+    /// group of its own and waits for it, as LTP's runners do: the test is not the program that
+    /// `wasmer run` starts, which leads its session.
+    fn launched(&self, launcher: &Path, invocation: &mut Invocation) {
+        invocation.module = launcher.to_owned();
+        invocation.args.insert(0, self.command.clone());
     }
 
     /// A shell script, or a runtest line that only a shell can run (`;`, pipes, `$VAR`).
