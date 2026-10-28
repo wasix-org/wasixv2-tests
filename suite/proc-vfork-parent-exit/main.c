@@ -1,8 +1,7 @@
 // A vfork parent whose thread group exits while its child runs ends with the group's status, and
 // the child, which runs on in the parent's address space, goes to the subreaper and ends as it
-// chooses. On Linux the parent dies at once (`wait_for_vfork_done` is killable); on wasixv2 the
-// child runs in the parent's instance, so the parent becomes a zombie once the child is done.
-// Either way the subreaper reaps the parent, then the child.
+// chooses. The parent dies at once (`wait_for_vfork_done` is killable), so the subreaper reaps
+// the parent, then the child.
 //#MappedDirectory: .:/t
 //#ExpectedStdout: parent exited=3
 //#ExpectedStdout: child exited=7
