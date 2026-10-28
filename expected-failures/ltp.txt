@@ -422,9 +422,6 @@ ltp/syscalls/epoll_wait03
 ## TFAIL: epoll_wait() slept for too long
 ltp/syscalls/epoll_wait02
 
-## TFAIL: event 1 woke 2 waiters in total, expected 1
-ltp/syscalls/epoll_wait16
-
 ## TFAIL: execute file_x as root failed: ENOENT (2)
 ltp/syscalls/access02
 
