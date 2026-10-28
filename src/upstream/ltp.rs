@@ -5,6 +5,10 @@
 //! UAPI headers: the sysroot's, or, for a sysroot without them, ones generated for LTP's build
 //! only. Tests whose metadata (or `excluded.txt`) shows they
 //! cannot make sense on wasixv2 are excluded. Tests that need root run as uid 0.
+//!
+//! Shell tests (LTP's shell scripts, and runtest lines that need a shell) run as
+//! `bash -c '<line>'` with a v2 userland at `/bin`, from `WASIXV2_TESTS_USERLAND`; without one
+//! they are skipped.
 
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
@@ -44,6 +48,7 @@ const LISTS: &[&str] = &[
     "ltp-aiodio.part4",
     "ltp-aio-stress",
     "capability",
+    "commands",
     "net.features",
     "net.ipv6",
     "net.ipv6_lib",
@@ -56,10 +61,6 @@ const LISTS: &[&str] = &[
 /// for, and why. A `*` suffix matches a prefix.
 const EXCLUDED_LISTS: &[(&str, &str)] = &[
     ("can", "CAN bus devices"),
-    (
-        "commands",
-        "host userspace commands, not the system interface",
-    ),
     ("controllers", "cgroups"),
     ("cpuhotplug", "CPU hotplug"),
     ("crashme", "executes random machine code"),
@@ -99,8 +100,10 @@ pub struct Test {
     name: String,
     command: String,
     args: Vec<String>,
-    /// The test needs root (`needs_root`, or `tst_require_root()` in the old API): it runs as
-    /// uid 0, which holds every capability.
+    /// The runtest line after the tag, which shell tests run.
+    line: String,
+    /// The test needs root (`needs_root`, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old
+    /// APIs): it runs as uid 0, which holds every capability.
     root: bool,
 }
 
@@ -128,6 +131,7 @@ pub fn discover(
     );
     let metadata = metadata(suite_build_root)?;
     let sources = source_index(&src());
+    let scripts = script_index(&src());
     let mut tests = Vec::new();
     let mut all_lists: Vec<String> = std::fs::read_dir(src().join("runtest"))?
         .filter_map(Result::ok)
@@ -152,21 +156,31 @@ pub fn discover(
         if !LISTS.contains(&list.as_str()) {
             bail!("runtest/{list} is neither in LISTS nor EXCLUDED_LISTS");
         }
-        for (tag, command, args) in entries {
+        for Entry {
+            tag,
+            command,
+            args,
+            line,
+        } in entries
+        {
             let name = format!("ltp/{list}/{tag}");
+            let scripts = script_texts(&line, &scripts);
+            let declared = declared(&metadata, &sources, &command, &scripts);
             let reason = excludes
                 .reason(&name)
                 .map(str::to_owned)
-                .or_else(|| metadata_reason(&metadata, &command));
+                .or_else(|| scripts.iter().find_map(|text| script_reason(text)))
+                .or_else(|| declared.iter().find_map(metadata_reason));
             if let Some(reason) = reason {
                 excluded.add(reason);
                 continue;
             }
             let test = Test {
                 name: name.clone(),
-                root: needs_root(&metadata, &sources, &command),
+                root: declared.iter().any(|test| has(test, "needs_root")),
                 command,
                 args,
+                line,
             };
             tests.push((name, Case::Ltp(test)));
         }
@@ -174,8 +188,17 @@ pub fn discover(
     Ok(tests)
 }
 
-/// `tag command args...` lines of a runtest list.
-fn runtest_entries(path: &Path) -> Result<Vec<(String, String, Vec<String>)>> {
+/// A `tag command args...` line of a runtest list.
+struct Entry {
+    tag: String,
+    command: String,
+    args: Vec<String>,
+    /// Everything after the tag, as written.
+    line: String,
+}
+
+/// The entries of a runtest list.
+fn runtest_entries(path: &Path) -> Result<Vec<Entry>> {
     let text =
         std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     let mut entries = Vec::new();
@@ -188,11 +211,12 @@ fn runtest_entries(path: &Path) -> Result<Vec<(String, String, Vec<String>)>> {
         let (Some(tag), Some(command)) = (words.next(), words.next()) else {
             continue;
         };
-        entries.push((
-            tag.to_owned(),
-            command.to_owned(),
-            words.map(str::to_owned).collect(),
-        ));
+        entries.push(Entry {
+            tag: tag.to_owned(),
+            command: command.to_owned(),
+            args: words.map(str::to_owned).collect(),
+            line: line[tag.len()..].trim().to_owned(),
+        });
     }
     Ok(entries)
 }
@@ -203,13 +227,124 @@ fn metadata_key(command: &str) -> &str {
     command.strip_suffix("_64").unwrap_or(command)
 }
 
+/// Whether a test's metadata sets `key`.
+fn has(test: &serde_json::Value, key: &str) -> bool {
+    test.get(key)
+        .is_some_and(|v| !v.is_null() && v != &serde_json::Value::from(0))
+}
+
+/// What a test declares it needs, in the shape of an entry of LTP's metadata: one for its program
+/// and one for each LTP shell script (`scripts`, their text) its runtest line runs.
+fn declared(
+    metadata: &serde_json::Value,
+    sources: &HashMap<String, PathBuf>,
+    command: &str,
+    scripts: &[String],
+) -> Vec<serde_json::Value> {
+    let key = metadata_key(command);
+    let mut program = metadata
+        .get("tests")
+        .and_then(|t| t.get(key))
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    // Old-API tests have no metadata; they call tst_require_root().
+    let old_api_root = sources
+        .get(key)
+        .and_then(|path| std::fs::read_to_string(path).ok())
+        .is_some_and(|text| {
+            text.contains("tst_require_root()") && !text.contains("struct tst_test")
+        });
+    if old_api_root && let Some(program) = program.as_object_mut() {
+        program.insert("needs_root".to_owned(), true.into());
+    }
+    let mut declared = vec![program];
+    declared.extend(scripts.iter().map(|text| script_metadata(text)));
+    declared
+}
+
+/// The metadata of a shell test on LTP's shell library (`tst_test.sh`), which declares what it
+/// needs in `TST_*` variables, or of an old-API one (`test.sh`), which calls `tst_require_root`.
+fn script_metadata(text: &str) -> serde_json::Value {
+    const VARIABLES: &[(&str, &str)] = &[
+        ("TST_NEEDS_ROOT", "needs_root"),
+        ("TST_NEEDS_DEVICE", "needs_device"),
+        ("TST_FORMAT_DEVICE", "format_device"),
+        ("TST_MOUNT_DEVICE", "mount_device"),
+        ("TST_ALL_FILESYSTEMS", "all_filesystems"),
+        ("TST_NEEDS_KCONFIGS", "needs_kconfigs"),
+    ];
+    let mut test = serde_json::Map::new();
+    for line in text.lines().map(str::trim) {
+        if line.starts_with('#') {
+            continue;
+        }
+        if line.contains("tst_require_root") && !line.contains("tst_require_root()") {
+            test.insert("needs_root".to_owned(), true.into());
+        }
+        let assignment = line.strip_prefix("export ").unwrap_or(line);
+        for (variable, key) in VARIABLES {
+            let Some(value) = assignment
+                .strip_prefix(variable)
+                .and_then(|rest| rest.strip_prefix('='))
+            else {
+                continue;
+            };
+            let value = value.trim_matches(|c: char| c == '"' || c == '\'' || c.is_whitespace());
+            if !value.is_empty() && value != "0" {
+                test.insert((*key).to_owned(), true.into());
+            }
+        }
+    }
+    test.into()
+}
+
+/// The text of each LTP shell script a runtest line runs, and of the scripts they source
+/// (`. netns_lib.sh`), where tests share their setup and declarations.
+fn script_texts(line: &str, scripts: &HashMap<String, PathBuf>) -> Vec<String> {
+    let mut pending: Vec<String> = line.split_whitespace().map(str::to_owned).collect();
+    let mut seen = std::collections::HashSet::new();
+    let mut texts = Vec::new();
+    while let Some(word) = pending.pop() {
+        let Some(path) = scripts.get(&word) else {
+            continue;
+        };
+        if !seen.insert(word) {
+            continue;
+        }
+        let Ok(text) = std::fs::read_to_string(path) else {
+            continue;
+        };
+        pending.extend(
+            text.lines()
+                .filter_map(|l| {
+                    let l = l.trim_start();
+                    l.strip_prefix(". ").or_else(|| l.strip_prefix("source "))
+                })
+                .filter_map(|rest| rest.split_whitespace().next())
+                .map(str::to_owned),
+        );
+        texts.push(text);
+    }
+    texts
+}
+
+/// Why a shell script cannot run on wasixv2, beyond what its metadata declares.
+fn script_reason(text: &str) -> Option<String> {
+    // tst_loader.sh runs the script under tst_run_shell, a C test whose library shares its
+    // results page with the shell (LTP_IPC_PATH, MAP_SHARED): forked processes on wasixv2 do not
+    // share memory.
+    text.lines()
+        .any(|line| !line.trim_start().starts_with('#') && line.contains("tst_loader.sh"))
+        .then(|| {
+            "LTP: a shell test on the C test library (tst_loader.sh), which needs memory shared \
+             between processes"
+                .to_owned()
+        })
+}
+
 /// Why a test's declared requirements cannot make sense on wasixv2.
-fn metadata_reason(metadata: &serde_json::Value, command: &str) -> Option<String> {
-    let test = metadata.get("tests")?.get(metadata_key(command))?;
-    let has = |key: &str| {
-        test.get(key)
-            .is_some_and(|v| !v.is_null() && v != &serde_json::Value::from(0))
-    };
+fn metadata_reason(test: &serde_json::Value) -> Option<String> {
+    let has = |key: &str| has(test, key);
     let reason = if has("needs_device")
         || has("format_device")
         || has("mount_device")
@@ -251,28 +386,6 @@ fn metadata_reason(metadata: &serde_json::Value, command: &str) -> Option<String
     Some(format!("LTP: {reason}"))
 }
 
-/// Whether a test needs root: `needs_root` in its metadata, or, for old-API tests, which have no
-/// metadata, `tst_require_root()` in its source.
-fn needs_root(
-    metadata: &serde_json::Value,
-    sources: &HashMap<String, PathBuf>,
-    command: &str,
-) -> bool {
-    let key = metadata_key(command);
-    let declared = metadata
-        .get("tests")
-        .and_then(|t| t.get(key))
-        .and_then(|t| t.get("needs_root"))
-        .is_some_and(|v| !v.is_null() && v != &serde_json::Value::from(0));
-    declared
-        || sources
-            .get(key)
-            .and_then(|path| std::fs::read_to_string(path).ok())
-            .is_some_and(|text| {
-                text.contains("tst_require_root()") && !text.contains("struct tst_test")
-            })
-}
-
 /// Every `.c` under `testcases/` by stem, for finding a test's source and build log.
 fn source_index(root: &Path) -> HashMap<String, PathBuf> {
     WalkDir::new(root.join("testcases"))
@@ -283,6 +396,18 @@ fn source_index(root: &Path) -> HashMap<String, PathBuf> {
             let stem = e.path().file_stem().unwrap().to_string_lossy().into_owned();
             (stem, e.into_path())
         })
+        .collect()
+}
+
+/// Every shell script under `testcases/` but LTP's shell library, by file name, as runtest lines
+/// name them.
+fn script_index(root: &Path) -> HashMap<String, PathBuf> {
+    WalkDir::new(root.join("testcases"))
+        .into_iter()
+        .filter_entry(|e| e.path() != root.join("testcases/lib"))
+        .filter_map(Result::ok)
+        .filter(|e| e.file_type().is_file() && e.path().extension().is_some_and(|x| x == "sh"))
+        .map(|e| (e.file_name().to_string_lossy().into_owned(), e.into_path()))
         .collect()
 }
 
@@ -701,57 +826,85 @@ fn jobs() -> usize {
     std::thread::available_parallelism().map_or(4, |n| n.get())
 }
 
+/// The v2 userland that shell tests run in: `WASIXV2_TESTS_USERLAND`, a directory with GNU bash,
+/// coreutils and the other commands LTP's shell tests use, built for wasixv2 (`out/bin` of a
+/// userland build), which is mounted at `/bin`. `None` when the variable is unset.
+fn userland() -> Result<Option<&'static Path>, Failure> {
+    static USERLAND: OnceLock<Result<Option<PathBuf>, String>> = OnceLock::new();
+    USERLAND
+        .get_or_init(|| {
+            let Some(bin) = crate::env_path("WASIXV2_TESTS_USERLAND") else {
+                return Ok(None);
+            };
+            if !bin.join("bash").is_file() {
+                return Err(format!(
+                    "WASIXV2_TESTS_USERLAND: {} has no bash",
+                    bin.display()
+                ));
+            }
+            Ok(Some(bin))
+        })
+        .as_ref()
+        .map(Option::as_deref)
+        .map_err(|e| Failure::harness(e.clone()))
+}
+
 impl Test {
     pub fn run(&self, suite: &Suite) -> Result<Outcome, Failure> {
         let prepared = PREPARED
             .get_or_init(|| prepare(suite).map_err(|e| format!("{e:#}")))
             .as_ref()
             .map_err(|e| Failure::harness(format!("preparing LTP: {e}")))?;
-        if self.needs_shell() {
-            return Err(Failure::new(
-                "runner: a shell command; needs a shell in the guest",
-                format!("{} {}", self.command, self.args.join(" ")),
-            ));
-        }
         let binary = prepared.ltproot.join("testcases/bin").join(&self.command);
-        let Ok(head) = std::fs::read(&binary).map(|b| b.into_iter().take(4).collect::<Vec<_>>())
-        else {
-            return Err(self.build_failure(prepared));
+        let shell = self.needs_shell() || {
+            let Ok(head) =
+                std::fs::read(&binary).map(|b| b.into_iter().take(4).collect::<Vec<_>>())
+            else {
+                return Err(self.build_failure(prepared, &self.command));
+            };
+            head.starts_with(b"#!")
         };
-        if head.starts_with(b"#!") {
-            return Err(Failure::new(
-                "runner: a shell script; needs a shell in the guest",
-                format!("{} is a script", binary.display()),
-            ));
+        let mut invocation = Invocation {
+            module: binary,
+            args: self.args.clone(),
+            env: [
+                ("LTPROOT", "/opt/ltp"),
+                ("PATH", "/opt/ltp/testcases/bin:/usr/bin:/bin"),
+                ("TMPDIR", "/tmp"),
+                ("LTP_COLORIZE_OUTPUT", "0"),
+            ]
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect(),
+            volumes: vec![(prepared.ltproot.clone(), "/opt/ltp".to_owned())],
+            cwd: None,
+            user: self.root.then(|| "0:0".to_owned()),
+        };
+        if shell {
+            // A script the runtest line names is LTP's to install.
+            let bin = prepared.ltproot.join("testcases/bin");
+            if let Some(script) = self.line.split_whitespace().find(|word| {
+                word.ends_with(".sh") && !word.contains(['/', '$']) && !bin.join(word).is_file()
+            }) {
+                return Err(self.build_failure(prepared, script));
+            }
+            let Some(userland) = userland()? else {
+                return Ok(Outcome::Skipped(
+                    "a shell test; set WASIXV2_TESTS_USERLAND to run it".to_owned(),
+                ));
+            };
+            self.in_shell(userland, &mut invocation);
         }
         let dir = suite.build_root.join(&self.name);
         std::fs::create_dir_all(&dir).map_err(|e| Failure::harness(e.to_string()))?;
-        let env = [
-            ("LTPROOT", "/opt/ltp"),
-            ("PATH", "/opt/ltp/testcases/bin:/usr/bin:/bin"),
-            ("TMPDIR", "/tmp"),
-            ("LTP_COLORIZE_OUTPUT", "0"),
-        ];
-        let ran = run_wasm(
-            suite,
-            &Invocation {
-                module: binary,
-                args: self.args.clone(),
-                env: env
-                    .iter()
-                    .map(|(k, v)| (k.to_string(), v.to_string()))
-                    .collect(),
-                volumes: vec![(prepared.ltproot.clone(), "/opt/ltp".to_owned())],
-                cwd: None,
-                user: self.root.then(|| "0:0".to_owned()),
-            },
-            &dir,
-        )?;
+        let ran = run_wasm(suite, &invocation, &dir)?;
         match ran.output.status {
             Some(0) => return Ok(Outcome::Passed),
             // Only TCONF results: the test found what it needs missing.
             Some(32) => {
-                let why = super::first_line(&ran.output.stdout, |l| l.contains("TCONF"))
+                // The shell library reports on stderr.
+                let output = format!("{}\n{}", ran.output.stdout, ran.output.stderr);
+                let why = super::first_line(&output, |l| l.contains("TCONF"))
                     .map(old_api_line)
                     .unwrap_or_else(|| "TCONF".to_owned());
                 return Ok(Outcome::Skipped(why));
@@ -765,6 +918,20 @@ impl Test {
         Err(ran.fail(suite, cause))
     }
 
+    /// Runs the runtest line with the userland's bash instead, as LTP's runners do (`sh -c`).
+    ///
+    /// The shell's job control (`set -m`) puts the test in a process group of its own, which
+    /// LTP's shell library expects: its timer, `tst_timeout_kill`, signals the test script's
+    /// group, and refuses pid 1, which this way is never the test. The trailing `exit` keeps bash
+    /// from executing the last command in place of itself.
+    fn in_shell(&self, userland: &Path, invocation: &mut Invocation) {
+        invocation.module = userland.join("bash");
+        invocation.args = vec!["-c".to_owned(), format!("set -m; {}; exit $?", self.line)];
+        invocation
+            .volumes
+            .push((userland.to_owned(), "/bin".to_owned()));
+    }
+
     /// A shell script, or a runtest line that only a shell can run (`;`, pipes, `$VAR`).
     fn needs_shell(&self) -> bool {
         self.command.ends_with(".sh")
@@ -775,32 +942,77 @@ impl Test {
     }
 
     /// The binary was not installed: report the first error of its directory's build.
-    fn build_failure(&self, prepared: &Prepared) -> Failure {
+    fn build_failure(&self, prepared: &Prepared, program: &str) -> Failure {
         let log = prepared
             .logs
-            .get(metadata_key(&self.command))
+            .get(metadata_key(program))
             .and_then(|log| std::fs::read_to_string(log).ok())
             .unwrap_or_default();
         let cause = match crate::build::first_error_line(&log, "").as_str() {
             "failed without output" => {
-                format!("`{}` is not built by LTP's makefiles", self.command)
+                format!("`{program}` is not built by LTP's makefiles")
             }
             line => line.to_owned(),
         };
         Failure::new(
             format!("build: {cause}"),
-            format!("`{}` was not built\n--- build log\n{log}", self.command),
+            format!("`{program}` was not built\n--- build log\n{log}"),
         )
     }
 }
 
 /// The cause in an LTP result line. The old API prints `name  N  TFAIL  :  file.c:42: message`,
-/// the new one `file.c:42: TFAIL: message`; both become `TFAIL: message`.
+/// the new one `file.c:42: TFAIL: message`, the shell library `name N TFAIL: message`; all become
+/// `TFAIL: message`.
 fn old_api_line(line: &str) -> String {
     for kind in ["TFAIL", "TBROK", "TCONF"] {
         if let Some((_, rest)) = line.split_once(&format!("{kind}  :")) {
             return super::cause_from_line(&format!("{kind}: "), rest);
         }
     }
+    // The shell library's `name N TFAIL: message`.
+    let mut words = line.trim().splitn(3, ' ');
+    if let (Some(_), Some(n), Some(rest)) = (words.next(), words.next(), words.next())
+        && n.bytes().all(|b| b.is_ascii_digit())
+        && let Some((kind @ ("TFAIL" | "TBROK" | "TCONF"), message)) = rest.split_once(": ")
+    {
+        return super::cause_from_line(&format!("{kind}: "), message);
+    }
     super::cause_from_line("", line)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{has, old_api_line, script_metadata, script_reason};
+
+    #[test]
+    fn shell_scripts_declare_requirements_in_variables() {
+        let test = script_metadata(
+            "#!/bin/sh\n# TST_NEEDS_DEVICE=1\nTST_NEEDS_ROOT=1\nTST_NEEDS_TMPDIR=1\n\
+             TST_NEEDS_KCONFIGS=\"CONFIG_SYSCTL=y\"\nTST_MOUNT_DEVICE=0\n. tst_test.sh\n",
+        );
+        assert!(has(&test, "needs_root"));
+        assert!(has(&test, "needs_kconfigs"));
+        assert!(!has(&test, "needs_device"));
+        assert!(!has(&test, "mount_device"));
+        assert!(has(
+            &script_metadata("setup()\n{\n\ttst_require_root\n}\n"),
+            "needs_root"
+        ));
+        assert!(script_reason(". tst_loader.sh\n").is_some());
+        assert!(script_reason("# not . tst_loader.sh\n. tst_test.sh\n").is_none());
+    }
+
+    #[test]
+    fn shell_library_results_name_their_cause() {
+        assert_eq!(
+            old_api_line("du01 3 TFAIL: 'du -a' failed"),
+            "TFAIL: 'du -a' failed"
+        );
+        assert_eq!(
+            old_api_line("wc01 1 TBROK: tst_rod failed"),
+            "TBROK: tst_rod failed"
+        );
+        assert_eq!(old_api_line("foo.c:42: TFAIL: bar"), "TFAIL: bar");
+    }
 }
