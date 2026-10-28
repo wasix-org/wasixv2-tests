@@ -835,6 +835,13 @@ ltp/syscalls/listmount04
 ## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
 ltp/commands/ldd01_sh
 
+## the LTP fork's in-process mode (no fork_testrun on wasixv2) frees the guarded buffers (tst_free_all) after the first iteration or variant; later ones use the stale pointers, which now fault (EFAULT) as on Linux for unmapped or PROT_NONE memory; follow-up: fix the LTP fork
+ltp/syscalls/accept4_01
+ltp/syscalls/chmod01
+ltp/syscalls/clock_getres01
+ltp/syscalls/sendmmsg01
+ltp/syscalls/setrlimit06
+
 ## timeout
 ltp/dma_thread_diotest/dma_thread_diotest1
 ltp/dma_thread_diotest/dma_thread_diotest2

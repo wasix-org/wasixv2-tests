@@ -483,6 +483,9 @@ posix/conformance/interfaces/sigpause/1-2
 posix/conformance/interfaces/sigpause/2-1
 posix/conformance/interfaces/sigpause/3-1
 
+## mlockall(MCL_CURRENT) fails with ENOMEM: the RLIMIT_MEMLOCK accounting counts the whole wasm linear memory, the 8 MiB stack included, against the default 8 MiB limit (Linux counts only mapped and touched stack pages); follow-up
+posix/conformance/interfaces/mlockall/8-1
+
 ## musl names semaphores /dev/shm/<name> without glibc's sem. prefix, so a NAME_MAX name is valid
 posix/conformance/interfaces/sem_unlink/5-1
 
