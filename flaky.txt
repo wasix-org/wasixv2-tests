@@ -22,7 +22,6 @@ posix/conformance/interfaces/pthread_equal/1-2             # exit 139 after PASS
 posix/conformance/interfaces/pthread_equal/2-1             # hangs about half the time
 posix/conformance/interfaces/pthread_mutex_init/1-2        # times out or passes
 posix/conformance/interfaces/pthread_mutex_trylock/4-3     # timing
-posix/conformance/interfaces/pthread_once/6-1              # hangs in about 1 of 10 runs, alone too and before WP2/WP7 (e595aea505f): all three threads exit, then the main thread never returns from pthread_join (likely a lost futex wake at thread exit)
 posix/conformance/interfaces/pthread_rwlock_unlock/3-1     # timing
 ltp/syscalls/getrusage04                                   # under load: utime grows more than 5 ms between getrusage calls (host CPU-time granularity)
 ltp/syscalls/clock_gettime04                               # under load: successive CLOCK_REALTIME readings more than 5 ms apart
