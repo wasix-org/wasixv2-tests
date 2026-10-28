@@ -1173,8 +1173,6 @@ ltp/cve/cve-2018-6927
 ltp/syscalls-ipc/msgrcv05
 ltp/syscalls-ipc/semop02
 ltp/syscalls/epoll_wait08
-ltp/syscalls/fcntl14
-ltp/syscalls/fcntl14_64
 ltp/syscalls/futex_cmp_requeue02
 ltp/syscalls/futex_wait01
 ltp/syscalls/futex_wait03

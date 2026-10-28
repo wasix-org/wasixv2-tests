@@ -4,6 +4,7 @@
 
 base-mmap-threads/default                                  # exits nonzero or passes
 posix/conformance/interfaces/aio_error/2-1                 # UNRESOLVED or PASS
+posix/conformance/interfaces/aio_suspend/1-1               # passes only under load: alone, AIOCB 6 completes before aio_suspend (UNRESOLVED), 8 of 8 runs on the feat and train 7 binaries alike
 posix/conformance/interfaces/aio_fsync/5-1                 # UNTESTED or PASS: passes only if the fsync is still in progress at the first aio_error
 posix/conformance/interfaces/lio_listio/4-1                # under load: "did not receive the right number of notifications"
 posix/conformance/interfaces/pthread_atfork/3-3            # timing
@@ -25,6 +26,8 @@ posix/conformance/interfaces/pthread_mutex_trylock/4-3     # timing
 posix/conformance/interfaces/pthread_rwlock_unlock/3-1     # timing
 posix/conformance/interfaces/timer_getoverrun/2-2          # 0 overruns or the expected 75: fails about half the time alone, on the feat and train 7 binaries alike
 ltp/syscalls/getrusage04                                   # under load: utime grows more than 5 ms between getrusage calls (host CPU-time granularity)
+ltp/syscalls/fcntl14                                       # forks lockers (asyncify build): passes or dies with SIGKILL (exit 137) from run to run, alone too, on the feat binary as well
+ltp/syscalls/fcntl14_64                                    # as fcntl14
 ltp/syscalls/clock_gettime04                               # under load: successive CLOCK_REALTIME readings more than 5 ms apart
 ltp/syscalls/inotify09                                     # times out under full-suite load (inotify vs. concurrent writers stress); passes alone
 ltp/mm/mallocstress01                                      # stress test near the timeout: times out or passes from run to run
