@@ -1,9 +1,13 @@
 # Syscall microbenchmark
 
 `sysbench.c` times the syscall hot path of a guest: N `getpid`, N 1-byte reads from `/dev/zero`,
-N 1-byte writes to `/dev/null`, N `clock_gettime`, N `dup`+`close`, N/1000
+N 1-byte writes to `/dev/null`, N `clock_gettime`, N `dup`+`close`, N/20 `stat` and N/20
+`open`+`close` of a file six path components deep on `/tmp` (`stat_tmp`, `open_tmp`) and under
+the `--volume` host directory `/bench` (`stat_host`, `open_host`), N/1000
 `pthread_create`+`pthread_join` and N/1000 `posix_spawn`+`waitpid` of itself doing nothing. It
-prints ns per call for each. The same source builds against libc2 (WASIX v2) and wasix-libc
+prints ns per call for each. The path walks measure per-component lookup cost, which on a host
+directory means asking the host for every component; they decide whether the VFS needs an
+attribute cache. The same source builds against libc2 (WASIX v2) and wasix-libc
 (WASIX v1), so one wasmer can be compared across ABIs, and two wasmers on one ABI.
 
 It is not part of the pass/fail suite: the runner never builds or runs it.
