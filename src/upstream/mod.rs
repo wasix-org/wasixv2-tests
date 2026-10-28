@@ -191,30 +191,160 @@ pub fn wasixcc_env_for(cmd: &mut Command, config: BuildConfig) -> &mut Command {
     cmd
 }
 
-/// Whether a module built for exception handling can fork: whether it contains libc2's `_Fork`,
-/// which `fork`, `daemon`, `forkpty` and a `vfork` that bypasses libc2's macro all go through.
+/// libc2's numbers for clone and clone3, Linux's generic syscall table.
+const SYS_CLONE: i32 = 220;
+const SYS_CLONE3: i32 = 435;
+
+/// Whether a module built for exception handling can fork, in either of the two ways a program
+/// reaches the `clone`/`clone3` imports that return twice in the asyncify configuration:
+///
+/// - It contains libc2's `_Fork`, which `fork`, `daemon`, `forkpty` and a `vfork` that bypasses
+///   libc2's macro all go through.
+/// - It calls `syscall` with `SYS_clone` or `SYS_clone3` as the number (`raw_clone`): LTP's
+///   `tst_clone` (`SAFE_CLONE`, `tst_ns_create`, `tst_ns_exec`) and its `clone3` tests. A raw
+///   clone has no function to run on a new stack, so it forks. Threads never come this way:
+///   libc2's `pthread_create` goes through `__clone` and the thread-spawn extension.
+///
+/// libc2's `clone` wrapper, which LTP's `ltp_clone` calls, is not a way to fork: it runs a
+/// function on a new stack, which libc2 does only for threads and vforks, and fails with
+/// `ENOSYS` otherwise, in both configurations.
+///
 /// The linker drops functions nothing calls, so this follows what the program and every library
-/// it links actually use. Read from the name section; `None` for a module without one.
+/// it links actually use. Names come from the name section; `None` for a module without one, or
+/// whose code cannot be read.
 pub fn links_fork(wasm: &[u8]) -> Option<bool> {
+    let mut bodies = Vec::new();
+    let mut syscall = None;
+    let mut named = false;
     for payload in wasmparser::Parser::new(0).parse_all(wasm) {
-        let Ok(wasmparser::Payload::CustomSection(section)) = payload else {
-            continue;
-        };
-        let wasmparser::KnownCustom::Name(names) = section.as_known() else {
-            continue;
-        };
-        for name in names.into_iter().flatten() {
-            if let wasmparser::Name::Function(functions) = name {
-                return Some(
-                    functions
-                        .into_iter()
-                        .flatten()
-                        .any(|naming| naming.name == "_Fork"),
-                );
+        match payload.ok()? {
+            wasmparser::Payload::CodeSectionEntry(body) => bodies.push(body),
+            wasmparser::Payload::CustomSection(section) => {
+                let wasmparser::KnownCustom::Name(names) = section.as_known() else {
+                    continue;
+                };
+                for name in names {
+                    let wasmparser::Name::Function(functions) = name.ok()? else {
+                        continue;
+                    };
+                    named = true;
+                    for naming in functions {
+                        let naming = naming.ok()?;
+                        match naming.name {
+                            "_Fork" => return Some(true),
+                            "syscall" => syscall = Some(naming.index),
+                            _ => {}
+                        }
+                    }
+                }
             }
+            _ => {}
         }
     }
-    None
+    if !named {
+        return None;
+    }
+    let Some(syscall) = syscall else {
+        return Some(false);
+    };
+    for body in bodies {
+        if raw_clone(body.get_operators_reader().ok()?, syscall)? {
+            return Some(true);
+        }
+    }
+    Some(false)
+}
+
+/// Whether a function calls `syscall` (function `syscall`, `long syscall(long n, ...)`: on
+/// wasm32 the number and a pointer to the variadic arguments) with `SYS_clone` or `SYS_clone3`
+/// as a constant number. Follows the operand stack through the instructions that compute
+/// arguments, constants, locals, arithmetic, loads and stores; any other instruction, a call or
+/// control flow, forgets what is on it. `None` when the code cannot be read.
+fn raw_clone(ops: wasmparser::OperatorsReader<'_>, syscall: u32) -> Option<bool> {
+    use wasmparser::Operator as Op;
+    // The top of the operand stack since the last instruction that is not followed: each entry
+    // the constant it is, if it is an i32 constant.
+    let mut stack: Vec<Option<i32>> = Vec::new();
+    let pop = |stack: &mut Vec<Option<i32>>, n: usize| {
+        stack.truncate(stack.len().saturating_sub(n));
+    };
+    for op in ops {
+        match op.ok()? {
+            Op::Call { function_index } if function_index == syscall => {
+                if let [.., Some(SYS_CLONE | SYS_CLONE3), _] = stack[..] {
+                    return Some(true);
+                }
+                stack.clear();
+            }
+            Op::I32Const { value } => stack.push(Some(value)),
+            Op::I64Const { .. }
+            | Op::F32Const { .. }
+            | Op::F64Const { .. }
+            | Op::LocalGet { .. }
+            | Op::GlobalGet { .. } => stack.push(None),
+            Op::LocalSet { .. } | Op::GlobalSet { .. } | Op::Drop => pop(&mut stack, 1),
+            Op::LocalTee { .. }
+            | Op::I32Load { .. }
+            | Op::I32Load8S { .. }
+            | Op::I32Load8U { .. }
+            | Op::I32Load16S { .. }
+            | Op::I32Load16U { .. }
+            | Op::I64Load { .. }
+            | Op::I64Load8S { .. }
+            | Op::I64Load8U { .. }
+            | Op::I64Load16S { .. }
+            | Op::I64Load16U { .. }
+            | Op::I64Load32S { .. }
+            | Op::I64Load32U { .. }
+            | Op::F32Load { .. }
+            | Op::F64Load { .. }
+            | Op::V128Load { .. }
+            | Op::I32Eqz
+            | Op::I64ExtendI32S
+            | Op::I64ExtendI32U
+            | Op::I32WrapI64 => {
+                pop(&mut stack, 1);
+                stack.push(None);
+            }
+            Op::I32Store { .. }
+            | Op::I32Store8 { .. }
+            | Op::I32Store16 { .. }
+            | Op::I64Store { .. }
+            | Op::I64Store8 { .. }
+            | Op::I64Store16 { .. }
+            | Op::I64Store32 { .. }
+            | Op::F32Store { .. }
+            | Op::F64Store { .. }
+            | Op::V128Store { .. } => pop(&mut stack, 2),
+            Op::I32Add
+            | Op::I32Sub
+            | Op::I32Mul
+            | Op::I32And
+            | Op::I32Or
+            | Op::I32Xor
+            | Op::I32Shl
+            | Op::I32ShrS
+            | Op::I32ShrU
+            | Op::I64Add
+            | Op::I64Sub
+            | Op::I64Mul
+            | Op::I64And
+            | Op::I64Or
+            | Op::I64Xor
+            | Op::I64Shl
+            | Op::I64ShrS
+            | Op::I64ShrU => {
+                pop(&mut stack, 2);
+                stack.push(None);
+            }
+            Op::Select | Op::TypedSelect { .. } => {
+                pop(&mut stack, 3);
+                stack.push(None);
+            }
+            _ => stack.clear(),
+        }
+    }
+    Some(false)
 }
 
 /// Builds the program `main` with `build`, for exception handling, and rebuilds it for asyncify
@@ -354,30 +484,162 @@ pub fn first_line(text: &str, pred: impl Fn(&str) -> bool) -> Option<&str> {
 mod tests {
     use super::links_fork;
 
-    /// A module with only a name section naming functions `names`.
-    fn module_naming(names: &[&str]) -> Vec<u8> {
-        let mut functions = vec![names.len() as u8];
-        for (i, name) in names.iter().enumerate() {
-            functions.extend([i as u8, name.len() as u8]);
-            functions.extend(name.as_bytes());
+    const I32_CONST: u8 = 0x41;
+    const CALL: u8 = 0x10;
+    const LOCAL_GET: u8 = 0x20;
+    const I32_ADD: u8 = 0x6a;
+    const DROP: u8 = 0x1a;
+    const BLOCK: u8 = 0x02;
+    const EMPTY: u8 = 0x40;
+    const END: u8 = 0x0b;
+
+    fn section(id: u8, contents: Vec<u8>) -> Vec<u8> {
+        let mut section = vec![id];
+        leb(&mut section, contents.len() as u64);
+        section.extend(contents);
+        section
+    }
+
+    fn leb(out: &mut Vec<u8>, mut value: u64) {
+        loop {
+            let byte = (value & 0x7f) as u8;
+            value >>= 7;
+            if value == 0 {
+                out.push(byte);
+                return;
+            }
+            out.push(byte | 0x80);
         }
-        let mut section = vec![4];
-        section.extend(b"name");
-        section.extend([1, functions.len() as u8]);
-        section.extend(functions);
+    }
+
+    /// `i32.const value`.
+    fn i32_const(value: i32) -> Vec<u8> {
+        let mut out = vec![I32_CONST];
+        let mut value = i64::from(value);
+        loop {
+            let byte = (value & 0x7f) as u8;
+            value >>= 7;
+            if (value == 0 && byte & 0x40 == 0) || (value == -1 && byte & 0x40 != 0) {
+                out.push(byte);
+                return out;
+            }
+            out.push(byte | 0x80);
+        }
+    }
+
+    /// A module of functions `(name, code)`, function `i` named `name` with body `code`, and a
+    /// name section naming them.
+    fn module(functions: &[(&str, Vec<u8>)]) -> Vec<u8> {
         let mut wasm = b"\0asm\x01\0\0\0".to_vec();
-        wasm.extend([0, section.len() as u8]);
-        wasm.extend(section);
+        wasm.extend(section(1, vec![1, 0x60, 0, 0]));
+        let mut types = vec![functions.len() as u8];
+        types.extend(std::iter::repeat_n(0, functions.len()));
+        wasm.extend(section(3, types));
+        let mut code = vec![functions.len() as u8];
+        for (_, ops) in functions {
+            let mut body = vec![0];
+            body.extend(ops);
+            body.push(END);
+            leb(&mut code, body.len() as u64);
+            code.extend(body);
+        }
+        wasm.extend(section(10, code));
+        let mut names = vec![functions.len() as u8];
+        for (i, (name, _)) in functions.iter().enumerate() {
+            names.extend([i as u8, name.len() as u8]);
+            names.extend(name.as_bytes());
+        }
+        let mut custom = vec![4];
+        custom.extend(b"name");
+        custom.extend(section(1, names));
+        wasm.extend(section(0, custom));
         wasm
+    }
+
+    /// `main`, with `code`, and `syscall` as function 1.
+    fn calling_syscall(code: Vec<u8>) -> Vec<u8> {
+        module(&[("main", code), ("syscall", vec![])])
     }
 
     #[test]
     fn fork_is_found_by_name() {
-        assert_eq!(links_fork(&module_naming(&["main", "_Fork"])), Some(true));
         assert_eq!(
-            links_fork(&module_naming(&["main", "fork_testrun"])),
+            links_fork(&module(&[("main", vec![]), ("_Fork", vec![])])),
+            Some(true)
+        );
+        assert_eq!(
+            links_fork(&module(&[("main", vec![]), ("fork_testrun", vec![])])),
             Some(false)
         );
         assert_eq!(links_fork(b"\0asm\x01\0\0\0"), None);
+    }
+
+    /// `syscall(SYS_clone3, &args, sizeof(args))` as clang emits it for LTP's `tst_clone`: the
+    /// number, then the address of the variadic arguments on the stack.
+    #[test]
+    fn raw_clone3_forks() {
+        let code = [
+            i32_const(435),
+            vec![LOCAL_GET, 0],
+            i32_const(32),
+            vec![I32_ADD, CALL, 1, DROP],
+        ]
+        .concat();
+        assert_eq!(links_fork(&calling_syscall(code)), Some(true));
+    }
+
+    #[test]
+    fn raw_clone_forks() {
+        let code = [i32_const(220), vec![LOCAL_GET, 0, CALL, 1, DROP]].concat();
+        assert_eq!(links_fork(&calling_syscall(code)), Some(true));
+    }
+
+    /// Another syscall whose variadic arguments happen to sit at 220 bytes into the frame.
+    #[test]
+    fn clone_number_as_another_argument_does_not_fork() {
+        let code = [
+            i32_const(39),
+            vec![LOCAL_GET, 0],
+            i32_const(220),
+            vec![I32_ADD, CALL, 1, DROP],
+        ]
+        .concat();
+        assert_eq!(links_fork(&calling_syscall(code)), Some(false));
+    }
+
+    /// A constant left behind by code the operand stack is not followed through.
+    #[test]
+    fn clone_number_before_control_flow_is_forgotten() {
+        let code = [
+            i32_const(435),
+            vec![BLOCK, EMPTY, END],
+            i32_const(39),
+            vec![LOCAL_GET, 0, CALL, 1, DROP, DROP],
+        ]
+        .concat();
+        assert_eq!(links_fork(&calling_syscall(code)), Some(false));
+        let code = [i32_const(435), vec![DROP, LOCAL_GET, 0, CALL, 1, DROP]].concat();
+        assert_eq!(links_fork(&calling_syscall(code)), Some(false));
+    }
+
+    /// The clone number passed to a function other than `syscall`.
+    #[test]
+    fn clone_number_to_another_function_does_not_fork() {
+        let code = [i32_const(435), vec![LOCAL_GET, 0, CALL, 2, DROP]].concat();
+        let wasm = module(&[("main", code), ("syscall", vec![]), ("other", vec![])]);
+        assert_eq!(links_fork(&wasm), Some(false));
+    }
+
+    /// pthread_create reaches `__clone`, which spawns threads through the thread-spawn extension
+    /// and never calls `syscall`.
+    #[test]
+    fn threads_do_not_fork() {
+        let wasm = module(&[
+            ("main", vec![CALL, 1]),
+            ("pthread_create", vec![CALL, 2]),
+            ("__clone", vec![]),
+            ("syscall", vec![]),
+        ]);
+        assert_eq!(links_fork(&wasm), Some(false));
     }
 }
