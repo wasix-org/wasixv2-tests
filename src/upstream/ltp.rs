@@ -87,6 +87,10 @@ const EXCLUDED_LISTS: &[(&str, &str)] = &[
     ("uevent", "device events"),
 ];
 
+/// The version of what the runner builds in LTP's tree. A tree built by an older runner, with
+/// another version, is built again. 2: trunk directories too.
+const BUILD_VERSION: u32 = 2;
+
 /// Linux release whose UAPI headers LTP builds against, the newest release covering wasixv2's
 /// syscall table but for `fchroot`.
 const LINUX_UAPI_TAG: &str = "v7.2";
@@ -411,9 +415,9 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         .collect();
     // The exception-handling build of everything, then the asyncify build of the programs that
     // fork, which replaces theirs in the install.
-    let built = tree.join(".wasixv2-ltp-built");
-    let forking_list = tree.join("wasixv2-forking.txt");
-    let ready = tree.join(".wasixv2-ltp-ready");
+    let built = tree.join(format!(".wasixv2-ltp-built-{BUILD_VERSION}"));
+    let forking_list = tree.join(format!("wasixv2-forking-{BUILD_VERSION}.txt"));
+    let ready = tree.join(format!(".wasixv2-ltp-ready-{BUILD_VERSION}"));
     if !ready.exists() {
         if !built.exists() {
             build_tree(
@@ -450,7 +454,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
     Ok(Prepared { ltproot, logs })
 }
 
-/// The build log of a leaf directory, given relative to the tree.
+/// The build log of a directory of `program_dirs`, given relative to the tree.
 fn leaf_log(logs_dir: &Path, leaf: &Path, config: BuildConfig) -> PathBuf {
     let suffix = match config {
         BuildConfig::ExceptionHandling => "",
@@ -462,8 +466,9 @@ fn leaf_log(logs_dir: &Path, leaf: &Path, config: BuildConfig) -> PathBuf {
     ))
 }
 
-/// Configures LTP's `tree` for `config` and builds its library, then the leaf directories under
-/// `testcases/`: each one's `targets` only, when given, else everything, installed.
+/// Configures LTP's `tree` for `config` and builds its library, then the directories under
+/// `testcases/` with programs (`program_dirs`): each one's `targets` only, when given, else
+/// everything, installed.
 fn build_tree(
     tree: &Path,
     config: BuildConfig,
@@ -516,11 +521,11 @@ fn build_tree(
         String::from_utf8_lossy(&out.stderr)
     );
 
-    // Leaf directories one by one: LTP's directory makefiles stop at the first failure.
+    // Directories one by one: LTP's directory makefiles stop at the first failure.
     std::fs::create_dir_all(logs_dir)?;
     let leaves: Vec<PathBuf> = match targets {
         Some(targets) => targets.keys().map(|leaf| tree.join(leaf)).collect(),
-        None => leaf_dirs(tree),
+        None => program_dirs(tree),
     };
     let next = std::sync::atomic::AtomicUsize::new(0);
     std::thread::scope(|s| {
@@ -531,14 +536,30 @@ fn build_tree(
                     let Some(leaf) = leaves.get(i) else { break };
                     let rel = leaf.strip_prefix(tree).unwrap();
                     let mut text = String::new();
+                    // A trunk directory's own programs and scripts, without its subdirectories,
+                    // which are directories of their own here. LTP's makefiles define install
+                    // rules only when `install` is a goal (env_post.mk), and a trunk's `install`
+                    // recurses: ask for `trunk-install`, with the goals the rules look for.
+                    let (all, install) = if is_trunk(leaf) {
+                        (
+                            vec!["trunk-all".to_owned()],
+                            vec![
+                                "trunk-install".to_owned(),
+                                "MAKECMDGOALS=install".to_owned(),
+                            ],
+                        )
+                    } else {
+                        (vec![], vec!["install".to_owned()])
+                    };
                     let steps: Vec<Vec<String>> = match targets {
                         Some(targets) => vec![targets[&rel.display().to_string()].clone()],
                         None => vec![
-                            vec![],
-                            vec![
-                                "install".to_owned(),
-                                format!("DESTDIR={}", tree.join("install").display()),
-                            ],
+                            all,
+                            [
+                                install,
+                                vec![format!("DESTDIR={}", tree.join("install").display())],
+                            ]
+                            .concat(),
                         ],
                     };
                     for args in steps {
@@ -558,21 +579,31 @@ fn build_tree(
     Ok(())
 }
 
-/// The leaf directories of `testcases/`, which build programs.
-fn leaf_dirs(tree: &Path) -> Vec<PathBuf> {
+/// The directories of `testcases/` that build or install programs: leaf directories, and trunk
+/// directories, which can have programs and scripts of their own besides their subdirectories
+/// (`testcases/lib`, LTP's shell library; `fs_bind_lib.sh`, ...).
+fn program_dirs(tree: &Path) -> Vec<PathBuf> {
     WalkDir::new(tree.join("testcases"))
         .into_iter()
         .filter_map(Result::ok)
         .filter(|e| e.file_name() == "Makefile")
         .filter(|e| {
-            std::fs::read_to_string(e.path()).is_ok_and(|m| m.contains("generic_leaf_target"))
+            std::fs::read_to_string(e.path()).is_ok_and(|m| {
+                m.contains("generic_leaf_target") || m.contains("generic_trunk_target")
+            })
         })
         .map(|e| e.path().parent().unwrap().to_path_buf())
         .collect()
 }
 
-/// The installed programs that fork (`links_fork`), each under `ltproot` with the leaf directory
-/// that built it, relative to `tree`, or `-` when no leaf directory has the same program.
+/// Whether `dir`'s makefile is a trunk's, whose `all` and `install` recurse into its
+/// subdirectories.
+fn is_trunk(dir: &Path) -> bool {
+    std::fs::read_to_string(dir.join("Makefile")).is_ok_and(|m| m.contains("generic_trunk_target"))
+}
+
+/// The installed programs that fork (`links_fork`), each under `ltproot` with the directory that
+/// built it, relative to `tree`, or `-` when no directory has the same program.
 fn forking_programs(tree: &Path, ltproot: &Path) -> Result<Vec<(String, String)>> {
     let mut forking = Vec::new();
     let mut unnamed = Vec::new();
@@ -596,8 +627,8 @@ fn forking_programs(tree: &Path, ltproot: &Path) -> Result<Vec<(String, String)>
         unnamed.is_empty(),
         "LTP: programs without a name section, so whether they fork is unknown: {unnamed:?}"
     );
-    // Installed programs are copies of what a leaf directory built.
-    let leaves = leaf_dirs(tree);
+    // Installed programs are copies of what a directory built.
+    let leaves = program_dirs(tree);
     Ok(forking
         .into_iter()
         .map(|(program, wasm)| {
