@@ -20,4 +20,5 @@ tempfile = "3.6.0"
 walkdir = "2.3.2"
 wasmparser = { version = "0.259.0", default-features = false, features = [
   "std",
+  "simd",
 ] }
