@@ -37,7 +37,7 @@ The runner builds and runs every test. It needs, from the environment:
 | --- | --- |
 | `WASIXV2_TESTS_WASMER` | The `wasmer` binary under test (default: `wasmer` on `PATH`). |
 | `PATH` | Must contain `wasixcc` and `wasix++` with wasixv2 support. The runner sets `WASIXCC_TARGET=wasm32-wasixv2`. |
-| `WASIXCC_*` | wasixcc's own settings, such as `WASIXCC_LLVM_LOCATION` and `WASIXCC_SYSROOT_PREFIX`, apply as usual. Without them, wasixcc uses its downloaded defaults. Tests that fork build for the asyncify configuration (`//#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no`), which has its own sysroot, so give libc2's sysroots with `WASIXCC_SYSROOT_PREFIX` (its `build-wasixv2`) rather than one with `WASIXCC_SYSROOT`. |
+| `WASIXCC_*` | wasixcc's own settings, such as `WASIXCC_LLVM_LOCATION` and `WASIXCC_SYSROOT_PREFIX`, apply as usual. Without them, wasixcc uses its downloaded defaults. Tests that fork build for the asyncify configuration (`WASIXCC_WASM_EXCEPTIONS=no`; see [Tests that fork](#tests-that-fork)), which has its own sysroot, so give libc2's sysroots with `WASIXCC_SYSROOT_PREFIX` (its `build-wasixv2`) rather than one with `WASIXCC_SYSROOT`. |
 | `WASIXV2_TESTS_BUILD_DIR` | Where tests are built (default `target/suite`). |
 | `WASIXV2_TESTS_TIMEOUT_SECS` | Per-test timeout (default 60). |
 | `WASIXV2_TESTS_EXPECTED_FAILURES` | A directory of expected-failures files to use instead of `expected-failures/`. |
@@ -47,7 +47,7 @@ The runner builds and runs every test. It needs, from the environment:
 The first run also fetches Linux's UAPI headers (v7.2, a shallow sparse clone) into the build
 directory: LTP's build needs `<linux/*.h>` and `<asm/*.h>`, and only its build sees them, with
 `asm/unistd.h` replaced by libc2's syscall numbers. Building LTP takes a few minutes, once per
-LTP commit.
+LTP commit, and its programs that fork once more for asyncify.
 
 ```sh
 cargo run --release -- [FILTER] [--exact] [--list] ...
@@ -56,6 +56,22 @@ cargo run --release -- [FILTER] [--exact] [--list] ...
 Arguments are those of the standard Rust test harness. A failure report names its cause, and for
 a test that fails at run time, the syscalls the kernel answered with `ENOSYS` (from a rerun with
 `RUST_LOG=wasixv2_trace=trace`) and the last syscalls made.
+
+## Tests that fork
+
+libc2 has two build configurations, each with its own sysroot: exception handling, wasixcc's
+default, in which fork fails with `ENOSYS`, and asyncify (`WASIXCC_WASM_EXCEPTIONS=no`), in which
+fork returns twice. Tests that fork build for asyncify and everything else for exception handling.
+
+- Fixtures say so with `//#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no`.
+- Upstream tests are built for exception handling first. A program that contains libc2's `_Fork`,
+  which every way to fork goes through, is built again for asyncify. The linker drops what nothing
+  calls, so this catches forks in helper libraries (LTP's `SAFE_FORK`, `create_sig_proc`, ...) and
+  nothing else; the name section tells, so builds must keep it (they do by default). libc-test and
+  Open POSIX tests are rebuilt one by one. LTP's forking programs are listed in
+  `wasixv2-forking.txt` in its build tree, built in a second tree configured for asyncify
+  (`ltp-<commit>-asyncify`) and copied over their exception-handling builds in the install, so
+  helpers that a test executes fork too. Their build logs end in `.asyncify.log`.
 
 ## Expected failures
 

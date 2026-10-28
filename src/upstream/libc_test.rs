@@ -1,5 +1,6 @@
 //! musl's libc-test (`upstream/libc-test`): functional, regression and math tests, each a program
-//! that exits 0 and prints nothing on success, and api tests that only have to compile.
+//! that exits 0 and prints nothing on success, and api tests that only have to compile. Tests that
+//! fork are built for the asyncify configuration, the rest for exception handling.
 
 use std::path::PathBuf;
 use std::process::Command;
@@ -7,7 +8,10 @@ use std::sync::OnceLock;
 
 use anyhow::{Result, ensure};
 
-use super::{Case, ExcludeList, Excluded, Invocation, Outcome, run_build, run_wasm, wasixcc_env};
+use super::{
+    BuildConfig, Case, ExcludeList, Excluded, Invocation, Outcome, build_program, run_build,
+    run_wasm, wasixcc_env_for,
+};
 use crate::{Failure, Suite};
 
 /// The flags of libc-test's `config.mak.def`, without `-frounding-math`: wasm has only
@@ -58,9 +62,20 @@ pub struct Test {
 /// libc-test's sources and its built helper library, shared by every test.
 struct Prepared {
     src: PathBuf,
-    /// `common/*.o` and the generated `options.h`.
+    /// The generated `options.h`.
     common: PathBuf,
+    /// `src/common/*.c`, built for exception handling and for asyncify.
     objects: Vec<PathBuf>,
+    objects_asyncify: Vec<PathBuf>,
+}
+
+impl Prepared {
+    fn objects(&self, config: BuildConfig) -> &[PathBuf] {
+        match config {
+            BuildConfig::ExceptionHandling => &self.objects,
+            BuildConfig::Asyncify => &self.objects_asyncify,
+        }
+    }
 }
 
 static PREPARED: OnceLock<Result<Prepared, String>> = OnceLock::new();
@@ -131,7 +146,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
     }
     std::fs::write(common.join("options.h"), options)?;
 
-    let mut objects = Vec::new();
+    let (mut objects, mut objects_asyncify) = (Vec::new(), Vec::new());
     for entry in std::fs::read_dir(src.join("src/common"))? {
         let path = entry?.path();
         let stem = path.file_stem().unwrap().to_string_lossy().into_owned();
@@ -139,25 +154,31 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         if path.extension().is_none_or(|e| e != "c") || stem == "runtest" {
             continue;
         }
-        let object = common.join(format!("{stem}.o"));
-        let mut cmd = Command::new(&suite.cc);
-        wasixcc_env(&mut cmd)
-            .args(CFLAGS)
-            .arg("-I")
-            .arg(&common)
-            .arg("-I")
-            .arg(src.join("src/common"))
-            .arg("-c")
-            .arg(&path)
-            .arg("-o")
-            .arg(&object);
-        run_build(&mut cmd).map_err(|f| anyhow::anyhow!("{}\n{}", f.cause, f.details))?;
-        objects.push(object);
+        for (config, suffix, list) in [
+            (BuildConfig::ExceptionHandling, "", &mut objects),
+            (BuildConfig::Asyncify, "-asyncify", &mut objects_asyncify),
+        ] {
+            let object = common.join(format!("{stem}{suffix}.o"));
+            let mut cmd = Command::new(&suite.cc);
+            wasixcc_env_for(&mut cmd, config)
+                .args(CFLAGS)
+                .arg("-I")
+                .arg(&common)
+                .arg("-I")
+                .arg(src.join("src/common"))
+                .arg("-c")
+                .arg(&path)
+                .arg("-o")
+                .arg(&object);
+            run_build(&mut cmd).map_err(|f| anyhow::anyhow!("{}\n{}", f.cause, f.details))?;
+            list.push(object);
+        }
     }
     Ok(Prepared {
         src,
         common,
         objects,
+        objects_asyncify,
     })
 }
 
@@ -170,15 +191,19 @@ impl Test {
         let dir = suite.build_root.join(&self.name);
         std::fs::create_dir_all(&dir).map_err(|e| Failure::harness(e.to_string()))?;
         let main = dir.join("main");
-        let mut cmd = Command::new(&suite.cc);
-        wasixcc_env(&mut cmd)
-            .args(CFLAGS)
-            .arg("-I")
-            .arg(&prepared.common)
-            .arg("-I")
-            .arg(prepared.src.join("src/common"))
-            .arg(prepared.src.join("src").join(&self.file));
+        let compile = |config| {
+            let mut cmd = Command::new(&suite.cc);
+            wasixcc_env_for(&mut cmd, config)
+                .args(CFLAGS)
+                .arg("-I")
+                .arg(&prepared.common)
+                .arg("-I")
+                .arg(prepared.src.join("src/common"))
+                .arg(prepared.src.join("src").join(&self.file));
+            cmd
+        };
         if self.dir == "api" {
+            let mut cmd = compile(BuildConfig::ExceptionHandling);
             cmd.args(API_CFLAGS)
                 .arg("-c")
                 .arg("-o")
@@ -186,11 +211,14 @@ impl Test {
             run_build(&mut cmd)?;
             return Ok(Outcome::Passed);
         }
-        cmd.args(&prepared.objects)
-            .arg("-o")
-            .arg(&main)
-            .args(LDLIBS);
-        run_build(&mut cmd)?;
+        build_program(&main, |config| {
+            let mut cmd = compile(config);
+            cmd.args(prepared.objects(config))
+                .arg("-o")
+                .arg(&main)
+                .args(LDLIBS);
+            run_build(&mut cmd)
+        })?;
         let ran = run_wasm(
             suite,
             &Invocation {
