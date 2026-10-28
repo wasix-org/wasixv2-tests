@@ -69,11 +69,11 @@ fork returns twice. Tests that fork build for asyncify and everything else for e
 - Fixtures say so with `//#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no`.
 - Upstream tests are built for exception handling first. A program that forks is built again
   for asyncify: one that contains libc2's `_Fork`, which fork, daemon, forkpty and vfork without
-  libc2's macro go through, or that calls `syscall` with `SYS_clone` or `SYS_clone3` as the
-  number, a raw clone, which forks (LTP's `SAFE_CLONE` and its namespace helpers
-  `tst_ns_create` and `tst_ns_exec`). Threads take neither way. libc2's `clone()`, which runs a
-  function on a new stack, does that only for threads and vforks in either configuration. The
-  linker drops what nothing calls, so this catches forks in helper libraries (LTP's `SAFE_FORK`,
+  libc2's macro go through; libc2's `clone()`, which forks without `CLONE_VM` (LTP's
+  `ltp_clone`); or that calls `syscall` with `SYS_clone` or `SYS_clone3` as the number, a raw
+  clone, which forks (LTP's `SAFE_CLONE` and its namespace helpers `tst_ns_create` and
+  `tst_ns_exec`). Threads take none of these ways: `pthread_create` starts them through libc2's
+  internal `__clone`. The linker drops what nothing calls, so this catches forks in helper libraries (LTP's `SAFE_FORK`,
   `create_sig_proc`, ...) and nothing else; the name section tells, so builds must keep it (they
   do by default). libc-test and Open POSIX tests are rebuilt one by one. LTP's forking programs
   are listed in `wasixv2-forking-*.txt` in its build tree, built in a second tree configured for

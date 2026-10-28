@@ -116,8 +116,8 @@ const BUILD_VERSION: u32 = 2;
 
 /// The version of which programs `links_fork` finds forking. An install prepared with another
 /// version is completed in place: the programs it finds now are built for asyncify too. 2: raw
-/// `clone`/`clone3` syscalls.
-const FORK_DETECTION: u32 = 2;
+/// `clone`/`clone3` syscalls. 3: libc2's `clone` wrapper.
+const FORK_DETECTION: u32 = 3;
 
 /// Linux release whose UAPI headers LTP builds against, the newest release covering wasixv2's
 /// syscall table but for `fchroot`.

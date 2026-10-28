@@ -195,19 +195,19 @@ pub fn wasixcc_env_for(cmd: &mut Command, config: BuildConfig) -> &mut Command {
 const SYS_CLONE: i32 = 220;
 const SYS_CLONE3: i32 = 435;
 
-/// Whether a module built for exception handling can fork, in either of the two ways a program
-/// reaches the `clone`/`clone3` imports that return twice in the asyncify configuration:
+/// Whether a module built for exception handling can fork, in one of the ways a program reaches
+/// the `clone`/`clone3` imports that return twice in the asyncify configuration:
 ///
 /// - It contains libc2's `_Fork`, which `fork`, `daemon`, `forkpty` and a `vfork` that bypasses
 ///   libc2's macro all go through.
+/// - It contains libc2's `clone` wrapper, which forks when the flags lack `CLONE_VM` (LTP's
+///   `ltp_clone`, clone01 to clone11, the namespace tests). The flags are seldom constants
+///   there, so every caller counts; one that only vforks (`CLONE_VM | CLONE_VFORK`) works in
+///   either configuration, and threads cannot start through it (`CLONE_THREAD` is `EINVAL`).
 /// - It calls `syscall` with `SYS_clone` or `SYS_clone3` as the number (`raw_clone`): LTP's
 ///   `tst_clone` (`SAFE_CLONE`, `tst_ns_create`, `tst_ns_exec`) and its `clone3` tests. A raw
 ///   clone has no function to run on a new stack, so it forks. Threads never come this way:
 ///   libc2's `pthread_create` goes through `__clone` and the thread-spawn extension.
-///
-/// libc2's `clone` wrapper, which LTP's `ltp_clone` calls, is not a way to fork: it runs a
-/// function on a new stack, which libc2 does only for threads and vforks, and fails with
-/// `ENOSYS` otherwise, in both configurations.
 ///
 /// The linker drops functions nothing calls, so this follows what the program and every library
 /// it links actually use. Names come from the name section; `None` for a module without one, or
@@ -231,7 +231,7 @@ pub fn links_fork(wasm: &[u8]) -> Option<bool> {
                     for naming in functions {
                         let naming = naming.ok()?;
                         match naming.name {
-                            "_Fork" => return Some(true),
+                            "_Fork" | "clone" => return Some(true),
                             "syscall" => syscall = Some(naming.index),
                             _ => {}
                         }
@@ -565,6 +565,10 @@ mod tests {
     fn fork_is_found_by_name() {
         assert_eq!(
             links_fork(&module(&[("main", vec![]), ("_Fork", vec![])])),
+            Some(true)
+        );
+        assert_eq!(
+            links_fork(&module(&[("main", vec![]), ("clone", vec![])])),
             Some(true)
         );
         assert_eq!(
