@@ -98,7 +98,9 @@ particular CPU.
   `taint_check`, ...), see `metadata_reason` in `src/upstream/ltp.rs`. Shell tests declare theirs
   in `TST_*` variables (`TST_NEEDS_DEVICE=1`, ...), which count the same. Tests that need root
   (`needs_root`, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old APIs) are not excluded:
-  they run as uid 0.
+  they run as uid 0. Tests that need kernel options (`needs_kconfigs`) run when the kernel has
+  every one, which only namespaces' options (`CONFIG_PID_NS`, `CONFIG_IPC_NS`, `CONFIG_UTS_NS`,
+  `CONFIG_NET_NS`) can be; LTP reads them from a kernel configuration the runner gives it.
 - LTP shell tests on the C test library (`tst_loader.sh`) are excluded: the library shares memory
   with the shell it runs, and processes on wasixv2 cannot share memory.
 - Whole LTP runtest lists about hardware or kernel internals are excluded by `EXCLUDED_LISTS` in
