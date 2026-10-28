@@ -194,6 +194,8 @@ pub struct Invocation {
     /// Host directory to guest path.
     pub volumes: Vec<(PathBuf, String)>,
     pub cwd: Option<String>,
+    /// `UID[:GID]` to run as, instead of `wasmer run`'s default user.
+    pub user: Option<String>,
 }
 
 /// The result of running an `Invocation`.
@@ -228,6 +230,9 @@ pub fn run_wasm(suite: &Suite, inv: &Invocation, dir: &Path) -> Result<Ran, Fail
     }
     if let Some(cwd) = &inv.cwd {
         cmd.arg("--cwd").arg(cwd);
+    }
+    if let Some(user) = &inv.user {
+        cmd.arg("--user").arg(user);
     }
     for (key, value) in &inv.env {
         cmd.arg("--env").arg(format!("{key}={value}"));
