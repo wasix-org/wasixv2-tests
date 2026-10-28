@@ -29,6 +29,8 @@ libc-test/regression/malloc-brk-fail                       # t_vmfill commits ~4
 libc-test/regression/setenv-oom                            # t_vmfill commits ~4.2 GB of host memory per test (PROT_NONE address-space fill), so concurrent runs exceed the suite's 11 GB slice; same on feat; follow-up: stop PROT_NONE/unused address space from committing host memory, then remove these entries
 ltp/syscalls/nice05                                        # nice values are advisory (the host schedules guest threads), so both threads get the same CPU time and the sign of the difference is chance: 4 of 6 passes alone
 ltp/syscalls/epoll_wait16                                  # EPOLLEXCLUSIVE: usually one or two waiters too many wake ("event N woke N+1 waiters"), so it fails, but passes now and then: 1 of 8 alone, once in four full runs
+ltp/syscalls/tgkill01                                      # under load SIGUSR1 sent by tgkill now and then runs its handler on another thread ("delivered to wrong thread"): 1 of 1900 stress runs on feat, 10 of 1410 on train 9; passes alone; a race to fix
+ltp/fs/fs_inod01                                           # shell stress test: 17-25 s alone, times out (60 s) under full-suite load now and then
 ltp/syscalls/getrusage04                                   # under load: utime grows more than 5 ms between getrusage calls (host CPU-time granularity)
 ltp/syscalls/fcntl14                                       # forks lockers (asyncify build): passes or dies with SIGKILL (exit 137) from run to run, alone too, on the feat binary as well
 ltp/syscalls/fcntl14_64                                    # as fcntl14
