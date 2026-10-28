@@ -4,6 +4,9 @@
 //! LTP is built once per commit: its own configure and makefiles with wasixcc, against Linux's
 //! UAPI headers, which only LTP's build sees. Tests whose metadata (or `excluded.txt`) shows they
 //! cannot make sense on wasixv2 are excluded.
+//!
+//! A test runs as a child of `ltp-launch.c`, in a process group of its own, as LTP's own runners
+//! run it: the program `wasmer run` starts leads a session, which a test must not (see there).
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -97,6 +100,8 @@ pub struct Test {
 struct Prepared {
     /// `opt/ltp` of the installed build.
     ltproot: PathBuf,
+    /// `ltp-launch.c`, built.
+    launcher: PathBuf,
     /// Leaf directory of each source file stem, and its build log.
     logs: HashMap<String, PathBuf>,
 }
@@ -355,7 +360,30 @@ fn uapi_headers(build_root: &Path) -> Result<PathBuf> {
     Ok(out.join("include"))
 }
 
+/// Builds `ltp-launch.c`, the program each test runs under, for this run.
+fn launcher(suite: &Suite) -> Result<PathBuf> {
+    let dir = suite.build_root.join("ltp-launch");
+    std::fs::create_dir_all(&dir)?;
+    let out = dir.join("ltp-launch.wasm");
+    let partial = dir.join(format!("ltp-launch.{}.wasm", std::process::id()));
+    let mut cc = Command::new(&suite.cc);
+    wasixcc_env(&mut cc)
+        .arg("-O2")
+        .arg(crate::root().join("src/upstream/ltp-launch.c"))
+        .arg("-o")
+        .arg(&partial);
+    let built = cc.output().context("building ltp-launch")?;
+    ensure!(
+        built.status.success(),
+        "building ltp-launch failed:\n{}",
+        String::from_utf8_lossy(&built.stderr)
+    );
+    std::fs::rename(&partial, &out)?;
+    Ok(out)
+}
+
 fn prepare(suite: &Suite) -> Result<Prepared> {
+    let launcher = launcher(suite)?;
     let uapi = uapi_headers(&suite.build_root)?;
     let tree = super::source_copy(suite, "ltp")?;
     let ltproot = tree.join("install/opt/ltp");
@@ -374,7 +402,11 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         })
         .collect();
     if ready.exists() {
-        return Ok(Prepared { ltproot, logs });
+        return Ok(Prepared {
+            ltproot,
+            launcher,
+            logs,
+        });
     }
     let env = |cmd: &mut Command| {
         wasixcc_env(cmd).current_dir(&tree);
@@ -455,7 +487,11 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         }
     });
     std::fs::write(&ready, "")?;
-    Ok(Prepared { ltproot, logs })
+    Ok(Prepared {
+        ltproot,
+        launcher,
+        logs,
+    })
 }
 
 fn jobs() -> usize {
@@ -493,20 +529,18 @@ impl Test {
             ("TMPDIR", "/tmp"),
             ("LTP_COLORIZE_OUTPUT", "0"),
         ];
-        let ran = run_wasm(
-            suite,
-            &Invocation {
-                module: binary,
-                args: self.args.clone(),
-                env: env
-                    .iter()
-                    .map(|(k, v)| (k.to_string(), v.to_string()))
-                    .collect(),
-                volumes: vec![(prepared.ltproot.clone(), "/opt/ltp".to_owned())],
-                cwd: None,
-            },
-            &dir,
-        )?;
+        let mut invocation = Invocation {
+            module: binary,
+            args: self.args.clone(),
+            env: env
+                .iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            volumes: vec![(prepared.ltproot.clone(), "/opt/ltp".to_owned())],
+            cwd: None,
+        };
+        self.launched(&prepared.launcher, &mut invocation);
+        let ran = run_wasm(suite, &invocation, &dir)?;
         match ran.output.status {
             Some(0) => return Ok(Outcome::Passed),
             // Only TCONF results: the test found what it needs missing.
@@ -523,6 +557,14 @@ impl Test {
             .map(old_api_line)
             .unwrap_or_else(|| super::libc_test::exit_cause(ran.output.status));
         Err(ran.fail(suite, cause))
+    }
+
+    /// Runs the test under `launcher` (`ltp-launch.c`), which starts it from `PATH` in a process
+    /// group of its own and waits for it, as LTP's runners do: the test is not the program that
+    /// `wasmer run` starts, which leads its session.
+    fn launched(&self, launcher: &Path, invocation: &mut Invocation) {
+        invocation.module = launcher.to_owned();
+        invocation.args.insert(0, self.command.clone());
     }
 
     /// A shell script, or a runtest line that only a shell can run (`;`, pipes, `$VAR`).
