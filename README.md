@@ -44,6 +44,7 @@ The runner builds and runs every test. It needs, from the environment:
 | `WASIXV2_TESTS_EXPECTED_FAILURES` | A directory of expected-failures files to use instead of `expected-failures/`. |
 | `WASIXV2_TESTS_BLESS` | Rewrite the expected-failures files from this run's results. |
 | `HOSTCC` | The host C compiler that builds LTP's metadata parser (default `cc`). |
+| `WASIXV2_TESTS_USERLAND` | A directory of v2 programs, mounted at `/bin` for LTP's shell tests (see [LTP shell tests](#ltp-shell-tests)). Without it, they are skipped. |
 
 LTP's build needs Linux's UAPI headers (`<linux/*.h>`, `<asm/*.h>`, `<asm-generic/*.h>`). It
 uses the sysroot's when the sysroot has them, as newer libc2 sysroots do. For an older sysroot,
@@ -94,8 +95,12 @@ filesystems (the module owns its whole filesystem), huge pages, cgroups, kernel 
 particular CPU.
 
 - LTP tests are excluded by the requirements their metadata declares (`needs_device`,
-  `taint_check`, ...), see `metadata_reason` in `src/upstream/ltp.rs`. Tests that need root
-  (`needs_root`, or `tst_require_root()` in the old API) are not excluded: they run as uid 0.
+  `taint_check`, ...), see `metadata_reason` in `src/upstream/ltp.rs`. Shell tests declare theirs
+  in `TST_*` variables (`TST_NEEDS_DEVICE=1`, ...), which count the same. Tests that need root
+  (`needs_root`, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old APIs) are not excluded:
+  they run as uid 0.
+- LTP shell tests on the C test library (`tst_loader.sh`) are excluded: the library shares memory
+  with the shell it runs, and processes on wasixv2 cannot share memory.
 - Whole LTP runtest lists about hardware or kernel internals are excluded by `EXCLUDED_LISTS` in
   the same file; every list is either included or excluded with a reason.
 - `excluded.txt` names the rest, each with a `# reason`; a pattern ending in `*` matches a prefix.
@@ -112,12 +117,33 @@ cause, then take the test off the list.
 | --- | --- | --- | --- |
 | libc-test | exit 0; api tests: compiles | | its first line of output |
 | Open POSIX | `PTS_PASS`; `-buildonly` tests: compiles | `PTS_UNSUPPORTED`, `PTS_UNTESTED` | `FAIL` or `UNRESOLVED` and the last line of stdout |
-| LTP | exit 0 | exit 32, only `TCONF` | the first `TFAIL` or `TBROK` line; shell scripts and shell command lines fail as needing a shell |
+| LTP | exit 0 | exit 32, only `TCONF`; shell tests without `WASIXV2_TESTS_USERLAND` | the first `TFAIL` or `TBROK` line |
 
 LTP tests run with LTP's install mounted at `/opt/ltp`, `LTPROOT=/opt/ltp` and its
 `testcases/bin` on `PATH`, so tests can execute their helper programs. They run as `wasmer run`'s
-default user, except tests that need root, which run as uid 0 (`wasmer run --user 0:0`). LTP
-tests that are shell scripts fail until the guest has a shell.
+default user, except tests that need root, which run as uid 0 (`wasmer run --user 0:0`).
+
+### LTP shell tests
+
+A runtest line is a shell test when its program is a shell script, or when only a shell can run
+it (`;`, pipes, `$VAR`, redirections). Shell tests run the whole line as
+`bash -c 'set -m; <line>; exit $?'`, as LTP's runners run every line with `sh -c`, in a v2
+userland mounted at `/bin`: GNU bash, coreutils, grep, sed, gawk, findutils, diffutils and which,
+built for `wasm32-wasixv2`. LTP's shell library (`tst_test.sh`, ...) and the helper programs it
+runs (`tst_timeout_kill`, ...) are part of LTP's install, from `testcases/lib`. `set -m` puts the
+test in a process group of its own, as LTP's runners do: the shell library's timer signals the
+test script's process group, and refuses to signal pid 1.
+
+`WASIXV2_TESTS_USERLAND` is the userland's directory of programs. The runner does not build the
+userland, which takes a while and needs host autotools, and this repository holds no binaries.
+The build scripts are in wasmer's `lib/wasixv2/plan/userland` (branch `wasixv2/plan`); they
+build against libc2's asyncify sysroot (`WASIXCC_SYSROOT_PREFIX` as above):
+
+```sh
+cp -r lib/wasixv2/plan/userland ~/userland   # the scripts build next to themselves
+~/userland/build-all.sh bash coreutils grep sed gawk findutils diffutils which
+WASIXV2_TESTS_USERLAND=~/userland/out/bin cargo run --release -- ltp/
+```
 
 ## Fixtures
 
