@@ -483,6 +483,9 @@ posix/conformance/interfaces/sigpause/1-2
 posix/conformance/interfaces/sigpause/2-1
 posix/conformance/interfaces/sigpause/3-1
 
+## mlockall(MCL_CURRENT) by an unprivileged process fails with ENOMEM: the default RLIMIT_MEMLOCK (8 MiB) is below the process's mapped size, which counts the whole stack region of the wasm image; Linux counts only the stack's touched pages
+posix/conformance/interfaces/mlockall/8-1
+
 ## musl names semaphores /dev/shm/<name> without glibc's sem. prefix, so a NAME_MAX name is valid
 posix/conformance/interfaces/sem_unlink/5-1
 

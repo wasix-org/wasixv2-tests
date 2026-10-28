@@ -835,6 +835,13 @@ ltp/syscalls/listmount04
 ## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
 ltp/commands/ldd01_sh
 
+## the LTP library runs the test in its own process on wasixv2 (no fork_testrun) and unmaps the guarded buffers (tst_free_all) after the first variant or iteration; the next one passes their stale addresses, which kernel copies now fault on (EFAULT) as Linux would, where each run is a fork of its own
+ltp/syscalls/accept4_01
+ltp/syscalls/chmod01
+ltp/syscalls/clock_getres01
+ltp/syscalls/sendmmsg01
+ltp/syscalls/setrlimit06
+
 ## timeout
 ltp/dma_thread_diotest/dma_thread_diotest1
 ltp/dma_thread_diotest/dma_thread_diotest2
