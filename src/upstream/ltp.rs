@@ -2,7 +2,8 @@
 //! of LTP's `runtest/` lists, named `ltp/<list>/<tag>` and run with the list's command line.
 //!
 //! LTP is built once per commit: its own configure and makefiles with wasixcc, against Linux's
-//! UAPI headers, which only LTP's build sees. Tests whose metadata (or `excluded.txt`) shows they
+//! UAPI headers: the sysroot's, or, for a sysroot without them, ones generated for LTP's build
+//! only. Tests whose metadata (or `excluded.txt`) shows they
 //! cannot make sense on wasixv2 are excluded. Tests that need root run as uid 0.
 
 use std::collections::{BTreeMap, HashMap};
@@ -316,6 +317,28 @@ fn metadata(build_root: &Path) -> Result<serde_json::Value> {
     serde_json::from_str(&text).context("parsing LTP's ltp.json")
 }
 
+/// Where LTP's build for `config` finds Linux's UAPI headers: in the sysroot (`None`), which
+/// libc2's sysroots provide (`linux/`, `asm/`, `asm-generic/`), or else in headers generated for
+/// it (`uapi_headers`).
+fn uapi_for(suite: &Suite, config: BuildConfig) -> Result<Option<PathBuf>> {
+    let scratch = tempfile::tempdir()?;
+    let probe = scratch.path().join("uapi.c");
+    // linux/types.h includes asm/types.h, which includes asm-generic/int-ll64.h.
+    std::fs::write(&probe, "#include <linux/types.h>\n")?;
+    let mut cmd = Command::new(&suite.cc);
+    wasixcc_env_for(&mut cmd, config)
+        .current_dir(scratch.path())
+        .arg("-E")
+        .arg(&probe)
+        .arg("-o")
+        .arg(scratch.path().join("uapi.i"));
+    if cmd.output().context("running wasixcc")?.status.success() {
+        Ok(None)
+    } else {
+        uapi_headers(&suite.build_root).map(Some)
+    }
+}
+
 /// Linux's UAPI headers for LTP's build only, with `asm/unistd.h` replaced by libc2's syscall
 /// numbers, which are the wasixv2 ABI's.
 fn uapi_headers(build_root: &Path) -> Result<PathBuf> {
@@ -373,7 +396,6 @@ fn uapi_headers(build_root: &Path) -> Result<PathBuf> {
 }
 
 fn prepare(suite: &Suite) -> Result<Prepared> {
-    let uapi = uapi_headers(&suite.build_root)?;
     let tree = super::source_copy(suite, "ltp")?;
     let ltproot = tree.join("install/opt/ltp");
     let logs_dir = tree.join("wasixv2-build-logs");
@@ -397,7 +419,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
             build_tree(
                 &tree,
                 BuildConfig::ExceptionHandling,
-                &uapi,
+                uapi_for(suite, BuildConfig::ExceptionHandling)?.as_deref(),
                 None,
                 &logs_dir,
             )?;
@@ -413,7 +435,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         }
         let forking = read_forking_list(&forking_list)?;
         if !forking.is_empty() {
-            build_asyncify(suite, &uapi, &ltproot, &forking, &logs_dir)?;
+            build_asyncify(suite, &ltproot, &forking, &logs_dir)?;
         }
         std::fs::write(&ready, "")?;
     }
@@ -445,7 +467,7 @@ fn leaf_log(logs_dir: &Path, leaf: &Path, config: BuildConfig) -> PathBuf {
 fn build_tree(
     tree: &Path,
     config: BuildConfig,
-    uapi: &Path,
+    uapi: Option<&Path>,
     targets: Option<&BTreeMap<String, Vec<String>>>,
     logs_dir: &Path,
 ) -> Result<()> {
@@ -464,7 +486,7 @@ fn build_tree(
     );
     let mut configure = Command::new("./configure");
     env(&mut configure);
-    let out = configure
+    configure
         .args([
             "--host=wasm32-unknown-wasixv2",
             "CC=wasixcc",
@@ -472,9 +494,11 @@ fn build_tree(
             "RANLIB=wasixranlib",
         ])
         .args(["NM=wasixnm", "HOSTCC=cc"])
-        .arg(format!("CPPFLAGS=-isystem {}", uapi.display()))
-        .env("WASIXCC_AUTOCONF_WORKAROUNDS", "yes")
-        .output()?;
+        .env("WASIXCC_AUTOCONF_WORKAROUNDS", "yes");
+    if let Some(uapi) = uapi {
+        configure.arg(format!("CPPFLAGS=-isystem {}", uapi.display()));
+    }
+    let out = configure.output()?;
     ensure!(
         out.status.success(),
         "{what}: configure failed:\n{}",
@@ -605,7 +629,6 @@ fn read_forking_list(path: &Path) -> Result<Vec<(String, String)>> {
 /// removed, so its test fails with the asyncify build's error rather than with ENOSYS.
 fn build_asyncify(
     suite: &Suite,
-    uapi: &Path,
     ltproot: &Path,
     forking: &[(String, String)],
     logs_dir: &Path,
@@ -621,7 +644,14 @@ fn build_asyncify(
                 .push(name.to_owned());
         }
     }
-    build_tree(&tree, BuildConfig::Asyncify, uapi, Some(&targets), logs_dir)?;
+    let uapi = uapi_for(suite, BuildConfig::Asyncify)?;
+    build_tree(
+        &tree,
+        BuildConfig::Asyncify,
+        uapi.as_deref(),
+        Some(&targets),
+        logs_dir,
+    )?;
     for (program, leaf) in forking {
         if leaf == "-" {
             continue;

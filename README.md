@@ -44,10 +44,11 @@ The runner builds and runs every test. It needs, from the environment:
 | `WASIXV2_TESTS_BLESS` | Rewrite the expected-failures files from this run's results. |
 | `HOSTCC` | The host C compiler that builds LTP's metadata parser (default `cc`). |
 
-The first run also fetches Linux's UAPI headers (v7.2, a shallow sparse clone) into the build
-directory: LTP's build needs `<linux/*.h>` and `<asm/*.h>`, and only its build sees them, with
-`asm/unistd.h` replaced by libc2's syscall numbers. Building LTP takes a few minutes, once per
-LTP commit, and its programs that fork once more for asyncify.
+LTP's build needs Linux's UAPI headers (`<linux/*.h>`, `<asm/*.h>`, `<asm-generic/*.h>`). It
+uses the sysroot's when the sysroot has them, as newer libc2 sysroots do. For an older sysroot,
+the first run fetches them (v7.2, a shallow sparse clone) into the build directory, and only
+LTP's build sees them, with `asm/unistd.h` replaced by libc2's syscall numbers. Building LTP
+takes a few minutes, once per LTP commit, and its programs that fork once more for asyncify.
 
 ```sh
 cargo run --release -- [FILTER] [--exact] [--list] ...
