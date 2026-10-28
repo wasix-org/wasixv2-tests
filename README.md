@@ -151,7 +151,9 @@ Each directory under `suite/` with a primary source is a fixture: shell scripts 
 any `*.sh`, each a separate test), a `Cargo.toml`, `main.c`, `main.cpp`, or `*.rs` files (each a
 separate test), in that order of precedence. Every build must produce `main`.
 
-- `main.c` / `main.cpp` are built with `wasixcc` / `wasix++`.
+- `main.c` / `main.cpp` are built with `wasixcc` / `wasix++`. C++ needs libc2's sysroots with libc++
+  (both have it; the asyncify one is built without exceptions). A fixture picks its language
+  standard with `//#BuildEnv: WASIXCC_COMPILER_FLAGS_CXX=-std=c++20`.
 - Shell scripts run with `CC=wasixcc`, `CXX=wasix++` and `WASIXCC_DISCARD_UNSUPPORTED_FLAGS=yes`.
 - Rust fixtures fail: there is no Rust toolchain for `wasm32-wasixv2` yet.
 
