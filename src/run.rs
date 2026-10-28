@@ -1,7 +1,7 @@
 //! Running a built module with `wasmer run` and checking the result against the fixture's
 //! expectations.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 use std::io::{Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -11,6 +11,12 @@ use crate::{Failure, Suite, fixture::Config, fixture::Host};
 
 /// How many of the last syscalls a failure report lists.
 const RECENT_SYSCALLS: usize = 30;
+
+/// How much of each output stream of a run is kept, from its start and from its end. A guest
+/// that spins in a syscall writes gigabytes of trace in a minute, which would exhaust the
+/// host's memory with three tests at a time.
+const KEEP_HEAD: usize = 4 << 20;
+const KEEP_TAIL: usize = 4 << 20;
 
 pub(crate) struct Output {
     /// `None` when the process was killed after the timeout.
@@ -118,16 +124,8 @@ pub(crate) fn execute(
     });
     let mut out = child.stdout.take().unwrap();
     let mut err = child.stderr.take().unwrap();
-    let stdout = std::thread::spawn(move || {
-        let mut buf = Vec::new();
-        let _ = out.read_to_end(&mut buf);
-        buf
-    });
-    let stderr = std::thread::spawn(move || {
-        let mut buf = Vec::new();
-        let _ = err.read_to_end(&mut buf);
-        buf
-    });
+    let stdout = std::thread::spawn(move || read_bounded(&mut out));
+    let stderr = std::thread::spawn(move || read_bounded(&mut err));
 
     let deadline = Instant::now() + suite.timeout;
     let status = loop {
@@ -148,6 +146,47 @@ pub(crate) fn execute(
         stdout: String::from_utf8_lossy(&stdout.join().unwrap_or_default()).into_owned(),
         stderr: String::from_utf8_lossy(&stderr.join().unwrap_or_default()).into_owned(),
     })
+}
+
+/// Reads `stream` to its end, keeping its first [`KEEP_HEAD`] and last [`KEEP_TAIL`] bytes, with
+/// a line in between that says how much was left out.
+fn read_bounded(stream: &mut impl Read) -> Vec<u8> {
+    let mut head = Vec::new();
+    let mut tail = Vec::new();
+    let mut dropped = 0usize;
+    let mut buf = vec![0; 64 << 10];
+    loop {
+        let n = match stream.read(&mut buf) {
+            Ok(0) | Err(_) => break,
+            Ok(n) => n,
+        };
+        let mut chunk = &buf[..n];
+        if head.len() < KEEP_HEAD {
+            let take = chunk.len().min(KEEP_HEAD - head.len());
+            head.extend_from_slice(&chunk[..take]);
+            chunk = &chunk[take..];
+        }
+        tail.extend_from_slice(chunk);
+        if tail.len() > 2 * KEEP_TAIL {
+            let excess = tail.len() - KEEP_TAIL;
+            dropped += excess;
+            tail.drain(..excess);
+        }
+    }
+    if tail.len() > KEEP_TAIL {
+        let excess = tail.len() - KEEP_TAIL;
+        dropped += excess;
+        tail.drain(..excess);
+    }
+    if dropped > 0 {
+        // Start the kept end at a line.
+        let start = tail.iter().position(|&b| b == b'\n').map_or(0, |i| i + 1);
+        dropped += start;
+        tail.drain(..start);
+        head.extend_from_slice(format!("\n[... {dropped} bytes left out ...]\n").as_bytes());
+    }
+    head.extend_from_slice(&tail);
+    head
 }
 
 fn check(config: &Config, output: &Output, dir: &Path) -> Result<(), Failure> {
@@ -220,7 +259,7 @@ struct Syscalls {
 impl Syscalls {
     fn parse(log: &str) -> Self {
         let mut enosys = BTreeMap::new();
-        let mut recent = Vec::new();
+        let mut recent = VecDeque::new();
         for line in log.lines().filter(|l| l.contains("wasixv2_trace")) {
             let Some(call) = line.split_once("call=").map(|(_, rest)| rest) else {
                 continue;
@@ -230,10 +269,12 @@ impl Syscalls {
                 let name = call.split([' ', '{', '(']).next().unwrap_or(call);
                 *enosys.entry(name.to_owned()).or_default() += 1;
             }
-            recent.push(line[line.find("call=").unwrap()..].to_owned());
+            if recent.len() == RECENT_SYSCALLS {
+                recent.pop_front();
+            }
+            recent.push_back(line[line.find("call=").unwrap()..].to_owned());
         }
-        let skip = recent.len().saturating_sub(RECENT_SYSCALLS);
-        recent.drain(..skip);
+        let recent = recent.into();
         Self { enosys, recent }
     }
 
@@ -254,5 +295,23 @@ impl Syscalls {
             out.push('\n');
         }
         out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn read_bounded_keeps_both_ends_of_a_long_stream() {
+        let lines: String = (0..2_000_000).map(|i| format!("line {i}\n")).collect();
+        let kept = read_bounded(&mut lines.as_bytes());
+        let kept = String::from_utf8(kept).unwrap();
+        assert!(kept.len() < KEEP_HEAD + KEEP_TAIL + 100);
+        assert!(kept.starts_with("line 0\n"));
+        assert!(kept.ends_with("line 1999999\n"));
+        assert!(kept.contains(" bytes left out ...]\nline "));
+        let short = read_bounded(&mut "a\nb\n".as_bytes());
+        assert_eq!(short, b"a\nb\n");
     }
 }
