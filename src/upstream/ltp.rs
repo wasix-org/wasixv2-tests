@@ -13,6 +13,10 @@
 //! Other tests run as a child of `ltp-launch.c`, in a process group of its own, as LTP's own
 //! runners run them: the program `wasmer run` starts leads a session, which a test must not (see
 //! there).
+//!
+//! A test that needs kernel options (`needs_kconfigs`) runs only if wasixv2's kernel has every
+//! one ([`KCONFIGS`]); LTP checks them against a kernel configuration that lists those
+//! (`KCONFIG_PATH`).
 
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
@@ -93,6 +97,19 @@ const EXCLUDED_LISTS: &[(&str, &str)] = &[
     ("uevent", "device events"),
 ];
 
+/// The kernel options wasixv2's kernel has that tests ask for (`needs_kconfigs`): its pid, IPC,
+/// UTS and network namespaces. There are no user or time namespaces, and mount namespaces have
+/// no option of their own.
+const KCONFIGS: &[&str] = &[
+    "CONFIG_PID_NS",
+    "CONFIG_IPC_NS",
+    "CONFIG_UTS_NS",
+    "CONFIG_NET_NS",
+];
+
+/// The kernel configuration LTP reads for the tests that need options, in the install.
+const KCONFIG_FILE: &str = "wasixv2-kconfig";
+
 /// The version of what the runner builds in LTP's tree. A tree built by an older runner, with
 /// another version, is built again. 2: trunk directories too.
 const BUILD_VERSION: u32 = 2;
@@ -115,6 +132,8 @@ pub struct Test {
     /// The test needs root (`needs_root`, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old
     /// APIs): it runs as uid 0, which holds every capability.
     root: bool,
+    /// The test checks kernel options (`needs_kconfigs`), all of which the kernel has.
+    kconfigs: bool,
 }
 
 struct Prepared {
@@ -190,6 +209,7 @@ pub fn discover(
             let test = Test {
                 name: name.clone(),
                 root: declared.iter().any(|test| has(test, "needs_root")),
+                kconfigs: declared.iter().any(|test| has(test, "needs_kconfigs")),
                 command,
                 args,
                 line,
@@ -375,8 +395,8 @@ fn metadata_reason(test: &serde_json::Value) -> Option<String> {
     } else if has("needs_cgroup_ctrls") || has("needs_cgroup_ver") || has("needs_cgroup_nsdelegate")
     {
         "needs cgroups"
-    } else if has("needs_kconfigs") {
-        "reads the kernel's build configuration"
+    } else if has("needs_kconfigs") && !kconfigs_supported(test) {
+        "needs kernel options wasixv2's kernel does not have"
     } else if has("min_swap_avail") {
         "needs swap"
     } else if has("needs_cpu_vendor") {
@@ -396,6 +416,24 @@ fn metadata_reason(test: &serde_json::Value) -> Option<String> {
         return None;
     };
     Some(format!("LTP: {reason}"))
+}
+
+/// Whether the kernel has every option `test` needs: each of its `needs_kconfigs` is one of
+/// [`KCONFIGS`], alone or `=y`. A shell test's, which are not parsed, are not.
+fn kconfigs_supported(test: &serde_json::Value) -> bool {
+    let Some(kconfigs) = test.get("needs_kconfigs").and_then(|v| v.as_array()) else {
+        return false;
+    };
+    kconfigs.iter().all(|kconfig| {
+        let kconfig = kconfig.as_str().unwrap_or_default().trim();
+        let name = kconfig.strip_suffix("=y").unwrap_or(kconfig);
+        KCONFIGS.contains(&name)
+    })
+}
+
+/// The kernel configuration of [`KCONFIG_FILE`]: every option of [`KCONFIGS`] built in.
+fn kconfig_text() -> String {
+    KCONFIGS.iter().map(|name| format!("{name}=y\n")).collect()
 }
 
 /// Every `.c` under `testcases/` by stem, for finding a test's source and build log.
@@ -615,6 +653,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         let log = leaf_log(&logs_dir, Path::new(&leaf), BuildConfig::Asyncify);
         logs.insert(metadata_key(name).to_owned(), log);
     }
+    std::fs::write(ltproot.join(KCONFIG_FILE), kconfig_text())?;
     Ok(Prepared {
         ltproot,
         launcher,
@@ -937,18 +976,22 @@ impl Test {
             };
             head.starts_with(b"#!")
         };
+        let mut env: Vec<(String, String)> = [
+            ("LTPROOT", "/opt/ltp"),
+            ("PATH", "/opt/ltp/testcases/bin:/usr/bin:/bin"),
+            ("TMPDIR", "/tmp"),
+            ("LTP_COLORIZE_OUTPUT", "0"),
+        ]
+        .iter()
+        .map(|(k, v)| (k.to_string(), v.to_string()))
+        .collect();
+        if self.kconfigs {
+            env.push(("KCONFIG_PATH".into(), format!("/opt/ltp/{KCONFIG_FILE}")));
+        }
         let mut invocation = Invocation {
             module: binary,
             args: self.args.clone(),
-            env: [
-                ("LTPROOT", "/opt/ltp"),
-                ("PATH", "/opt/ltp/testcases/bin:/usr/bin:/bin"),
-                ("TMPDIR", "/tmp"),
-                ("LTP_COLORIZE_OUTPUT", "0"),
-            ]
-            .iter()
-            .map(|(k, v)| (k.to_string(), v.to_string()))
-            .collect(),
+            env,
             volumes: vec![(prepared.ltproot.clone(), "/opt/ltp".to_owned())],
             cwd: None,
             user: self.root.then(|| "0:0".to_owned()),
@@ -1066,7 +1109,36 @@ fn old_api_line(line: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{has, old_api_line, script_metadata, script_reason};
+    use super::{
+        has, kconfig_text, kconfigs_supported, metadata_reason, old_api_line, script_metadata,
+        script_reason,
+    };
+
+    #[test]
+    fn tests_run_when_the_kernel_has_every_option_they_need() {
+        let needs = |kconfigs: &[&str]| serde_json::json!({ "needs_kconfigs": kconfigs });
+        assert!(kconfigs_supported(&needs(&["CONFIG_PID_NS"])));
+        assert!(kconfigs_supported(&needs(&[
+            "CONFIG_NET_NS=y",
+            "CONFIG_UTS_NS"
+        ])));
+        assert!(!kconfigs_supported(&needs(&[
+            "CONFIG_USER_NS",
+            "CONFIG_PID_NS"
+        ])));
+        assert!(!kconfigs_supported(&needs(&["CONFIG_TIME_NS=y"])));
+        assert!(!kconfigs_supported(&needs(&[
+            "CONFIG_NET_NS=y",
+            "CONFIG_TUN"
+        ])));
+        assert!(!kconfigs_supported(&needs(&["CONFIG_PID_NS=m"])));
+        assert_eq!(metadata_reason(&needs(&["CONFIG_PID_NS"])), None);
+        assert!(metadata_reason(&needs(&["CONFIG_KVM"])).is_some());
+        // A shell test's options are not read.
+        let shell = script_metadata("TST_NEEDS_KCONFIGS=\"CONFIG_PID_NS\"\n");
+        assert!(metadata_reason(&shell).is_some());
+        assert!(kconfig_text().lines().any(|line| line == "CONFIG_PID_NS=y"));
+    }
 
     #[test]
     fn shell_scripts_declare_requirements_in_variables() {
