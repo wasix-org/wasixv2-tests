@@ -1,5 +1,6 @@
 //! The Open POSIX Test Suite (`testcases/open_posix_testsuite` in `upstream/ltp`): one program per
-//! assertion, reporting through its exit status. `-buildonly` tests only have to compile.
+//! assertion, reporting through its exit status. `-buildonly` tests only have to compile. Tests
+//! that fork are built for the asyncify configuration, the rest for exception handling.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -8,7 +9,10 @@ use std::sync::OnceLock;
 use anyhow::{Result, ensure};
 use walkdir::WalkDir;
 
-use super::{Case, ExcludeList, Excluded, Invocation, Outcome, run_build, run_wasm, wasixcc_env};
+use super::{
+    BuildConfig, Case, ExcludeList, Excluded, Invocation, Outcome, build_program, run_build,
+    run_wasm, wasixcc_env, wasixcc_env_for,
+};
 use crate::{Failure, Suite};
 
 /// `posixtest.h`'s exit statuses.
@@ -32,8 +36,18 @@ pub struct Test {
 
 struct Prepared {
     root: PathBuf,
-    /// `lib/common.c`, built once.
+    /// `lib/common.c`, built once for exception handling and once for asyncify.
     common: PathBuf,
+    common_asyncify: PathBuf,
+}
+
+impl Prepared {
+    fn common(&self, config: BuildConfig) -> &Path {
+        match config {
+            BuildConfig::ExceptionHandling => &self.common,
+            BuildConfig::Asyncify => &self.common_asyncify,
+        }
+    }
 }
 
 static PREPARED: OnceLock<Result<Prepared, String>> = OnceLock::new();
@@ -94,16 +108,26 @@ pub fn discover(excludes: &ExcludeList, excluded: &mut Excluded) -> Result<Vec<(
 fn prepare(suite: &Suite) -> Result<Prepared> {
     let root = super::source_copy(suite, "ltp")?.join(SUITE_DIR);
     let common = suite.build_root.join("posix-common.o");
-    let mut cmd = Command::new(&suite.cc);
-    wasixcc_env(&mut cmd)
-        .arg("-I")
-        .arg(root.join("include"))
-        .arg("-c")
-        .arg(root.join("lib/common.c"))
-        .arg("-o")
-        .arg(&common);
-    run_build(&mut cmd).map_err(|f| anyhow::anyhow!("{}\n{}", f.cause, f.details))?;
-    Ok(Prepared { root, common })
+    let common_asyncify = suite.build_root.join("posix-common-asyncify.o");
+    for (config, object) in [
+        (BuildConfig::ExceptionHandling, &common),
+        (BuildConfig::Asyncify, &common_asyncify),
+    ] {
+        let mut cmd = Command::new(&suite.cc);
+        wasixcc_env_for(&mut cmd, config)
+            .arg("-I")
+            .arg(root.join("include"))
+            .arg("-c")
+            .arg(root.join("lib/common.c"))
+            .arg("-o")
+            .arg(object);
+        run_build(&mut cmd).map_err(|f| anyhow::anyhow!("{}\n{}", f.cause, f.details))?;
+    }
+    Ok(Prepared {
+        root,
+        common,
+        common_asyncify,
+    })
 }
 
 /// The flags in a test directory's `CFLAGS`, `LDFLAGS` or `LDLIBS` file, as the suite's
@@ -145,27 +169,34 @@ impl Test {
         let src_dir = source.parent().unwrap();
         let dir = suite.build_root.join(&self.name);
         std::fs::create_dir_all(&dir).map_err(|e| Failure::harness(e.to_string()))?;
-        let mut cmd = Command::new(&suite.cc);
-        wasixcc_env(&mut cmd)
-            .arg("-I")
-            .arg(prepared.root.join("include"))
-            .arg("-I")
-            .arg(src_dir)
-            .args(dir_flags(suite, src_dir, "CFLAGS"))
-            .arg(&source);
+        let compile = |config| {
+            let mut cmd = Command::new(&suite.cc);
+            wasixcc_env_for(&mut cmd, config)
+                .arg("-I")
+                .arg(prepared.root.join("include"))
+                .arg("-I")
+                .arg(src_dir)
+                .args(dir_flags(suite, src_dir, "CFLAGS"))
+                .arg(&source);
+            cmd
+        };
         if self.build_only {
+            let mut cmd = compile(BuildConfig::ExceptionHandling);
             cmd.arg("-c").arg("-o").arg(dir.join("main.o"));
             run_build(&mut cmd)?;
             return Ok(Outcome::Passed);
         }
         let main = dir.join("main");
-        cmd.arg(&prepared.common)
-            .args(dir_flags(suite, src_dir, "LDFLAGS"))
-            .arg("-o")
-            .arg(&main)
-            .args(dir_flags(suite, src_dir, "LDLIBS"))
-            .args(["-lpthread", "-lrt", "-lm"]);
-        run_build(&mut cmd)?;
+        build_program(&main, |config| {
+            let mut cmd = compile(config);
+            cmd.arg(prepared.common(config))
+                .args(dir_flags(suite, src_dir, "LDFLAGS"))
+                .arg("-o")
+                .arg(&main)
+                .args(dir_flags(suite, src_dir, "LDLIBS"))
+                .args(["-lpthread", "-lrt", "-lm"]);
+            run_build(&mut cmd)
+        })?;
         let ran = run_wasm(
             suite,
             &Invocation {

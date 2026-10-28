@@ -105,6 +105,11 @@ impl ExcludeList {
 /// A clean copy of submodule `name` at its checked-out commit, under the build directory, so
 /// builds never touch the submodule. Made once per commit.
 pub fn source_copy(suite: &Suite, name: &str) -> Result<PathBuf> {
+    source_copy_as(suite, name, "")
+}
+
+/// `source_copy`, another copy for each `variant`, such as a second build configuration.
+pub fn source_copy_as(suite: &Suite, name: &str, variant: &str) -> Result<PathBuf> {
     // Two suites share LTP's copy; only one may create it.
     static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
     let _guard = LOCK.lock().unwrap();
@@ -112,10 +117,15 @@ pub fn source_copy(suite: &Suite, name: &str) -> Result<PathBuf> {
     let commit = git(&repo, &["rev-parse", "HEAD"]).with_context(|| {
         format!("upstream/{name} is not checked out: run `git submodule update --init`")
     })?;
+    let suffix = if variant.is_empty() {
+        String::new()
+    } else {
+        format!("-{variant}")
+    };
     let dest = suite
         .build_root
         .join("upstream")
-        .join(format!("{name}-{}", &commit[..12]));
+        .join(format!("{name}-{}{suffix}", &commit[..12]));
     let ready = dest.join(".wasixv2-tests-ready");
     if ready.exists() {
         return Ok(dest);
@@ -160,6 +170,73 @@ pub(crate) fn git(dir: &Path, args: &[&str]) -> Result<String> {
 pub fn wasixcc_env(cmd: &mut Command) -> &mut Command {
     cmd.env("WASIXCC_TARGET", "wasm32-wasixv2")
         .env("WASIXCC_DISCARD_UNSUPPORTED_FLAGS", "yes")
+}
+
+/// libc2's two build configurations, each with its own sysroot under `WASIXCC_SYSROOT_PREFIX`.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum BuildConfig {
+    /// wasixcc's default, with wasm exception handling. fork fails with `ENOSYS`.
+    ExceptionHandling,
+    /// `WASIXCC_WASM_EXCEPTIONS=no`: wasixcc runs `wasm-opt --asyncify` on every program, so the
+    /// host can unwind and rewind the stack, and fork returns twice.
+    Asyncify,
+}
+
+/// `wasixcc_env`, for `config`.
+pub fn wasixcc_env_for(cmd: &mut Command, config: BuildConfig) -> &mut Command {
+    wasixcc_env(cmd);
+    if config == BuildConfig::Asyncify {
+        cmd.env("WASIXCC_WASM_EXCEPTIONS", "no");
+    }
+    cmd
+}
+
+/// Whether a module built for exception handling can fork: whether it contains libc2's `_Fork`,
+/// which `fork`, `daemon`, `forkpty` and a `vfork` that bypasses libc2's macro all go through.
+/// The linker drops functions nothing calls, so this follows what the program and every library
+/// it links actually use. Read from the name section; `None` for a module without one.
+pub fn links_fork(wasm: &[u8]) -> Option<bool> {
+    for payload in wasmparser::Parser::new(0).parse_all(wasm) {
+        let Ok(wasmparser::Payload::CustomSection(section)) = payload else {
+            continue;
+        };
+        let wasmparser::KnownCustom::Name(names) = section.as_known() else {
+            continue;
+        };
+        for name in names.into_iter().flatten() {
+            if let wasmparser::Name::Function(functions) = name {
+                return Some(
+                    functions
+                        .into_iter()
+                        .flatten()
+                        .any(|naming| naming.name == "_Fork"),
+                );
+            }
+        }
+    }
+    None
+}
+
+/// Builds the program `main` with `build`, for exception handling, and rebuilds it for asyncify
+/// when it can fork (`links_fork`). Returns the configuration it was built for.
+pub fn build_program(
+    main: &Path,
+    mut build: impl FnMut(BuildConfig) -> Result<(), Failure>,
+) -> Result<BuildConfig, Failure> {
+    build(BuildConfig::ExceptionHandling)?;
+    let wasm = std::fs::read(main)
+        .map_err(|e| Failure::harness(format!("reading {}: {e}", main.display())))?;
+    match links_fork(&wasm) {
+        Some(false) => Ok(BuildConfig::ExceptionHandling),
+        Some(true) => {
+            build(BuildConfig::Asyncify)?;
+            Ok(BuildConfig::Asyncify)
+        }
+        None => Err(Failure::harness(format!(
+            "{} has no name section, so whether it forks is unknown",
+            main.display()
+        ))),
+    }
 }
 
 /// Runs `cmd` (a build step) and turns a failure into a `build:` failure named after its first
@@ -271,4 +348,36 @@ pub fn cause_from_line(prefix: &str, line: &str) -> String {
 /// The first line of `text` that satisfies `pred`.
 pub fn first_line(text: &str, pred: impl Fn(&str) -> bool) -> Option<&str> {
     text.lines().find(|l| pred(l))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::links_fork;
+
+    /// A module with only a name section naming functions `names`.
+    fn module_naming(names: &[&str]) -> Vec<u8> {
+        let mut functions = vec![names.len() as u8];
+        for (i, name) in names.iter().enumerate() {
+            functions.extend([i as u8, name.len() as u8]);
+            functions.extend(name.as_bytes());
+        }
+        let mut section = vec![4];
+        section.extend(b"name");
+        section.extend([1, functions.len() as u8]);
+        section.extend(functions);
+        let mut wasm = b"\0asm\x01\0\0\0".to_vec();
+        wasm.extend([0, section.len() as u8]);
+        wasm.extend(section);
+        wasm
+    }
+
+    #[test]
+    fn fork_is_found_by_name() {
+        assert_eq!(links_fork(&module_naming(&["main", "_Fork"])), Some(true));
+        assert_eq!(
+            links_fork(&module_naming(&["main", "fork_testrun"])),
+            Some(false)
+        );
+        assert_eq!(links_fork(b"\0asm\x01\0\0\0"), None);
+    }
 }

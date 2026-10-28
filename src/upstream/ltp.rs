@@ -5,7 +5,7 @@
 //! UAPI headers, which only LTP's build sees. Tests whose metadata (or `excluded.txt`) shows they
 //! cannot make sense on wasixv2 are excluded. Tests that need root run as uid 0.
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::OnceLock;
@@ -13,7 +13,9 @@ use std::sync::OnceLock;
 use anyhow::{Context, Result, bail, ensure};
 use walkdir::WalkDir;
 
-use super::{Case, ExcludeList, Excluded, Invocation, Outcome, run_wasm, wasixcc_env};
+use super::{
+    BuildConfig, Case, ExcludeList, Excluded, Invocation, Outcome, run_wasm, wasixcc_env_for,
+};
 use crate::{Failure, Suite};
 
 /// The `runtest/` lists that test the system interface wasixv2 provides.
@@ -375,30 +377,90 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
     let tree = super::source_copy(suite, "ltp")?;
     let ltproot = tree.join("install/opt/ltp");
     let logs_dir = tree.join("wasixv2-build-logs");
-    let ready = tree.join(".wasixv2-ltp-built");
-    let sources = source_index(&tree);
-    let logs = sources
+    let mut logs: HashMap<String, PathBuf> = source_index(&tree)
         .iter()
         .map(|(stem, path)| {
             let leaf = path.parent().unwrap().strip_prefix(&tree).unwrap();
-            let log = logs_dir.join(format!(
-                "{}.log",
-                leaf.display().to_string().replace('/', "_")
-            ));
-            (stem.clone(), log)
+            (
+                stem.clone(),
+                leaf_log(&logs_dir, leaf, BuildConfig::ExceptionHandling),
+            )
         })
         .collect();
-    if ready.exists() {
-        return Ok(Prepared { ltproot, logs });
+    // The exception-handling build of everything, then the asyncify build of the programs that
+    // fork, which replaces theirs in the install.
+    let built = tree.join(".wasixv2-ltp-built");
+    let forking_list = tree.join("wasixv2-forking.txt");
+    let ready = tree.join(".wasixv2-ltp-ready");
+    if !ready.exists() {
+        if !built.exists() {
+            build_tree(
+                &tree,
+                BuildConfig::ExceptionHandling,
+                &uapi,
+                None,
+                &logs_dir,
+            )?;
+            std::fs::write(&built, "")?;
+        }
+        if !forking_list.exists() {
+            let forking = forking_programs(&tree, &ltproot)?;
+            let text: String = forking
+                .iter()
+                .map(|(program, leaf)| format!("{program} {leaf}\n"))
+                .collect();
+            std::fs::write(&forking_list, text)?;
+        }
+        let forking = read_forking_list(&forking_list)?;
+        if !forking.is_empty() {
+            build_asyncify(suite, &uapi, &ltproot, &forking, &logs_dir)?;
+        }
+        std::fs::write(&ready, "")?;
     }
+    for (program, leaf) in read_forking_list(&forking_list)? {
+        if leaf == "-" {
+            continue;
+        }
+        let name = program.rsplit('/').next().unwrap_or(&program);
+        let log = leaf_log(&logs_dir, Path::new(&leaf), BuildConfig::Asyncify);
+        logs.insert(metadata_key(name).to_owned(), log);
+    }
+    Ok(Prepared { ltproot, logs })
+}
+
+/// The build log of a leaf directory, given relative to the tree.
+fn leaf_log(logs_dir: &Path, leaf: &Path, config: BuildConfig) -> PathBuf {
+    let suffix = match config {
+        BuildConfig::ExceptionHandling => "",
+        BuildConfig::Asyncify => ".asyncify",
+    };
+    logs_dir.join(format!(
+        "{}{suffix}.log",
+        leaf.display().to_string().replace('/', "_")
+    ))
+}
+
+/// Configures LTP's `tree` for `config` and builds its library, then the leaf directories under
+/// `testcases/`: each one's `targets` only, when given, else everything, installed.
+fn build_tree(
+    tree: &Path,
+    config: BuildConfig,
+    uapi: &Path,
+    targets: Option<&BTreeMap<String, Vec<String>>>,
+    logs_dir: &Path,
+) -> Result<()> {
+    let what = match config {
+        BuildConfig::ExceptionHandling => "LTP",
+        BuildConfig::Asyncify => "LTP (asyncify)",
+    };
     let env = |cmd: &mut Command| {
-        wasixcc_env(cmd).current_dir(&tree);
+        wasixcc_env_for(cmd, config).current_dir(tree);
     };
     let mut autotools = Command::new("make");
     env(&mut autotools);
     ensure!(
         autotools.arg("autotools").output()?.status.success(),
-        "LTP: make autotools failed"
+        "{what}: make autotools failed"
     );
     let mut configure = Command::new("./configure");
     env(&mut configure);
@@ -415,7 +477,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         .output()?;
     ensure!(
         out.status.success(),
-        "LTP: configure failed:\n{}",
+        "{what}: configure failed:\n{}",
         String::from_utf8_lossy(&out.stdout)
     );
     let mut lib = Command::new("make");
@@ -426,21 +488,16 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
         .output()?;
     ensure!(
         out.status.success(),
-        "LTP: building lib failed:\n{}",
+        "{what}: building lib failed:\n{}",
         String::from_utf8_lossy(&out.stderr)
     );
 
     // Leaf directories one by one: LTP's directory makefiles stop at the first failure.
-    std::fs::create_dir_all(&logs_dir)?;
-    let leaves: Vec<PathBuf> = WalkDir::new(tree.join("testcases"))
-        .into_iter()
-        .filter_map(Result::ok)
-        .filter(|e| e.file_name() == "Makefile")
-        .filter(|e| {
-            std::fs::read_to_string(e.path()).is_ok_and(|m| m.contains("generic_leaf_target"))
-        })
-        .map(|e| e.path().parent().unwrap().to_path_buf())
-        .collect();
+    std::fs::create_dir_all(logs_dir)?;
+    let leaves: Vec<PathBuf> = match targets {
+        Some(targets) => targets.keys().map(|leaf| tree.join(leaf)).collect(),
+        None => leaf_dirs(tree),
+    };
     let next = std::sync::atomic::AtomicUsize::new(0);
     std::thread::scope(|s| {
         for _ in 0..jobs() {
@@ -448,29 +505,135 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
                 loop {
                     let i = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                     let Some(leaf) = leaves.get(i) else { break };
-                    let rel = leaf.strip_prefix(&tree).unwrap().display().to_string();
-                    let log = logs_dir.join(format!("{}.log", rel.replace('/', "_")));
+                    let rel = leaf.strip_prefix(tree).unwrap();
                     let mut text = String::new();
-                    for target in [None, Some("install")] {
+                    let steps: Vec<Vec<String>> = match targets {
+                        Some(targets) => vec![targets[&rel.display().to_string()].clone()],
+                        None => vec![
+                            vec![],
+                            vec![
+                                "install".to_owned(),
+                                format!("DESTDIR={}", tree.join("install").display()),
+                            ],
+                        ],
+                    };
+                    for args in steps {
                         let mut make = Command::new("make");
                         env(&mut make);
-                        make.arg("-k").arg("-C").arg(leaf);
-                        if let Some(t) = target {
-                            make.arg(t)
-                                .arg(format!("DESTDIR={}", tree.join("install").display()));
-                        }
+                        make.arg("-k").arg("-C").arg(leaf).args(args);
                         if let Ok(out) = make.output() {
                             text.push_str(&String::from_utf8_lossy(&out.stdout));
                             text.push_str(&String::from_utf8_lossy(&out.stderr));
                         }
                     }
-                    let _ = std::fs::write(&log, text);
+                    let _ = std::fs::write(leaf_log(logs_dir, rel, config), text);
                 }
             });
         }
     });
-    std::fs::write(&ready, "")?;
-    Ok(Prepared { ltproot, logs })
+    Ok(())
+}
+
+/// The leaf directories of `testcases/`, which build programs.
+fn leaf_dirs(tree: &Path) -> Vec<PathBuf> {
+    WalkDir::new(tree.join("testcases"))
+        .into_iter()
+        .filter_map(Result::ok)
+        .filter(|e| e.file_name() == "Makefile")
+        .filter(|e| {
+            std::fs::read_to_string(e.path()).is_ok_and(|m| m.contains("generic_leaf_target"))
+        })
+        .map(|e| e.path().parent().unwrap().to_path_buf())
+        .collect()
+}
+
+/// The installed programs that fork (`links_fork`), each under `ltproot` with the leaf directory
+/// that built it, relative to `tree`, or `-` when no leaf directory has the same program.
+fn forking_programs(tree: &Path, ltproot: &Path) -> Result<Vec<(String, String)>> {
+    let mut forking = Vec::new();
+    let mut unnamed = Vec::new();
+    for entry in WalkDir::new(ltproot.join("testcases/bin"))
+        .into_iter()
+        .filter_map(Result::ok)
+        .filter(|e| e.file_type().is_file())
+    {
+        let wasm = std::fs::read(entry.path())?;
+        if !wasm.starts_with(b"\0asm") {
+            continue;
+        }
+        let program = entry.path().strip_prefix(ltproot)?.to_owned();
+        match super::links_fork(&wasm) {
+            Some(true) => forking.push((program, wasm)),
+            Some(false) => {}
+            None => unnamed.push(program.display().to_string()),
+        }
+    }
+    ensure!(
+        unnamed.is_empty(),
+        "LTP: programs without a name section, so whether they fork is unknown: {unnamed:?}"
+    );
+    // Installed programs are copies of what a leaf directory built.
+    let leaves = leaf_dirs(tree);
+    Ok(forking
+        .into_iter()
+        .map(|(program, wasm)| {
+            let name = program.file_name().unwrap();
+            let leaf = leaves
+                .iter()
+                .find(|leaf| std::fs::read(leaf.join(name)).is_ok_and(|built| built == wasm))
+                .map_or_else(
+                    || "-".to_owned(),
+                    |leaf| leaf.strip_prefix(tree).unwrap().display().to_string(),
+                );
+            (program.display().to_string(), leaf)
+        })
+        .collect())
+}
+
+/// `wasixv2-forking.txt`: `program leaf` lines, as `forking_programs` finds them.
+fn read_forking_list(path: &Path) -> Result<Vec<(String, String)>> {
+    let text = std::fs::read_to_string(path)?;
+    Ok(text
+        .lines()
+        .filter_map(|line| line.split_once(' '))
+        .map(|(program, leaf)| (program.to_owned(), leaf.to_owned()))
+        .collect())
+}
+
+/// Builds the programs that fork for asyncify, in a tree of their own, and puts them in place of
+/// their exception-handling builds under `ltproot`. A program whose asyncify build fails is
+/// removed, so its test fails with the asyncify build's error rather than with ENOSYS.
+fn build_asyncify(
+    suite: &Suite,
+    uapi: &Path,
+    ltproot: &Path,
+    forking: &[(String, String)],
+    logs_dir: &Path,
+) -> Result<()> {
+    let tree = super::source_copy_as(suite, "ltp", "asyncify")?;
+    let mut targets: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    for (program, leaf) in forking {
+        if leaf != "-" {
+            let name = program.rsplit('/').next().unwrap_or(program);
+            targets
+                .entry(leaf.clone())
+                .or_default()
+                .push(name.to_owned());
+        }
+    }
+    build_tree(&tree, BuildConfig::Asyncify, uapi, Some(&targets), logs_dir)?;
+    for (program, leaf) in forking {
+        if leaf == "-" {
+            continue;
+        }
+        let name = program.rsplit('/').next().unwrap_or(program);
+        let installed = ltproot.join(program);
+        match std::fs::read(tree.join(leaf).join(name)) {
+            Ok(built) => std::fs::write(&installed, built)?,
+            Err(_) => std::fs::remove_file(&installed)?,
+        }
+    }
+    Ok(())
 }
 
 fn jobs() -> usize {
