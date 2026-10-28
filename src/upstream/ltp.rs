@@ -3,7 +3,7 @@
 //!
 //! LTP is built once per commit: its own configure and makefiles with wasixcc, against Linux's
 //! UAPI headers, which only LTP's build sees. Tests whose metadata (or `excluded.txt`) shows they
-//! cannot make sense on wasixv2 are excluded.
+//! cannot make sense on wasixv2 are excluded. Tests that need root run as uid 0.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -92,6 +92,9 @@ pub struct Test {
     name: String,
     command: String,
     args: Vec<String>,
+    /// The test needs root (`needs_root`, or `tst_require_root()` in the old API): it runs as
+    /// uid 0, which holds every capability.
+    root: bool,
 }
 
 struct Prepared {
@@ -147,14 +150,14 @@ pub fn discover(
             let reason = excludes
                 .reason(&name)
                 .map(str::to_owned)
-                .or_else(|| metadata_reason(&metadata, &command))
-                .or_else(|| old_api_reason(&sources, &command));
+                .or_else(|| metadata_reason(&metadata, &command));
             if let Some(reason) = reason {
                 excluded.add(reason);
                 continue;
             }
             let test = Test {
                 name: name.clone(),
+                root: needs_root(&metadata, &sources, &command),
                 command,
                 args,
             };
@@ -200,9 +203,7 @@ fn metadata_reason(metadata: &serde_json::Value, command: &str) -> Option<String
         test.get(key)
             .is_some_and(|v| !v.is_null() && v != &serde_json::Value::from(0))
     };
-    let reason = if has("needs_root") {
-        "needs root, which a wasixv2 process never is"
-    } else if has("needs_device")
+    let reason = if has("needs_device")
         || has("format_device")
         || has("mount_device")
         || has("all_filesystems")
@@ -243,12 +244,26 @@ fn metadata_reason(metadata: &serde_json::Value, command: &str) -> Option<String
     Some(format!("LTP: {reason}"))
 }
 
-/// Old-API tests have no metadata; the ones that require root say so in their source.
-fn old_api_reason(sources: &HashMap<String, PathBuf>, command: &str) -> Option<String> {
-    let path = sources.get(metadata_key(command))?;
-    let text = std::fs::read_to_string(path).ok()?;
-    (text.contains("tst_require_root()") && !text.contains("struct tst_test"))
-        .then(|| "LTP: needs root, which a wasixv2 process never is".to_owned())
+/// Whether a test needs root: `needs_root` in its metadata, or, for old-API tests, which have no
+/// metadata, `tst_require_root()` in its source.
+fn needs_root(
+    metadata: &serde_json::Value,
+    sources: &HashMap<String, PathBuf>,
+    command: &str,
+) -> bool {
+    let key = metadata_key(command);
+    let declared = metadata
+        .get("tests")
+        .and_then(|t| t.get(key))
+        .and_then(|t| t.get("needs_root"))
+        .is_some_and(|v| !v.is_null() && v != &serde_json::Value::from(0));
+    declared
+        || sources
+            .get(key)
+            .and_then(|path| std::fs::read_to_string(path).ok())
+            .is_some_and(|text| {
+                text.contains("tst_require_root()") && !text.contains("struct tst_test")
+            })
 }
 
 /// Every `.c` under `testcases/` by stem, for finding a test's source and build log.
@@ -504,6 +519,7 @@ impl Test {
                     .collect(),
                 volumes: vec![(prepared.ltproot.clone(), "/opt/ltp".to_owned())],
                 cwd: None,
+                user: self.root.then(|| "0:0".to_owned()),
             },
             &dir,
         )?;

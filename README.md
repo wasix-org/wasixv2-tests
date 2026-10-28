@@ -71,12 +71,13 @@ diff. Tests that the run did not include keep their entries.
 
 Upstream tests that cannot make sense on wasixv2 are not registered at all, and a run prints how
 many were excluded for each reason. Expected failures are for tests that make sense and do not
-work yet; exclusions are for tests that never will, such as tests that need root (a wasixv2
-process never is), block devices or real filesystems (the module owns its whole filesystem), huge
-pages, cgroups, kernel modules or a particular CPU.
+work yet; exclusions are for tests that never will, such as tests that need block devices or real
+filesystems (the module owns its whole filesystem), huge pages, cgroups, kernel modules or a
+particular CPU.
 
-- LTP tests are excluded by the requirements their metadata declares (`needs_root`,
-  `needs_device`, `taint_check`, ...), see `metadata_reason` in `src/upstream/ltp.rs`.
+- LTP tests are excluded by the requirements their metadata declares (`needs_device`,
+  `taint_check`, ...), see `metadata_reason` in `src/upstream/ltp.rs`. Tests that need root
+  (`needs_root`, or `tst_require_root()` in the old API) are not excluded: they run as uid 0.
 - Whole LTP runtest lists about hardware or kernel internals are excluded by `EXCLUDED_LISTS` in
   the same file; every list is either included or excluded with a reason.
 - `excluded.txt` names the rest, each with a `# reason`; a pattern ending in `*` matches a prefix.
@@ -96,8 +97,9 @@ cause, then take the test off the list.
 | LTP | exit 0 | exit 32, only `TCONF` | the first `TFAIL` or `TBROK` line; shell scripts and shell command lines fail as needing a shell |
 
 LTP tests run with LTP's install mounted at `/opt/ltp`, `LTPROOT=/opt/ltp` and its
-`testcases/bin` on `PATH`, so tests can execute their helper programs. LTP tests that are shell
-scripts fail until the guest has a shell.
+`testcases/bin` on `PATH`, so tests can execute their helper programs. They run as `wasmer run`'s
+default user, except tests that need root, which run as uid 0 (`wasmer run --user 0:0`). LTP
+tests that are shell scripts fail until the guest has a shell.
 
 ## Fixtures
 
