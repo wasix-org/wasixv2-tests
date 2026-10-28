@@ -28,9 +28,6 @@ posix/conformance/interfaces/sched_getparam/1-1
 ## FAIL: Returned code is -1.
 posix/conformance/interfaces/sched_getscheduler/3-1
 
-## FAIL: TEST FAILED
-posix/conformance/interfaces/sem_timedwait/2-1
-
 ## FAIL: TEST FAILED: semaphore does exist
 posix/conformance/interfaces/sem_unlink/4-1
 
@@ -43,6 +40,7 @@ posix/conformance/interfaces/mq_close/2-1
 posix/conformance/interfaces/mq_receive/1-1
 posix/conformance/interfaces/mq_receive/10-1
 posix/conformance/interfaces/mq_receive/12-1
+posix/conformance/interfaces/mq_receive/13-1
 posix/conformance/interfaces/mq_receive/5-1
 posix/conformance/interfaces/mq_receive/8-1
 posix/conformance/interfaces/mq_timedreceive/1-1
@@ -58,35 +56,6 @@ posix/conformance/interfaces/mq_timedreceive/5-2
 posix/conformance/interfaces/mq_timedreceive/8-1
 posix/conformance/interfaces/mq_timedsend/5-1
 posix/conformance/interfaces/mq_timedsend/5-2
-posix/conformance/interfaces/shm_open/1-1
-posix/conformance/interfaces/shm_open/14-2
-posix/conformance/interfaces/shm_open/23-1
-posix/conformance/interfaces/sigaction/4-27
-posix/conformance/interfaces/sigaction/4-28
-posix/conformance/interfaces/sigaction/4-29
-posix/conformance/interfaces/sigaction/4-30
-posix/conformance/interfaces/sigaction/4-31
-posix/conformance/interfaces/sigaction/4-32
-posix/conformance/interfaces/sigaction/4-33
-posix/conformance/interfaces/sigaction/4-34
-posix/conformance/interfaces/sigaction/4-35
-posix/conformance/interfaces/sigaction/4-36
-posix/conformance/interfaces/sigaction/4-37
-posix/conformance/interfaces/sigaction/4-38
-posix/conformance/interfaces/sigaction/4-39
-posix/conformance/interfaces/sigaction/4-40
-posix/conformance/interfaces/sigaction/4-41
-posix/conformance/interfaces/sigaction/4-42
-posix/conformance/interfaces/sigaction/4-43
-posix/conformance/interfaces/sigaction/4-44
-posix/conformance/interfaces/sigaction/4-45
-posix/conformance/interfaces/sigaction/4-46
-posix/conformance/interfaces/sigaction/4-47
-posix/conformance/interfaces/sigaction/4-48
-posix/conformance/interfaces/sigaction/4-49
-posix/conformance/interfaces/sigaction/4-50
-posix/conformance/interfaces/sigaction/4-51
-posix/conformance/interfaces/sigaction/4-52
 posix/conformance/interfaces/sigismember/5-1
 posix/conformance/interfaces/timer_create/9-1
 
@@ -107,38 +76,29 @@ posix/conformance/interfaces/kill/3-1
 ## FAIL: Test FAILED: sigqueue() succeeded even though this program's user id did not match the recieving process's user id
 posix/conformance/interfaces/sigqueue/3-1
 
-## FAIL: Test Fail: block on pthread_barrier_wait()
-posix/conformance/interfaces/pthread_barrierattr_getpshared/2-1
-
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/fork/1-1.c FAILED: The new process does not execute
+## FAIL: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/fork/1-1.c FAILED: The new process does not execute
 posix/conformance/interfaces/fork/1-1
 
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/fork/14-1.c FAILED: Child did not inherit the semaphore A
-posix/conformance/interfaces/fork/14-1
-
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/fork/16-1.c FAILED: The memory mappings were not inherited by the child pro
-posix/conformance/interfaces/fork/16-1
-
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/fork/8-1.c FAILED: The process is created with non-zero tms_cutime or tms_c
+## FAIL: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/fork/8-1.c FAILED: The process is created with non-zero tms_cutime or tms_c
 posix/conformance/interfaces/fork/8-1
 
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/getpid/1-1.c FAILED: getpid() in the child returned a different value than 
+## FAIL: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/getpid/1-1.c FAILED: getpid() in the child returned a different value than 
 posix/conformance/interfaces/getpid/1-1
 
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/1-2.c FAILED: pthread_mutex_trylock() did not return 
+## FAIL: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/1-2.c FAILED: pthread_mutex_trylock() did not return 
 posix/conformance/interfaces/pthread_mutex_trylock/1-2
 
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/2-1.c FAILED: pthread_mutex_trylock() did not return 
+## FAIL: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/2-1.c FAILED: pthread_mutex_trylock() did not return 
 posix/conformance/interfaces/pthread_mutex_trylock/2-1
 
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/4-2.c FAILED: pthread_mutex_trylock() did not return 
+## FAIL: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/4-2.c FAILED: pthread_mutex_trylock() did not return 
 posix/conformance/interfaces/pthread_mutex_trylock/4-2
 
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/sem_init/3-3.c FAILED: The semaphore count was not increased in other proce
-posix/conformance/interfaces/sem_init/3-3
-
-## FAIL: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/sem_init/7-1.c FAILED: We were able to sem_init more than SEM_NSEMS_MAX sem
+## FAIL: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/sem_init/7-1.c FAILED: We were able to sem_init more than SEM_NSEMS_MAX sem
 posix/conformance/interfaces/sem_init/7-1
+
+## FAIL: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/2-2.c FAILED: Child 'exec' exited abnormally
+posix/conformance/interfaces/sem_unlink/2-2
 
 ## FAIL: The mapped files pages of the process are not locked.
 posix/conformance/interfaces/mlockall/3-7
@@ -207,9 +167,6 @@ posix/conformance/interfaces/lio_listio/18-1
 
 ## FAIL: lio_listio/5-1.c lio_listio() accepts invalid opcode
 posix/conformance/interfaces/lio_listio/5-1
-
-## FAIL: mmap with MAP_SHARED failed to propagate change into the child
-posix/conformance/interfaces/mmap/7-4
 
 ## FAIL: off: ffffffff0000, len: ffff0000
 posix/conformance/interfaces/mmap/31-1
@@ -302,7 +259,6 @@ posix/conformance/interfaces/mq_open/9-1
 posix/conformance/interfaces/mq_open/9-2
 posix/conformance/interfaces/mq_receive/11-1
 posix/conformance/interfaces/mq_receive/11-2
-posix/conformance/interfaces/mq_receive/13-1
 posix/conformance/interfaces/mq_receive/2-1
 posix/conformance/interfaces/mq_receive/7-1
 posix/conformance/interfaces/mq_timedreceive/14-1
@@ -317,22 +273,22 @@ posix/conformance/interfaces/mq_timedreceive/speculative/10-2
 posix/conformance/interfaces/clock_settime/17-2
 posix/conformance/interfaces/clock_settime/20-1
 
-## UNRESOLVED: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/fork/17-1.c unresolved: got 38 (Function not implemented) on line 73 (Faile
+## UNRESOLVED: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/fork/17-1.c unresolved: got 38 (Function not implemented) on line 73 (Faile
 posix/conformance/interfaces/fork/17-1
 
-## UNRESOLVED: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/fork/17-2.c unresolved: got 38 (Function not implemented) on line 104 (Fail
+## UNRESOLVED: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/fork/17-2.c unresolved: got 38 (Function not implemented) on line 104 (Fail
 posix/conformance/interfaces/fork/17-2
 
-## UNRESOLVED: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
+## UNRESOLVED: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
 
-## UNRESOLVED: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/1-2.c unresolved: got 1 (Operation not permitted) on 
+## UNRESOLVED: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/1-2.c unresolved: got 1 (Operation not permitted) on 
 posix/conformance/interfaces/pthread_setschedparam/1-2
 
-## UNRESOLVED: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/4-1.c unresolved: got 1 (Operation not permitted) on 
+## UNRESOLVED: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/pthread_setschedparam/4-1.c unresolved: got 1 (Operation not permitted) on 
 posix/conformance/interfaces/pthread_setschedparam/4-1
 
-## UNRESOLVED: Test upstream/ltp-bee8e8197117/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c unresolved: got 0 (No error information) on line 205 (An e
+## UNRESOLVED: Test upstream/ltp-6ffcbcc57b94/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c unresolved: got 0 (No error information) on line 205 (An e
 posix/conformance/interfaces/sem_unlink/3-1
 
 ## UNRESOLVED: This test must be run as superuser
@@ -346,9 +302,6 @@ posix/conformance/interfaces/shm_unlink/9-1
 ## UNRESOLVED: You have the right to call mlockall
 posix/conformance/interfaces/mlockall/15-1
 posix/conformance/interfaces/mlockall/speculative/15-1
-
-## UNRESOLVED: clock_getcpuclockid(1, ..) failed with an improper error (1 != 3)
-posix/conformance/interfaces/clock_getcpuclockid/5-1
 
 ## UNRESOLVED: clock_settime() was not successful
 posix/conformance/interfaces/clock_settime/4-2
@@ -436,23 +389,23 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmpFSgL1y/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
+## build: wasm-ld: error: /tmp/.tmp3qjS5m/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
 
-## build: wasm-ld: error: /tmp/.tmpJQ3GcJ/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
-
-## build: wasm-ld: error: /tmp/.tmpYRX8l5/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
-
-## build: wasm-ld: error: /tmp/.tmphmRJu9/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmp52Ye7M/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
 
-## build: wasm-ld: error: /tmp/.tmpo6k4Ts/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
+## build: wasm-ld: error: /tmp/.tmpKuaVy1/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmptwchhn/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
+## build: wasm-ld: error: /tmp/.tmpcs5us1/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
+
+## build: wasm-ld: error: /tmp/.tmpdeVeRX/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
+
+## build: wasm-ld: error: /tmp/.tmpux4qi6/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
 
 ## exit status 132
 posix/conformance/interfaces/pthread_attr_setdetachstate/2-1
@@ -534,8 +487,8 @@ posix/conformance/interfaces/sigpause/1-2
 posix/conformance/interfaces/sigpause/2-1
 posix/conformance/interfaces/sigpause/3-1
 
-## exit status 255
-posix/conformance/interfaces/sigaction/10-1
+## musl names semaphores /dev/shm/<name> without glibc's sem. prefix, so a NAME_MAX name is valid
+posix/conformance/interfaces/sem_unlink/5-1
 
 ## timeout
 posix/conformance/interfaces/pthread_cond_broadcast/2-3
@@ -548,15 +501,4 @@ posix/conformance/interfaces/pthread_cond_wait/2-2
 posix/conformance/interfaces/pthread_create/11-1
 posix/conformance/interfaces/pthread_mutex_init/3-2
 posix/conformance/interfaces/pthread_rwlock_wrlock/3-1
-posix/conformance/interfaces/pthread_rwlockattr_getpshared/2-1
-posix/conformance/interfaces/pthread_spin_init/2-1
-posix/conformance/interfaces/pthread_spin_init/2-2
-posix/conformance/interfaces/sem_init/3-2
-posix/conformance/interfaces/sem_unlink/2-2
 posix/conformance/interfaces/timer_settime/5-3
-
-## musl names semaphores /dev/shm/<name> without glibc's sem. prefix, so a NAME_MAX name is valid
-posix/conformance/interfaces/sem_unlink/5-1
-
-## reads the CPU clock of pid 1, now init: only the caller's own CPU clocks resolve (another pid's is EINVAL, which musl reports as ESRCH); it passed while the test itself was pid 1
-posix/conformance/interfaces/clock_getcpuclockid/1-2

@@ -4,9 +4,6 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdSecret, OpenTree, PerfEventOpen, Splice, Userfaultfd
-ltp/syscalls/splice07
-
 ## ENOSYS: Bpf, FanotifyInit, Fsopen, Fspick, IoUringSetup, MemfdSecret, OpenTree, PerfEventOpen, Userfaultfd
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
@@ -35,12 +32,6 @@ ltp/containers/shmem_2nstest_clone
 ltp/containers/shmnstest_clone
 ltp/containers/utsname03_clone
 
-## ENOSYS: Kcmp
-ltp/syscalls/kcmp01
-
-## ENOSYS: Listmount
-ltp/syscalls/listmount03
-
 ## ENOSYS: Mount
 ltp/syscalls/mount08
 ltp/syscalls/move_mount03
@@ -50,33 +41,12 @@ ltp/cve/cve-2022-2590
 ltp/syscalls/dirtyc0w_shmem
 ltp/syscalls/madvise01
 
-## ENOSYS: Mseal
-ltp/syscalls/mseal01
-
 ## ENOSYS: Reboot
 ltp/syscalls/reboot01
 ltp/syscalls/reboot02
 
 ## ENOSYS: Setns
 ltp/syscalls/setns02
-
-## ENOSYS: Splice
-ltp/cve/cve-2022-0847
-ltp/syscalls/dirtypipe
-ltp/syscalls/splice01
-ltp/syscalls/splice02
-ltp/syscalls/splice03
-ltp/syscalls/splice04
-ltp/syscalls/splice05
-ltp/syscalls/splice08
-ltp/syscalls/splice09
-ltp/syscalls/tee01
-
-## ENOSYS: Statmount
-ltp/syscalls/statmount08
-
-## ENOSYS: Tee
-ltp/syscalls/tee02
 
 ## ENOSYS: Unshare
 ltp/containers/mesgq_nstest_unshare
@@ -85,22 +55,25 @@ ltp/containers/semtest_2ns_unshare
 ltp/containers/shmem_2nstest_unshare
 ltp/containers/shmnstest_unshare
 ltp/containers/utsname03_unshare
-ltp/containers/utsname04_unshare
 ltp/syscalls/mount_setattr02
 ltp/syscalls/pivot_root01
 ltp/syscalls/statmount03
 ltp/syscalls/unshare01
 ltp/syscalls/unshare02
 
-## ENOSYS: Vhangup
-ltp/syscalls/vhangup01
-ltp/syscalls/vhangup02
+## MADV_WIPEONFORK/MADV_KEEPONFORK are accepted and ignored (not implemented): the child sees the parent's data; hidden before train 8, when the child's TFAIL stayed in a private LTP IPC region
+ltp/syscalls/madvise10
 
-## ENOSYS: Vmsplice
-ltp/syscalls/vmsplice01
-ltp/syscalls/vmsplice02
-ltp/syscalls/vmsplice03
-ltp/syscalls/vmsplice04
+## SIGHUP (129): the test runs as the session leader (first program, LTP in-process), so opening the slave without O_NOCTTY makes it the controlling terminal and closing the master hangs the session up, as on Linux; passes as a non-leader (child of a shell)
+ltp/pty/ptem01
+ltp/pty/ptem02
+ltp/pty/ptem03
+ltp/pty/ptem04
+ltp/pty/ptem05
+ltp/pty/ptem06
+ltp/pty/pty01
+ltp/pty/pty08
+ltp/pty/pty09
 
 ## TBROK: CLONE_PARENT clone() failed: ENOSYS (38)
 ltp/syscalls/clone08
@@ -235,85 +208,19 @@ ltp/mm/overcommit_memory06
 ## TBROK: Set setxattr03immutable immutable failed: ENOTTY (25)
 ltp/syscalls/setxattr03
 
-## TBROK: Test 0 haven't reported results!
-ltp/syscalls-ipc/msgrcv02
-ltp/syscalls-ipc/msgsnd02
-ltp/syscalls-ipc/semget02
-ltp/syscalls/creat04
-ltp/syscalls/fstat03
-ltp/syscalls/fstat03_64
-ltp/syscalls/fstatfs02
-ltp/syscalls/fstatfs02_64
-ltp/syscalls/membarrier01
-ltp/syscalls/msgrcv02
-ltp/syscalls/msgsnd02
-ltp/syscalls/personality01
-ltp/syscalls/pipe11
-ltp/syscalls/sched_getparam01
-ltp/syscalls/select03
-ltp/syscalls/semget02
-ltp/syscalls/signal01
-ltp/syscalls/statfs02
-ltp/syscalls/statfs02_64
-ltp/syscalls/unlink08
-
-## TBROK: Test 1 haven't reported results!
-ltp/syscalls/readlink01
-
-## TBROK: Test 12 haven't reported results!
-ltp/syscalls/access01
-
-## TBROK: Test 2 haven't reported results!
-ltp/syscalls-ipc/shmat02
-ltp/syscalls/shmat02
-
-## TBROK: Test 3 haven't reported results!
-ltp/syscalls-ipc/msgget02
-ltp/syscalls/msgget02
-
-## TBROK: Test 4 haven't reported results!
-ltp/syscalls/setpriority02
-
-## TBROK: Test haven't reported results!
-ltp/containers/mesgq_nstest_none
-ltp/containers/sem_nstest_none
-ltp/containers/shmnstest_none
-ltp/mm/shmt07
-ltp/syscalls-ipc/semctl04
-ltp/syscalls/chroot02
-ltp/syscalls/epoll_wait11
-ltp/syscalls/epoll_wait12
-ltp/syscalls/eventfd2_03
-ltp/syscalls/fcntl12
-ltp/syscalls/fcntl12_64
-ltp/syscalls/futex_wake02
-ltp/syscalls/getpgid01
-ltp/syscalls/getpid01
-ltp/syscalls/getsid01
-ltp/syscalls/mmap01
-ltp/syscalls/nanosleep02
-ltp/syscalls/nice03
-ltp/syscalls/pipe10
-ltp/syscalls/sched_setparam05
-ltp/syscalls/sched_setscheduler02
-ltp/syscalls/semctl04
-ltp/syscalls/setpgrp02
-ltp/syscalls/setregid03
-ltp/syscalls/setreuid04
-ltp/syscalls/setreuid05
-
 ## TBROK: clock_gettime(CLOCK_REALTIME) failed: EPERM (1)
 ltp/syscalls/clock_settime04
 ltp/syscalls/leapsec01
-
-## TBROK: clock_gettime(INVALID/UNKNOWN CLOCK) failed: EINVAL (22)
-ltp/syscalls/nice05
 
 ## TBROK: clock_settime() failed: EPERM (1)
 ltp/syscalls/clock_settime03
 
 ## TBROK: execlp(/bin/true, /bin/true, ...) failed: ENOENT (2)
 ltp/syscalls/setrlimit04
+
+## TBROK: execvp("true", ...): ENOENT (2)
+ltp/cve/cve-2011-0999
+ltp/mm/thp01
 
 ## TBROK: fcntl(3,F_SETPIPE_SZ,...) failed: EINVAL (22)
 ltp/syscalls/pipe2_04
@@ -357,16 +264,6 @@ ltp/syscalls/posix_fadvise01_64
 ltp/syscalls/posix_fadvise03
 ltp/syscalls/posix_fadvise03_64
 
-## TBROK: open(/dev/ptmx,1,0000) failed: ENOENT (2)
-ltp/pty/pty02
-
-## TBROK: open(/dev/ptmx,2,0000) failed: ENOENT (2)
-ltp/cve/cve-2020-11494
-ltp/pty/pty04
-
-## TBROK: open(/dev/ptmx,2,0000) failed: errno=ENOENT(2): No such file or directory
-ltp/pty/hangup01
-
 ## TBROK: open(/proc/self/ns/pid,0,0000) failed: ENOENT (2)
 ltp/syscalls/ioctl_ns01
 
@@ -380,9 +277,6 @@ ltp/syscalls/ioctl_ns03
 ## TBROK: openat() failed: errno=EACCES(13): Permission denied
 ltp/syscalls/openat03
 
-## TBROK: pty creation failed: ENOENT (2)
-ltp/cve/cve-2014-0196
-
 ## TBROK: setsockopt(3, 0, 42, 0x8bff7c, 132) failed: ENOPROTOOPT (92)
 ltp/cve/cve-2017-8890
 ltp/syscalls/accept02
@@ -395,55 +289,13 @@ ltp/syscalls/setsockopt04
 ltp/net.ipv6_lib/asapi_03
 
 ## TBROK: tst_checkpoint_wait(0, 10000) failed: ETIMEDOUT (110)
-ltp/containers/semtest_2ns_none
-ltp/containers/shmem_2nstest_none
-ltp/containers/utsname02
 ltp/cve/cve-2016-5195
-ltp/mm/shmt02
-ltp/mm/shmt04
-ltp/sched/starvation
 ltp/syscalls/dirtyc0w
-ltp/syscalls/epoll_wait05
-ltp/syscalls/epoll_wait15
-ltp/syscalls/epoll_wait16
-ltp/syscalls/fcntl15
-ltp/syscalls/fcntl15_64
-ltp/syscalls/flock03
-ltp/syscalls/fork04
-ltp/syscalls/getsockopt02
-ltp/syscalls/mincore04
-ltp/syscalls/pause01
-ltp/syscalls/pause02
-ltp/syscalls/pidfd_open03
 ltp/syscalls/pidfd_open04
-ltp/syscalls/pipe02
-ltp/syscalls/pipe13
-ltp/syscalls/prctl03
-ltp/syscalls/rt_sigqueueinfo02
 ltp/syscalls/setpgid03
-ltp/syscalls/setpriority01
-ltp/syscalls/shutdown01
-ltp/syscalls/sighold02
-ltp/syscalls/waitid04
-ltp/syscalls/waitid07
-ltp/syscalls/waitid08
-ltp/syscalls/waitpid06
-ltp/syscalls/waitpid07
-ltp/syscalls/waitpid08
-ltp/syscalls/waitpid09
-ltp/syscalls/waitpid10
-ltp/syscalls/waitpid11
-ltp/syscalls/waitpid12
-ltp/syscalls/waitpid13
-
-## TBROK: unable to open pty: ENOENT (2)
-ltp/syscalls/ioctl01
 
 ## TFAIL: "hopopt" protocols entry
 ltp/net.ipv6_lib/asapi_01
-
-## TFAIL: *child_pid (0) != pid (3)
-ltp/syscalls/getppid02
 
 ## TFAIL: A single 6*ps VMA found.
 ltp/mm/vma01
@@ -476,8 +328,14 @@ ltp/syscalls/writev05
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
 
+## TFAIL: Expect: final_ball == 0
+ltp/sched/sched_football
+
 ## TFAIL: Expected 1024K locked, get 0K locked
 ltp/syscalls/mmap14
+
+## TFAIL: Faulty readfds: select() passed unexpectedly with 1
+ltp/syscalls/select03
 
 ## TFAIL: Invalid address expected EFAULT: ENOENT (2)
 ltp/syscalls/mknod06
@@ -510,10 +368,10 @@ ltp/mm/mmapstress05
 ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 
-## TFAIL: Test{3} failed, expected 0 exit.
+## TFAIL: Test{6} failed, expected 0 exit.
 ltp/fs/ftest06
 
-## TFAIL: Test{5} failed, expected 0 exit.
+## TFAIL: Test{7} failed, expected 0 exit.
 ltp/fs/ftest02
 
 ## TFAIL: VmLck showed wrong 0 pages, expected 1
@@ -522,10 +380,10 @@ ltp/syscalls/mlock201
 ## TFAIL: abort() failed to dump core
 ltp/syscalls/abort01
 
-## TFAIL: after child shmat() shm_nattcg=0 expected 20
+## TFAIL: after child shmat() shm_nattcg=1 expected 20
 ltp/syscalls-ipc/shmctl01
 
-## TFAIL: after child shmat() shm_nattcg=4 expected 20
+## TFAIL: after child shmat() shm_nattcg=3 expected 20
 ltp/syscalls/shmctl01
 
 ## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
@@ -594,8 +452,14 @@ ltp/syscalls/epoll_wait03
 ## TFAIL: epoll_wait() slept for too long
 ltp/syscalls/epoll_wait02
 
+## TFAIL: event 2 woke 4 waiters in total, expected 2
+ltp/syscalls/epoll_wait16
+
 ## TFAIL: execute file_x as root failed: ENOENT (2)
 ltp/syscalls/access02
+
+## TFAIL: executes less cycles than the high nice thread, delta: -6553 ns
+ltp/syscalls/nice05
 
 ## TFAIL: execve failed unexpectedly; expected Bad address: ENOENT (2)
 ltp/syscalls/execve03
@@ -649,20 +513,11 @@ ltp/syscalls/futex_wait05
 ## TFAIL: futex_wait(tv->fntype, futex, *futex, &timeout, 0) expected EINTR: ETIMEDOUT (110)
 ltp/syscalls/futex_wait07
 
-## TFAIL: futex_wake() failed: ENOENT (2)
-ltp/syscalls/futex_wait02
-
-## TFAIL: futex_wake() woken up 0 children, expected 1: SUCCESS (0)
-ltp/syscalls/futex_wake03
-
 ## TFAIL: get event: wd=1 mask=00000004 (expected 40000004) cookie=0     len=0  name="" (expected "") -1
 ltp/syscalls/inotify02
 
 ## TFAIL: getcpu(tc->cpu_id, tc->node_id) succeeded
 ltp/syscalls/getcpu02
-
-## TFAIL: getpgid(-99) expected ESRCH: EINVAL (22)
-ltp/syscalls/getpgid02
 
 ## TFAIL: got event: wd=2 (expected 1) mask=0004 (expected 40000004) len=0 name="" (expected "test_dir")
 ltp/syscalls/inotify10
@@ -721,9 +576,6 @@ ltp/syscalls/clone07
 ## TFAIL: madvise succeeded unexpectedly
 ltp/syscalls/madvise02
 
-## TFAIL: memcmp(cp2, tst_rand_data, SHMSIZE) (-1) != 0 (0)
-ltp/mm/shmt03
-
 ## TFAIL: mincore reports resident pages as 3, but expected 0
 ltp/syscalls/mincore03
 
@@ -758,6 +610,10 @@ ltp/syscalls/msgctl04
 ## TFAIL: msgrcv(0, 0x808f78, 1024, 1, 0) expected EIDRM: EINVAL (22)
 ltp/syscalls-ipc/msgrcv06
 ltp/syscalls/msgrcv06
+
+## TFAIL: msgsnd(0, 0, 1024, 0) expected EFAULT: EINVAL (22)
+ltp/syscalls-ipc/msgsnd02
+ltp/syscalls/msgsnd02
 
 ## TFAIL: msgsnd(0, 0x808f68, 1024, 0) expected EIDRM: EINVAL (22)
 ltp/syscalls-ipc/msgsnd06
@@ -815,7 +671,7 @@ ltp/syscalls/prctl02
 ltp/syscalls/preadv202
 ltp/syscalls/preadv202_64
 
-## TFAIL: process 3 wasn't woken up: ETIMEDOUT (110)
+## TFAIL: process 9 wasn't woken up: ETIMEDOUT (110)
 ltp/syscalls/futex_cmp_requeue01
 
 ## TFAIL: pselect() slept for too long
@@ -848,7 +704,7 @@ ltp/syscalls/send02
 ## TFAIL: recvmmsg() bad message vector address succeeded
 ltp/syscalls/recvmmsg01
 
-## TFAIL: returned 0, expected -1, expected errno: EFAULT (14): SUCCESS (0)
+## TFAIL: returned -1, expected -1, expected errno: EINVAL (22): EOPNOTSUPP (95)
 ltp/syscalls/clock_nanosleep01
 
 ## TFAIL: retval (0) != ERANGE (34)
@@ -924,13 +780,17 @@ ltp/syscalls/connect01
 ltp/syscalls/stat03
 ltp/syscalls/stat03_64
 
+## TFAIL: statfs() expected EFAULT: ENOENT (2)
+ltp/syscalls/statfs02
+ltp/syscalls/statfs02_64
+
 ## TFAIL: statvfs(tc->path, tc->buf) expected EFAULT: ENOENT (2)
 ltp/syscalls/statvfs02
 
 ## TFAIL: statx() should fail with EFAULT: ENOENT (2)
 ltp/syscalls/statx03
 
-## TFAIL: stime(1793191168) failed: EPERM (1)
+## TFAIL: stime(1793204095) failed: EPERM (1)
 ltp/syscalls/stime01
 
 ## TFAIL: succeeded unexpectedly
@@ -956,6 +816,21 @@ ltp/syscalls/mprotect04
 
 ## TFAIL: test-file: name_to_handle_at() failed: EOPNOTSUPP (95)
 ltp/syscalls/name_to_handle_at03
+
+## TFAIL: thread 0 (acos) terminated unsuccessfully 0 errors/0 loops
+ltp/math/float_trigo
+
+## TFAIL: thread 0 (ceil) terminated unsuccessfully 0 errors/0 loops
+ltp/math/float_power
+
+## TFAIL: thread 0 (cosh) terminated unsuccessfully 0 errors/0 loops
+ltp/math/float_iperb
+
+## TFAIL: thread 0 (exp) terminated unsuccessfully 0 errors/0 loops
+ltp/math/float_exp_log
+
+## TFAIL: thread 0 (j0) terminated unsuccessfully 0 errors/0 loops
+ltp/math/float_bessel
 
 ## TFAIL: timer_create(CLOCK_BOOTTIME_ALARM) failed: EPERM (1)
 ltp/syscalls/timer_settime01
@@ -1014,21 +889,6 @@ ltp/syscalls/write05
 
 ## TFAIL: writev wrote more than expected
 ltp/syscalls/writev07
-
-## build: `float_bessel` is not built by LTP's makefiles
-ltp/math/float_bessel
-
-## build: `float_exp_log` is not built by LTP's makefiles
-ltp/math/float_exp_log
-
-## build: `float_iperb` is not built by LTP's makefiles
-ltp/math/float_iperb
-
-## build: `float_power` is not built by LTP's makefiles
-ltp/math/float_power
-
-## build: `float_trigo` is not built by LTP's makefiles
-ltp/math/float_trigo
 
 ## build: `test_1_to_1_accept_close` is not built by LTP's makefiles
 ltp/net.sctp/test_1_to_1_accept_close
@@ -1161,12 +1021,14 @@ ltp/dio/dio10
 ltp/cve/cve-2017-18344
 ltp/syscalls/timer_create03
 
-## build: wasm-ld: error: unable to find library -lrealtime
-ltp/sched/sched_football
+## exit status 1
+ltp/sched/sched_cli_serv
 
-## exit status -1
-ltp/cve/cve-2017-17052
-ltp/sched/hackbench01
+## exit status 127
+ltp/syscalls/ioctl02
+
+## exit status 129
+ltp/pty/pty02
 
 ## exit status 137
 ltp/cve/cve-2018-6927
@@ -1175,10 +1037,12 @@ ltp/syscalls-ipc/semop02
 ltp/syscalls/epoll_wait08
 ltp/syscalls/futex_cmp_requeue02
 ltp/syscalls/futex_wait01
+ltp/syscalls/futex_wait02
 ltp/syscalls/futex_wait03
 ltp/syscalls/futex_wait04
 ltp/syscalls/futex_wake01
-ltp/syscalls/kill05
+ltp/syscalls/futex_wake02
+ltp/syscalls/futex_wake03
 ltp/syscalls/msgrcv05
 ltp/syscalls/semop02
 ltp/syscalls/setrlimit06
@@ -1199,268 +1063,13 @@ ltp/sched/trace_sched01
 ltp/syscalls/fcntl33
 ltp/syscalls/fcntl33_64
 
-## runner: a shell command; needs a shell in the guest
-ltp/capability/cap_bounds
-ltp/capability/filecaps
-ltp/containers/netns_breakns_ip_ipv4_ioctl
-ltp/containers/netns_breakns_ip_ipv4_netlink
-ltp/containers/netns_breakns_ip_ipv6_ioctl
-ltp/containers/netns_breakns_ip_ipv6_netlink
-ltp/containers/netns_breakns_ns_exec_ipv4_ioctl
-ltp/containers/netns_breakns_ns_exec_ipv4_netlink
-ltp/containers/netns_breakns_ns_exec_ipv6_ioctl
-ltp/containers/netns_breakns_ns_exec_ipv6_netlink
-ltp/containers/netns_comm_ip_ipv4_ioctl
-ltp/containers/netns_comm_ip_ipv4_netlink
-ltp/containers/netns_comm_ip_ipv6_ioctl
-ltp/containers/netns_comm_ip_ipv6_netlink
-ltp/containers/netns_comm_ns_exec_ipv4_ioctl
-ltp/containers/netns_comm_ns_exec_ipv4_netlink
-ltp/containers/netns_comm_ns_exec_ipv6_ioctl
-ltp/containers/netns_comm_ns_exec_ipv6_netlink
-ltp/containers/netns_sysfs
-ltp/cve/cve-2016-4470
-ltp/fs/binfmt_misc01
-ltp/fs/binfmt_misc02
-ltp/fs/fs_di
-ltp/fs/fs_inod01
-ltp/fs/fs_racer
-ltp/fs/gf01
-ltp/fs/gf02
-ltp/fs/gf03
-ltp/fs/gf04
-ltp/fs/gf05
-ltp/fs/gf06
-ltp/fs/gf07
-ltp/fs/gf08
-ltp/fs/gf09
-ltp/fs/gf10
-ltp/fs/gf11
-ltp/fs/gf12
-ltp/fs/gf13
-ltp/fs/gf14
-ltp/fs/gf15
-ltp/fs/gf16
-ltp/fs/gf17
-ltp/fs/gf18
-ltp/fs/gf19
-ltp/fs/gf20
-ltp/fs/gf21
-ltp/fs/gf22
-ltp/fs/gf23
-ltp/fs/gf24
-ltp/fs/gf25
-ltp/fs/gf26
-ltp/fs/gf27
-ltp/fs/gf28
-ltp/fs/gf29
-ltp/fs/gf30
-ltp/fs/iogen01
-ltp/fs/isofs
-ltp/fs/linker01
-ltp/fs/quota_remount_test01
-ltp/fs/rwtest01
-ltp/fs/rwtest02
-ltp/fs/rwtest03
-ltp/fs/rwtest04
-ltp/fs/rwtest05
-ltp/fs_bind/fs_bind01_sh
-ltp/fs_bind/fs_bind02_sh
-ltp/fs_bind/fs_bind03_sh
-ltp/fs_bind/fs_bind04_sh
-ltp/fs_bind/fs_bind05_sh
-ltp/fs_bind/fs_bind06_sh
-ltp/fs_bind/fs_bind07-2_sh
-ltp/fs_bind/fs_bind07_sh
-ltp/fs_bind/fs_bind08_sh
-ltp/fs_bind/fs_bind09_sh
-ltp/fs_bind/fs_bind10_sh
-ltp/fs_bind/fs_bind11_sh
-ltp/fs_bind/fs_bind12_sh
-ltp/fs_bind/fs_bind13_sh
-ltp/fs_bind/fs_bind14_sh
-ltp/fs_bind/fs_bind15_sh
-ltp/fs_bind/fs_bind16_sh
-ltp/fs_bind/fs_bind17_sh
-ltp/fs_bind/fs_bind18_sh
-ltp/fs_bind/fs_bind19_sh
-ltp/fs_bind/fs_bind20_sh
-ltp/fs_bind/fs_bind21_sh
-ltp/fs_bind/fs_bind22_sh
-ltp/fs_bind/fs_bind23_sh
-ltp/fs_bind/fs_bind24_sh
-ltp/fs_bind/fs_bind_cloneNS01_sh
-ltp/fs_bind/fs_bind_cloneNS02_sh
-ltp/fs_bind/fs_bind_cloneNS03_sh
-ltp/fs_bind/fs_bind_cloneNS04_sh
-ltp/fs_bind/fs_bind_cloneNS05_sh
-ltp/fs_bind/fs_bind_cloneNS06_sh
-ltp/fs_bind/fs_bind_cloneNS07_sh
-ltp/fs_bind/fs_bind_move01_sh
-ltp/fs_bind/fs_bind_move02_sh
-ltp/fs_bind/fs_bind_move03_sh
-ltp/fs_bind/fs_bind_move04_sh
-ltp/fs_bind/fs_bind_move05_sh
-ltp/fs_bind/fs_bind_move06_sh
-ltp/fs_bind/fs_bind_move07_sh
-ltp/fs_bind/fs_bind_move08_sh
-ltp/fs_bind/fs_bind_move09_sh
-ltp/fs_bind/fs_bind_move10_sh
-ltp/fs_bind/fs_bind_move11_sh
-ltp/fs_bind/fs_bind_move12_sh
-ltp/fs_bind/fs_bind_move13_sh
-ltp/fs_bind/fs_bind_move14_sh
-ltp/fs_bind/fs_bind_move15_sh
-ltp/fs_bind/fs_bind_move16_sh
-ltp/fs_bind/fs_bind_move17_sh
-ltp/fs_bind/fs_bind_move18_sh
-ltp/fs_bind/fs_bind_move19_sh
-ltp/fs_bind/fs_bind_move20_sh
-ltp/fs_bind/fs_bind_move21_sh
-ltp/fs_bind/fs_bind_move22_sh
-ltp/fs_bind/fs_bind_rbind01_sh
-ltp/fs_bind/fs_bind_rbind02_sh
-ltp/fs_bind/fs_bind_rbind03_sh
-ltp/fs_bind/fs_bind_rbind04_sh
-ltp/fs_bind/fs_bind_rbind05_sh
-ltp/fs_bind/fs_bind_rbind06_sh
-ltp/fs_bind/fs_bind_rbind07-2_sh
-ltp/fs_bind/fs_bind_rbind07_sh
-ltp/fs_bind/fs_bind_rbind08_sh
-ltp/fs_bind/fs_bind_rbind09_sh
-ltp/fs_bind/fs_bind_rbind10_sh
-ltp/fs_bind/fs_bind_rbind11_sh
-ltp/fs_bind/fs_bind_rbind12_sh
-ltp/fs_bind/fs_bind_rbind13_sh
-ltp/fs_bind/fs_bind_rbind14_sh
-ltp/fs_bind/fs_bind_rbind15_sh
-ltp/fs_bind/fs_bind_rbind16_sh
-ltp/fs_bind/fs_bind_rbind17_sh
-ltp/fs_bind/fs_bind_rbind18_sh
-ltp/fs_bind/fs_bind_rbind19_sh
-ltp/fs_bind/fs_bind_rbind20_sh
-ltp/fs_bind/fs_bind_rbind21_sh
-ltp/fs_bind/fs_bind_rbind22_sh
-ltp/fs_bind/fs_bind_rbind23_sh
-ltp/fs_bind/fs_bind_rbind24_sh
-ltp/fs_bind/fs_bind_rbind25_sh
-ltp/fs_bind/fs_bind_rbind26_sh
-ltp/fs_bind/fs_bind_rbind27_sh
-ltp/fs_bind/fs_bind_rbind28_sh
-ltp/fs_bind/fs_bind_rbind29_sh
-ltp/fs_bind/fs_bind_rbind30_sh
-ltp/fs_bind/fs_bind_rbind31_sh
-ltp/fs_bind/fs_bind_rbind32_sh
-ltp/fs_bind/fs_bind_rbind33_sh
-ltp/fs_bind/fs_bind_rbind34_sh
-ltp/fs_bind/fs_bind_rbind35_sh
-ltp/fs_bind/fs_bind_rbind36_sh
-ltp/fs_bind/fs_bind_rbind37_sh
-ltp/fs_bind/fs_bind_rbind38_sh
-ltp/fs_bind/fs_bind_rbind39_sh
-ltp/fs_bind/fs_bind_regression_sh
-ltp/mm/mmapstress07
-ltp/mm/vma05
-ltp/net.features/bbr01
-ltp/net.features/bbr01_ipv6
-ltp/net.features/bbr02
-ltp/net.features/bbr02_ipv6
-ltp/net.features/bind_noport01
-ltp/net.features/bind_noport01_ipv6
-ltp/net.features/busy_poll01
-ltp/net.features/busy_poll01_ipv6
-ltp/net.features/busy_poll02
-ltp/net.features/busy_poll02_ipv6
-ltp/net.features/busy_poll03
-ltp/net.features/busy_poll03_ipv6
-ltp/net.features/dccp01
-ltp/net.features/dccp01_ipv6
-ltp/net.features/dctcp_ipv4_01
-ltp/net.features/dctcp_ipv6_01
-ltp/net.features/fou01
-ltp/net.features/fou01_ipv6
-ltp/net.features/geneve01
-ltp/net.features/geneve01_ipv6
-ltp/net.features/geneve02
-ltp/net.features/geneve02_ipv6
-ltp/net.features/gre_ipv4_01
-ltp/net.features/gre_ipv4_02
-ltp/net.features/gre_ipv6_01
-ltp/net.features/gre_ipv6_02
-ltp/net.features/gue01
-ltp/net.features/gue01_ipv6
-ltp/net.features/ipvlan01
-ltp/net.features/macsec01
-ltp/net.features/macsec02
-ltp/net.features/macsec03
-ltp/net.features/macvlan01
-ltp/net.features/macvtap01
-ltp/net.features/mpls01
-ltp/net.features/mpls02
-ltp/net.features/mpls02_ipv6
-ltp/net.features/mpls03
-ltp/net.features/mpls03_ipv6
-ltp/net.features/mpls04
-ltp/net.features/sctp01
-ltp/net.features/sctp01_ipv6
-ltp/net.features/sit01
-ltp/net.features/tcp_fastopen
-ltp/net.features/tcp_fastopen6
-ltp/net.features/vlan01
-ltp/net.features/vlan02
-ltp/net.features/vlan03
-ltp/net.features/vxlan01
-ltp/net.features/vxlan02
-ltp/net.features/vxlan02_ipv6
-ltp/net.features/vxlan_ipv6_multi_03
-ltp/net.features/vxlan_ipv6_uni_03
-ltp/net.features/vxlan_ipv6_uni_04
-ltp/net.features/vxlan_multi_03
-ltp/net.features/vxlan_uni_03
-ltp/net.features/vxlan_uni_04
-ltp/net.features/wireguard01
-ltp/net.features/wireguard01_ipv6
-ltp/net.features/wireguard02
-ltp/net.features/wireguard02_ipv6
-ltp/net.ipv6/dhcpd6
-ltp/net.ipv6/dnsmasq6
-ltp/net.ipv6/ip6tables
-ltp/net.ipv6/ipneigh6_ip
-ltp/net.ipv6/nft6
-ltp/net.ipv6/ping601
-ltp/net.ipv6/ping602
-ltp/net.ipv6/sendfile601
-ltp/net.ipv6/tcpdump601
-ltp/net.ipv6/tracepath601
-ltp/net.ipv6/traceroute601
-ltp/net.multicast/mc_cmds
-ltp/net.multicast/mc_commo
-ltp/net.multicast/mc_member
-ltp/net.multicast/mc_opts
-ltp/net.tcp_cmds/arping01
-ltp/net.tcp_cmds/dhcpd
-ltp/net.tcp_cmds/dnsmasq
-ltp/net.tcp_cmds/ipneigh01_arp
-ltp/net.tcp_cmds/ipneigh01_ip
-ltp/net.tcp_cmds/iproute
-ltp/net.tcp_cmds/iptables
-ltp/net.tcp_cmds/netstat
-ltp/net.tcp_cmds/nft
-ltp/net.tcp_cmds/ping01
-ltp/net.tcp_cmds/ping02
-ltp/net.tcp_cmds/sendfile
-ltp/net.tcp_cmds/tc01
-ltp/net.tcp_cmds/tcpdump
-ltp/net.tcp_cmds/tracepath01
-ltp/net.tcp_cmds/traceroute01
-ltp/sched/sched_cli_serv
-ltp/sched/sched_stress
+## mlockall(MCL_CURRENT) with a non-zero RLIMIT_MEMLOCK below the process's size succeeds; Linux fails with ENOMEM (locked memory is not charged to RLIMIT_MEMLOCK)
+ltp/syscalls/mlockall03
 
-## runner: a shell script; needs a shell in the guest
-ltp/syscalls/ioctl02
+## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
+ltp/commands/ldd01_sh
 
 ## timeout
-ltp/cve/cve-2011-0999
 ltp/dma_thread_diotest/dma_thread_diotest1
 ltp/dma_thread_diotest/dma_thread_diotest2
 ltp/dma_thread_diotest/dma_thread_diotest3
@@ -1468,14 +1077,17 @@ ltp/dma_thread_diotest/dma_thread_diotest4
 ltp/dma_thread_diotest/dma_thread_diotest5
 ltp/dma_thread_diotest/dma_thread_diotest6
 ltp/dma_thread_diotest/dma_thread_diotest7
-ltp/fs/read_all_dev
-ltp/fs/read_all_proc
-ltp/fs/read_all_sys
-ltp/mm/mtest01
-ltp/mm/mtest01w
+ltp/fs/gf16
+ltp/fs/gf17
+ltp/fs/gf29
+ltp/fs/iogen01
+ltp/fs/rwtest01
+ltp/fs/rwtest02
+ltp/fs/rwtest03
+ltp/fs/rwtest04
 ltp/mm/mtest06
 ltp/mm/mtest06_3
-ltp/mm/thp01
+ltp/sched/sched_stress
 ltp/syscalls/recv01
 ltp/syscalls/recvfrom01
 ltp/syscalls/rt_sigtimedwait01
