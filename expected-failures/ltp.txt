@@ -89,13 +89,6 @@ ltp/syscalls/process_vm_readv02
 ltp/cve/cve-2020-14386
 ltp/syscalls/sendto03
 
-## TBROK: setsockopt(7, 41, 24, 0x7fe94c, 4) failed: ENOPROTOOPT (92)
-ltp/cve/cve-2026-53362
-ltp/syscalls/setsockopt11
-
-## TBROK: socket(10, 3, 159) failed: errno=EPERM(1): Operation not permitted
-ltp/net.ipv6_lib/asapi_03
-
 ## TBROK: unshare(131072) failed: EPERM (1)
 ltp/syscalls/statmount03
 
@@ -318,15 +311,8 @@ ltp/syscalls/pwritev202_64
 ltp/syscalls/brk01
 ltp/syscalls/brk02
 
-## TFAIL: recv() read 16 bytes, expected 0, step 1
-ltp/syscalls/send02
-
 ## TFAIL: recvmmsg() negative seconds in timeout succeeded
 ltp/syscalls/recvmmsg01
-
-## TFAIL: retval (0) != ERANGE (34)
-ltp/cve/cve-2015-0235
-ltp/syscalls/gethostbyname_r01
 
 ## TFAIL: sbrk(8192) returned 0xffffffff failed: ENOMEM (12)
 ltp/syscalls/sbrk01
@@ -343,10 +329,6 @@ ltp/syscalls/setgroups03
 
 ## TFAIL: setrlimit failed, expected 10 got 26
 ltp/syscalls/setrlimit01
-
-## TFAIL: setsockopt(IPV6_ADDRFORM) failed: ENOPROTOOPT (92)
-ltp/cve/cve-2018-9568
-ltp/syscalls/connect02
 
 ## TFAIL: setxattr(2) on sock failed with -1: EPERM (1)
 ltp/syscalls/setxattr02
