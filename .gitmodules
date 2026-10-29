@@ -5,3 +5,6 @@
 [submodule "upstream/libc-test"]
 	path = upstream/libc-test
 	url = https://repo.or.cz/libc-test.git
+[submodule "upstream/libcap"]
+	path = upstream/libcap
+	url = https://git.kernel.org/pub/scm/libs/libcap/libcap.git
