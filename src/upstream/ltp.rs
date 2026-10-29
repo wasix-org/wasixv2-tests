@@ -114,8 +114,9 @@ const KCONFIGS: &[&str] = &[
 const KCONFIG_FILE: &str = "wasixv2-kconfig";
 
 /// The version of what the runner builds in LTP's tree. A tree built by an older runner, with
-/// another version, is built again. 2: trunk directories too. 3: with libcap.
-const BUILD_VERSION: u32 = 3;
+/// another version, is built again. 2: trunk directories too. 3: with libcap. 4: the network
+/// tests' data files.
+const BUILD_VERSION: u32 = 4;
 
 /// The version of which programs `links_fork` finds forking. An install prepared with another
 /// version is completed in place: the programs it finds now are built for asyncify too. 2: raw
@@ -795,8 +796,16 @@ fn build_tree(
                     // rules only when `install` is a goal (env_post.mk), and a trunk's `install`
                     // recurses: ask for `trunk-install`, with the goals the rules look for.
                     let (all, install) = if is_trunk(leaf) {
+                        // `testcases/network` installs `datafiles/ascii.*` (the network tests'
+                        // `$TST_NET_DATAROOT`), which only its `generate` makes; its makefile
+                        // looks for them as it is read, so they are made by the step before.
+                        let generate =
+                            (rel == Path::new("testcases/network")).then(|| "generate".to_owned());
                         (
-                            vec!["trunk-all".to_owned()],
+                            ["trunk-all".to_owned()]
+                                .into_iter()
+                                .chain(generate)
+                                .collect(),
                             vec![
                                 "trunk-install".to_owned(),
                                 "MAKECMDGOALS=install".to_owned(),
