@@ -1311,6 +1311,18 @@ mod tests {
     }
 
     #[test]
+    fn legacy_ipv6_raw_tests_require_root() {
+        let sources = super::source_index(&super::src());
+        for name in ["asapi_01", "asapi_03"] {
+            let declared = super::declared(&serde_json::json!({}), &sources, name, &[]);
+            assert!(
+                declared.iter().any(|test| has(test, "needs_root")),
+                "{name}"
+            );
+        }
+    }
+
+    #[test]
     fn shell_scripts_declare_requirements_in_variables() {
         let test = script_metadata(
             "#!/bin/sh\n# TST_NEEDS_DEVICE=1\nTST_NEEDS_ROOT=1\nTST_NEEDS_TMPDIR=1\n\
