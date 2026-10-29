@@ -98,7 +98,7 @@ const EXCLUDED_LISTS: &[(&str, &str)] = &[
 ];
 
 /// The kernel options wasixv2's kernel has that tests ask for (`needs_kconfigs`): its pid, IPC,
-/// UTS and network namespaces, and dnotify. There are no user or time namespaces, and mount
+/// UTS, network and user namespaces, and dnotify. There are no time namespaces, and mount
 /// namespaces have no option of their own.
 const KCONFIGS: &[&str] = &[
     "CONFIG_PID_NS",
@@ -106,6 +106,7 @@ const KCONFIGS: &[&str] = &[
     "CONFIG_UTS_NS",
     "CONFIG_NET_NS",
     "CONFIG_DNOTIFY",
+    "CONFIG_USER_NS",
 ];
 
 /// The kernel configuration LTP reads for the tests that need options, in the install.
@@ -1123,9 +1124,13 @@ mod tests {
             "CONFIG_NET_NS=y",
             "CONFIG_UTS_NS"
         ])));
-        assert!(!kconfigs_supported(&needs(&[
+        assert!(kconfigs_supported(&needs(&[
             "CONFIG_USER_NS",
             "CONFIG_PID_NS"
+        ])));
+        assert!(!kconfigs_supported(&needs(&[
+            "CONFIG_USER_NS",
+            "CONFIG_TIME_NS"
         ])));
         assert!(!kconfigs_supported(&needs(&["CONFIG_TIME_NS=y"])));
         assert!(!kconfigs_supported(&needs(&[
