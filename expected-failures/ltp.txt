@@ -17,17 +17,6 @@ ltp/syscalls/getitimer01
 ## TBROK: CLONE_THREAD clone() failed: EINVAL: musl's clone() refuses CLONE_THREAD, as it does natively; the cases before it pass
 ltp/syscalls/clone08
 
-## TBROK: Cannot parse kernel .config
-ltp/sched/sched_football
-ltp/syscalls/clock_adjtime02
-ltp/syscalls/clock_gettime02
-ltp/syscalls/clock_settime02
-ltp/syscalls/sched_getscheduler01
-ltp/syscalls/sched_setparam02
-ltp/syscalls/sched_setparam03
-ltp/syscalls/seccomp01
-ltp/syscalls/timer_create02
-
 ## TBROK: Child (4) killed by signal SIGHUP
 ltp/syscalls-ipc/msgsnd05
 ltp/syscalls/msgsnd05
@@ -79,10 +68,6 @@ ltp/containers/userns06
 ## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
 ltp/syscalls/pipe15
 
-## TBROK: Failed to open FILE '/proc/sys/kernel/keys/root_maxkeys' for reading: ENOENT (2)
-ltp/cve/cve-2015-7550
-ltp/syscalls/keyctl02
-
 ## TBROK: Failed to open FILE '/proc/sys/kernel/msgmni' for reading: ENOENT (2)
 ltp/syscalls-ipc/msgstress01
 ltp/syscalls/msgstress01
@@ -104,7 +89,7 @@ ltp/syscalls/setrlimit04
 ltp/cve/cve-2011-0999
 ltp/mm/thp01
 
-## TBROK: fgets: ENOENT (2)
+## TBROK: fgets: SUCCESS (0)
 ltp/cve/cve-2017-1000364
 
 ## TBROK: fopen(/proc/sysvipc/shm,r) failed: ENOENT (2)
@@ -189,14 +174,14 @@ ltp/syscalls/inotify12
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
 
+## TFAIL: Expect: final_ball == 0
+ltp/sched/sched_football
+
 ## TFAIL: Faulty timeout: select() passed unexpectedly with 1
 ltp/syscalls/select03
 
 ## TFAIL: Found sequence in dump when MADV_DONTDUMP set
 ltp/syscalls/madvise08
-
-## TFAIL: IPC_STAT nattch=6 SHM_STAT nattch=7
-ltp/syscalls-ipc/shmctl01
 
 ## TFAIL: Invalid address expected EFAULT: ENOENT (2)
 ltp/syscalls/mknod06
@@ -239,16 +224,19 @@ ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 
 ## TFAIL: Test{5} failed, expected 0 exit.
-ltp/fs/ftest02
-
-## TFAIL: Test{7} failed, expected 0 exit.
 ltp/fs/ftest06
 
-## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
+## TFAIL: Test{8} failed, expected 0 exit.
+ltp/fs/ftest02
+
+## TFAIL: Timer CLOCK_THREAD_CPUTIME_ID expired too early
 ltp/syscalls/timer_settime01
 
-## TFAIL: after child shmat() shm_nattcg=12 expected 20
+## TFAIL: after child shmat() shm_nattcg=3 expected 20
 ltp/syscalls/shmctl01
+
+## TFAIL: after child shmat() shm_nattcg=7 expected 20
+ltp/syscalls-ipc/shmctl01
 
 ## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
 ltp/syscalls/alarm07
@@ -463,10 +451,6 @@ ltp/syscalls/send02
 ## TFAIL: recvmmsg() negative seconds in timeout succeeded
 ltp/syscalls/recvmmsg01
 
-## TFAIL: request_key() failed with unexpected error code: ENOKEY (126)
-ltp/cve/cve-2017-17807
-ltp/syscalls/request_key04
-
 ## TFAIL: returned -1, expected -1, expected errno: EINVAL (22): EOPNOTSUPP (95)
 ltp/syscalls/clock_nanosleep01
 
@@ -550,9 +534,6 @@ ltp/syscalls/futex_cmp_requeue03
 
 ## TFAIL: ulimit(UL_GETFSIZE, -1) failed: SUCCESS (0)
 ltp/syscalls/ulimit01
-
-## TFAIL: unexpected event.pid value
-ltp/syscalls/fanotify11
 
 ## TFAIL: unexpected exit code: 0
 ltp/syscalls/setdomainname02
@@ -735,10 +716,6 @@ ltp/net.tcp_cmds/ipneigh01_ip
 
 ## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
 ltp/commands/ldd01_sh
-
-## request_key constructs no key: no negative key is linked into the destination keyring when there is no /sbin/request-key (construct_alloc_key, complete_request_key -> key_negate_and_link); keyrings follow-up (train 14 regression: passed while keyctl was ENOSYS)
-ltp/cve/cve-2017-12192
-ltp/syscalls/keyctl07
 
 ## runs unprivileged (declares no root) but makes a network namespace with tst_ns_create: EPERM, as on Linux
 ltp/containers/netns_sysfs
