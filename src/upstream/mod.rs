@@ -12,6 +12,7 @@ pub mod posix;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::OnceLock;
 
 use anyhow::{Context, Result, ensure};
 
@@ -428,12 +429,41 @@ impl Ran {
     }
 }
 
-pub fn run_wasm(suite: &Suite, inv: &Invocation, dir: &Path) -> Result<Ran, Failure> {
+/// The optional userland for upstream tests: `WASIXV2_TESTS_USERLAND`, a directory with GNU bash,
+/// coreutils and the other commands upstream tests execute, built for wasixv2 (`out/bin` of a
+/// userland build), which is mounted at `/bin`. `None` when the variable is unset.
+pub fn userland() -> Result<Option<&'static Path>, Failure> {
+    static USERLAND: OnceLock<Result<Option<PathBuf>, String>> = OnceLock::new();
+    USERLAND
+        .get_or_init(|| {
+            let Some(bin) = crate::env_path("WASIXV2_TESTS_USERLAND") else {
+                return Ok(None);
+            };
+            if !bin.join("bash").is_file() {
+                return Err(format!(
+                    "WASIXV2_TESTS_USERLAND: {} has no bash",
+                    bin.display()
+                ));
+            }
+            Ok(Some(bin))
+        })
+        .as_ref()
+        .map(Option::as_deref)
+        .map_err(|e| Failure::harness(e.clone()))
+}
+
+fn wasm_command(suite: &Suite, inv: &Invocation, dir: &Path, userland: Option<&Path>) -> Command {
     let mut cmd = suite.wasmer_command();
     cmd.arg("run");
     for (host, guest) in &inv.volumes {
         cmd.arg("--volume")
             .arg(format!("{}:{guest}", host.display()));
+    }
+    if let Some(bin) = userland {
+        cmd.arg("--volume").arg(format!("{}:/bin", bin.display()));
+        if !inv.env.iter().any(|(key, _)| key == "PATH") {
+            cmd.args(["--env", "PATH=/bin"]);
+        }
     }
     if let Some(cwd) = &inv.cwd {
         cmd.arg("--cwd").arg(cwd);
@@ -448,6 +478,11 @@ pub fn run_wasm(suite: &Suite, inv: &Invocation, dir: &Path) -> Result<Ran, Fail
         .arg("--")
         .args(&inv.args)
         .current_dir(dir);
+    cmd
+}
+
+pub fn run_wasm(suite: &Suite, inv: &Invocation, dir: &Path) -> Result<Ran, Failure> {
+    let mut cmd = wasm_command(suite, inv, dir, userland()?);
     let output = run::execute(suite, &mut cmd, None)?;
     Ok(Ran { output, cmd })
 }
@@ -482,7 +517,35 @@ pub fn first_line(text: &str, pred: impl Fn(&str) -> bool) -> Option<&str> {
 
 #[cfg(test)]
 mod tests {
-    use super::links_fork;
+    use super::{Invocation, links_fork, wasm_command};
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn c_tests_get_the_userland_and_a_search_path() {
+        let suite = crate::Suite {
+            wasmer: "wasmer".into(),
+            wrapper: vec![],
+            cc: "cc".into(),
+            cxx: "c++".into(),
+            build_root: PathBuf::new(),
+            timeout: std::time::Duration::from_secs(1),
+        };
+        for path in [None, Some("/opt/ltp/testcases/bin:/bin")] {
+            let inv = Invocation {
+                module: "main.wasm".into(),
+                env: path
+                    .map(|p| vec![("PATH".into(), p.into())])
+                    .unwrap_or_default(),
+                ..Default::default()
+            };
+            let command = wasm_command(&suite, &inv, Path::new("."), Some(Path::new("/userland")));
+            let args: Vec<_> = command.get_args().map(|a| a.to_str().unwrap()).collect();
+            assert!(args.windows(2).any(|a| a == ["--volume", "/userland:/bin"]));
+            let expected = format!("PATH={}", path.unwrap_or("/bin"));
+            assert!(args.windows(2).any(|a| a == ["--env", &expected]));
+            assert_eq!(args.iter().filter(|a| a.starts_with("PATH=")).count(), 1);
+        }
+    }
 
     const I32_CONST: u8 = 0x41;
     const CALL: u8 = 0x10;

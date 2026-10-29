@@ -999,28 +999,6 @@ fn jobs() -> usize {
     std::thread::available_parallelism().map_or(4, |n| n.get())
 }
 
-/// The v2 userland that shell tests run in: `WASIXV2_TESTS_USERLAND`, a directory with GNU bash,
-/// coreutils and the other commands LTP's shell tests use, built for wasixv2 (`out/bin` of a
-/// userland build), which is mounted at `/bin`. `None` when the variable is unset.
-fn userland() -> Result<Option<&'static Path>, Failure> {
-    static USERLAND: OnceLock<Result<Option<PathBuf>, String>> = OnceLock::new();
-    USERLAND
-        .get_or_init(|| {
-            let Some(bin) = crate::env_path("WASIXV2_TESTS_USERLAND") else {
-                return Ok(None);
-            };
-            if !bin.join("bash").is_file() {
-                return Err(format!(
-                    "WASIXV2_TESTS_USERLAND: {} has no bash",
-                    bin.display()
-                ));
-            }
-            Ok(Some(bin))
-        })
-        .as_ref()
-        .map(Option::as_deref)
-        .map_err(|e| Failure::harness(e.clone()))
-}
 
 impl Test {
     fn environment(&self) -> Vec<(String, String)> {
@@ -1070,7 +1048,7 @@ impl Test {
             }) {
                 return Err(self.build_failure(prepared, script));
             }
-            let Some(userland) = userland()? else {
+            let Some(userland) = super::userland()? else {
                 return Ok(Outcome::Skipped(
                     "a shell test; set WASIXV2_TESTS_USERLAND to run it".to_owned(),
                 ));
@@ -1111,9 +1089,6 @@ impl Test {
     fn in_shell(&self, userland: &Path, invocation: &mut Invocation) {
         invocation.module = userland.join("bash");
         invocation.args = vec!["-c".to_owned(), format!("set -m; {}; exit $?", self.line)];
-        invocation
-            .volumes
-            .push((userland.to_owned(), "/bin".to_owned()));
     }
 
     /// Runs the test under `launcher` (`ltp-launch.c`), which starts it from `PATH` in a process

@@ -8,3 +8,6 @@
 [submodule "upstream/libcap"]
 	path = upstream/libcap
 	url = https://git.kernel.org/pub/scm/libs/libcap/libcap.git
+[submodule "upstream/libaio"]
+	path = upstream/libaio
+	url = https://pagure.io/libaio.git
