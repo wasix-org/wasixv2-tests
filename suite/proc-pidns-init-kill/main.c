@@ -3,6 +3,7 @@
 // inside does nothing to the init, but from the caller, outside, it kills it, and once the
 // caller reaps it none of the four is left (zap_pid_ns_processes). Without CAP_SYS_ADMIN
 // (a uid other than 0), clone with CLONE_NEWPID fails with EPERM.
+//#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no
 //#ExpectedStdout: PASS
 #define _GNU_SOURCE
 #include <dirent.h>
