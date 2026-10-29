@@ -31,7 +31,10 @@ static int mapped(unsigned long start, unsigned long end)
 			continue;
 		}
 		CHECK(lo < hi && lo >= last);
-		CHECK(perms[0] == 'r' && perms[3] == 'p');
+		/* A protection, as "rwxp": musl's malloc puts PROT_NONE guard pages (---p) in the
+		 * break, as it does on Linux. */
+		CHECK(strchr("r-", perms[0]) && strchr("w-", perms[1]) && strchr("x-", perms[2]) &&
+		      strchr("ps", perms[3]));
 		last = hi;
 		if (lo <= start && end <= hi)
 			found = 1;
