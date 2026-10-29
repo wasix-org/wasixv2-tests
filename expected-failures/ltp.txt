@@ -8,8 +8,8 @@
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
 
-## ENOSYS: Kcmp
-ltp/syscalls/kcmp03
+## ENOSYS: PkeyAlloc
+ltp/syscalls/mseal01
 
 ## ITIMER_REAL is not 0 at the start: the test runs in the LTP library's process (no fork_testrun on wasixv2), so it reads the library's own alarm(); ITIMER_VIRTUAL and ITIMER_PROF pass
 ltp/syscalls/getitimer01
@@ -18,9 +18,13 @@ ltp/syscalls/getitimer01
 ltp/syscalls/clone08
 
 ## TBROK: Cannot parse kernel .config
+ltp/sched/sched_football
 ltp/syscalls/clock_adjtime02
 ltp/syscalls/clock_gettime02
 ltp/syscalls/clock_settime02
+ltp/syscalls/sched_getscheduler01
+ltp/syscalls/sched_setparam02
+ltp/syscalls/sched_setparam03
 ltp/syscalls/seccomp01
 ltp/syscalls/timer_create02
 
@@ -72,17 +76,8 @@ ltp/syscalls/pipe2_02
 ## TBROK: Failed to copy '/opt/ltp/testcases/bin/userns06_capcheck' to '.'
 ltp/containers/userns06
 
-## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_queued_events' for reading: ENOENT (2)
-ltp/syscalls/inotify05
-
-## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_user_instances' for reading: ENOENT (2)
-ltp/syscalls/inotify06
-
 ## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
 ltp/syscalls/pipe15
-
-## TBROK: Failed to open FILE '/proc/sys/kernel/core_pattern' for reading: ENOENT (2)
-ltp/syscalls/waitid10
 
 ## TBROK: Failed to open FILE '/proc/sys/kernel/keys/root_maxkeys' for reading: ENOENT (2)
 ltp/cve/cve-2015-7550
@@ -99,12 +94,6 @@ ltp/syscalls/shmctl03
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
 
-## TBROK: Path not found: /proc/sys/kernel/printk: ENOENT (2)
-ltp/syscalls/syslog11
-
-## TBROK: Path not found: /proc/sys/vm/min_free_kbytes: ENOENT (2)
-ltp/mm/min_free_kbytes
-
 ## TBROK: Test haven't reported results!
 ltp/syscalls/futex_wait07
 
@@ -117,9 +106,6 @@ ltp/mm/thp01
 
 ## TBROK: fgets: ENOENT (2)
 ltp/cve/cve-2017-1000364
-
-## TBROK: fopen(/proc/self/smaps,r) failed: ENOENT (2)
-ltp/syscalls/mlock05
 
 ## TBROK: fopen(/proc/sysvipc/shm,r) failed: ENOENT (2)
 ltp/syscalls-ipc/shmctl04
@@ -155,36 +141,19 @@ ltp/syscalls/posix_fadvise01_64
 ltp/syscalls/posix_fadvise03
 ltp/syscalls/posix_fadvise03_64
 
-## TBROK: open(/proc/self/mem,2,0000) failed: errno=ENOENT(2): No such file or directory
-ltp/cve/cve-2016-5195
-ltp/cve/cve-2022-2590
-ltp/syscalls/dirtyc0w
-ltp/syscalls/dirtyc0w_shmem
-
 ## TBROK: openat() failed: errno=EACCES(13): Permission denied
 ltp/syscalls/openat03
 
-## TBROK: setsockopt(3, 263, 10, 0x7fe958, 4) failed: ENOPROTOOPT (92)
+## TBROK: process_vm_readv: EPERM
+ltp/syscalls/process_vm_readv02
+
+## TBROK: setsockopt(3, 263, 10, 0x7fe958, 4) failed: EINVAL (22)
 ltp/cve/cve-2020-14386
 ltp/syscalls/sendto03
 
-## TBROK: setsockopt(IPV6_RTHDR) failed: ENOPROTOOPT (92)
+## TBROK: setsockopt(7, 41, 24, 0x7fe96c, 4) failed: ENOPROTOOPT (92)
 ltp/cve/cve-2026-53362
 ltp/syscalls/setsockopt11
-
-## TBROK: setsockopt(PACKET_VERSION, TPACKET_V3): ENOPROTOOPT (92)
-ltp/cve/cve-2021-22600
-ltp/syscalls/setsockopt09
-
-## TBROK: setsockopt(PACKET_VERSION, TPACKET_V3: ENOPROTOOPT (92)
-ltp/cve/cve-2016-8655
-ltp/cve/cve-2017-1000111
-ltp/syscalls/setsockopt06
-ltp/syscalls/setsockopt07
-
-## TBROK: setsockopt(sk, SOL_PACKET, PACKET_VERSION, TPACKET_V3): ENOPROTOOPT (92)
-ltp/cve/cve-2017-7308
-ltp/syscalls/setsockopt02
 
 ## TBROK: socket(10, 3, 159) failed: errno=EPERM(1): Operation not permitted
 ltp/net.ipv6_lib/asapi_03
@@ -205,9 +174,6 @@ ltp/mm/vma01
 ltp/cve/cve-2016-9604
 ltp/syscalls/keyctl08
 
-## TFAIL: Child did not dump core when expected
-ltp/syscalls/waitpid01
-
 ## TFAIL: Child succeeds to refer unmapped memory region
 ltp/syscalls/munmap01
 
@@ -223,11 +189,14 @@ ltp/syscalls/inotify12
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
 
-## TFAIL: Expect: final_ball == 0
-ltp/sched/sched_football
-
 ## TFAIL: Faulty timeout: select() passed unexpectedly with 1
 ltp/syscalls/select03
+
+## TFAIL: Found sequence in dump when MADV_DONTDUMP set
+ltp/syscalls/madvise08
+
+## TFAIL: IPC_STAT nattch=6 SHM_STAT nattch=7
+ltp/syscalls-ipc/shmctl01
 
 ## TFAIL: Invalid address expected EFAULT: ENOENT (2)
 ltp/syscalls/mknod06
@@ -269,23 +238,17 @@ ltp/mm/mmapstress05
 ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 
-## TFAIL: Test{4} failed, expected 0 exit.
-ltp/fs/ftest06
-
 ## TFAIL: Test{5} failed, expected 0 exit.
 ltp/fs/ftest02
+
+## TFAIL: Test{7} failed, expected 0 exit.
+ltp/fs/ftest06
 
 ## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
 ltp/syscalls/timer_settime01
 
-## TFAIL: abort() failed to dump core
-ltp/syscalls/abort01
-
-## TFAIL: after child shmat() shm_nattcg=1 expected 20
+## TFAIL: after child shmat() shm_nattcg=12 expected 20
 ltp/syscalls/shmctl01
-
-## TFAIL: after child shmat() shm_nattcg=11 expected 20
-ltp/syscalls-ipc/shmctl01
 
 ## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
 ltp/syscalls/alarm07
@@ -317,9 +280,6 @@ ltp/syscalls/mprotect03
 
 ## TFAIL: clock_nanosleep() slept for too long
 ltp/syscalls/clock_nanosleep02
-
-## TFAIL: core dump bit not set for SIGQUIT
-ltp/syscalls/kill11
 
 ## TFAIL: description points outside the process's accessible address space expected EFAULT: ENODEV (19)
 ltp/syscalls/request_key06
@@ -473,8 +433,11 @@ ltp/syscalls/prctl09
 ## TFAIL: prctl() succeeded unexpectedly
 ltp/syscalls/prctl02
 
-## TFAIL: process 12 wasn't woken up: ETIMEDOUT (110)
+## TFAIL: process 13 wasn't woken up: ETIMEDOUT (110)
 ltp/syscalls/futex_cmp_requeue01
+
+## TFAIL: process_vm_read() failed: EPERM (1)
+ltp/syscalls/process_vm_readv03
 
 ## TFAIL: pselect() slept for too long
 ltp/syscalls/pselect01
@@ -524,6 +487,9 @@ ltp/syscalls/semctl03
 ## TFAIL: sendmmsg() invalid msgvec address expected EFAULT: EDESTADDRREQ (89)
 ltp/syscalls/sendmmsg02
 
+## TFAIL: sendto(fd, NULL, ...) succeeded unexpectedly
+ltp/syscalls/sendto02
+
 ## TFAIL: setgroups(33, groups_list) succeeded
 ltp/syscalls/setgroups03
 
@@ -572,6 +538,9 @@ ltp/math/float_bessel
 ## TFAIL: truncate(tc->pathname, tc->length) succeeded
 ltp/syscalls/truncate03
 ltp/syscalls/truncate03_64
+
+## TFAIL: tst_syscall(__NR_process_vm_writev, pid_alloc, &local, 1UL, &remote, 1UL, 0UL) failed: EPERM (1)
+ltp/syscalls/process_vm_writev02
 
 ## TFAIL: uaddr unmapped succeeded
 ltp/syscalls/futex_wake05
@@ -745,6 +714,7 @@ ltp/syscalls/ioctl02
 ltp/syscalls-ipc/msgrcv05
 ltp/syscalls/epoll_wait08
 ltp/syscalls/futex_wait01
+ltp/syscalls/kill11
 ltp/syscalls/msgrcv05
 
 ## exit status 139
