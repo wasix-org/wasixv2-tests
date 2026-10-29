@@ -4,8 +4,6 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## FAIL: /proc/<pid>/stat reports every live non-stopped task as S (sleeping), so the test's state wait sees the child's setup as the intended sleep; needs real task-state tracking (fs/proc/array.c get_task_state)
-
 ## FAIL: At least one test FAILED -- see output for status
 posix/conformance/interfaces/kill/2-2
 
@@ -14,9 +12,6 @@ posix/conformance/interfaces/mmap/5-1
 
 ## FAIL: Failed: func: pthread_attr_setschedpolicy() rc: No error information (0)
 posix/conformance/interfaces/pthread_attr_setschedpolicy/4-1
-
-## FAIL: TEST FAILED: errno != EINTR
-posix/conformance/interfaces/sem_timedwait/9-1
 
 ## FAIL: TEST FAILED: semaphore does exist
 posix/conformance/interfaces/sem_unlink/4-1
@@ -67,18 +62,6 @@ posix/conformance/interfaces/sigqueue/3-1
 
 ## FAIL: Test upstream/ltp-3351d0801a34/testcases/open_posix_testsuite/conformance/interfaces/fork/1-1.c FAILED: The new process does not execute
 posix/conformance/interfaces/fork/1-1
-
-## FAIL: Test upstream/ltp-3351d0801a34/testcases/open_posix_testsuite/conformance/interfaces/getpid/1-1.c FAILED: getpid() in the child returned a different value than 
-posix/conformance/interfaces/getpid/1-1
-
-## FAIL: Test upstream/ltp-3351d0801a34/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/1-2.c FAILED: pthread_mutex_trylock() did not return 
-posix/conformance/interfaces/pthread_mutex_trylock/1-2
-
-## FAIL: Test upstream/ltp-3351d0801a34/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/2-1.c FAILED: pthread_mutex_trylock() did not return 
-posix/conformance/interfaces/pthread_mutex_trylock/2-1
-
-## FAIL: Test upstream/ltp-3351d0801a34/testcases/open_posix_testsuite/conformance/interfaces/pthread_mutex_trylock/4-2.c FAILED: pthread_mutex_trylock() did not return 
-posix/conformance/interfaces/pthread_mutex_trylock/4-2
 
 ## FAIL: Test upstream/ltp-3351d0801a34/testcases/open_posix_testsuite/conformance/interfaces/sem_init/7-1.c FAILED: We were able to sem_init more than SEM_NSEMS_MAX sem
 posix/conformance/interfaces/sem_init/7-1
@@ -440,13 +423,6 @@ posix/conformance/interfaces/sigpause/3-1
 posix/conformance/interfaces/sem_unlink/5-1
 
 ## timeout
-posix/conformance/interfaces/pthread_cond_broadcast/2-3
-posix/conformance/interfaces/pthread_cond_destroy/2-1
-posix/conformance/interfaces/pthread_cond_signal/1-2
-posix/conformance/interfaces/pthread_cond_timedwait/2-4
-posix/conformance/interfaces/pthread_cond_timedwait/2-7
-posix/conformance/interfaces/pthread_cond_timedwait/4-2
-posix/conformance/interfaces/pthread_cond_wait/2-2
 posix/conformance/interfaces/pthread_mutex_init/3-2
 posix/conformance/interfaces/pthread_rwlock_wrlock/3-1
 posix/conformance/interfaces/timer_settime/5-3
