@@ -1,4 +1,4 @@
-// Process-shared pthread objects in MAP_SHARED|MAP_ANONYMOUS memory across fork, as the Open
+// Process-shared pthread objects in anonymous or file-backed MAP_SHARED memory across fork, as the Open
 // POSIX tests of PTHREAD_PROCESS_SHARED use them: parent and child take turns under a mutex and
 // a condition variable, both count under a contended mutex and a priority-inheritance mutex, and
 // a sem_init(pshared = 1) semaphore passes a token back and forth.
@@ -8,8 +8,13 @@
 //#ExpectedStdout: pi mutex count 40000 ok
 //#ExpectedStdout: semaphore ok
 //#ExpectedStdout: PASS
+//#Config: tmpfile:default
+//#Args: tmpfile
+//#Config: rootfile:default
+//#Args: rootfile
 #define _GNU_SOURCE
 #include <errno.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <signal.h>
@@ -114,9 +119,21 @@ static void init(void)
 	CHECK(sem_init(&s->to_parent, 1, 0) == 0);
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
-	s = mmap(NULL, sizeof *s, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+	int fd = -1;
+	int flags = MAP_SHARED | MAP_ANONYMOUS;
+	if (argc > 1) {
+		const char *name = !strcmp(argv[1], "tmpfile") ? "/tmp/pshared" : "/pshared";
+		/* mm/shmem.c shmem_mmap_prepare and kernel/futex/core.c get_futex_key: a tmpfs
+		 * file supplies the same shared pages and futex key in both processes. */
+		fd = open(name, O_CREAT | O_EXCL | O_RDWR, 0600);
+		CHECK(fd >= 0);
+		CHECK(unlink(name) == 0);
+		CHECK(ftruncate(fd, sizeof *s) == 0);
+		flags = MAP_SHARED;
+	}
+	s = mmap(NULL, sizeof *s, PROT_READ | PROT_WRITE, flags, fd, 0);
 	CHECK(s != MAP_FAILED);
 	init();
 

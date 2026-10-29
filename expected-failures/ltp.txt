@@ -79,9 +79,6 @@ ltp/syscalls/shmctl03
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
 
-## TBROK: Test haven't reported results!
-ltp/syscalls/futex_wait07
-
 ## TBROK: execlp(/bin/true, /bin/true, ...) failed: ENOENT (2)
 ltp/syscalls/setrlimit04
 
@@ -143,9 +140,6 @@ ltp/syscalls/setsockopt11
 ## TBROK: socket(10, 3, 159) failed: errno=EPERM(1): Operation not permitted
 ltp/net.ipv6_lib/asapi_03
 
-## TBROK: tst_checkpoint_wait(0, 10000) failed: ETIMEDOUT (110)
-ltp/syscalls/pidfd_open04
-
 ## TBROK: unshare(131072) failed: EPERM (1)
 ltp/syscalls/statmount03
 
@@ -182,9 +176,6 @@ ltp/syscalls/select03
 
 ## TFAIL: Found sequence in dump when MADV_DONTDUMP set
 ltp/syscalls/madvise08
-
-## TFAIL: Invalid address expected EFAULT: ENOENT (2)
-ltp/syscalls/mknod06
 
 ## TFAIL: Invalid rule attr expected EFAULT: ENOMSG (42)
 ltp/syscalls/landlock02
@@ -260,7 +251,7 @@ ltp/mm/overcommit_memory04
 ltp/mm/overcommit_memory05
 ltp/mm/overcommit_memory06
 
-## TFAIL: call succeeded unexpectedly
+## TBROK: /dev/zero has no mmap backend; low-guard mprotect now correctly returns ENOMEM
 ltp/syscalls/mprotect01
 
 ## TFAIL: child returned unexpected status
@@ -274,9 +265,6 @@ ltp/syscalls/request_key06
 
 ## TFAIL: do_epoll_pwait() slept for too long
 ltp/syscalls/epoll_pwait03
-
-## TFAIL: epoll_ctl(...) if events is NULL succeeded
-ltp/syscalls/epoll_ctl02
 
 ## TFAIL: epoll_wait() slept for too long
 ltp/syscalls/epoll_wait02
@@ -320,14 +308,8 @@ ltp/syscalls/inotify04
 ## TFAIL: got unexpected event 40000020
 ltp/syscalls/fanotify04
 
-## TFAIL: invalid iovec buffer: expected -1, returned 0: SUCCESS (0)
-ltp/syscalls/recvmsg01
-
 ## TFAIL: invalid level expected EOPNOTSUPP: ENOPROTOOPT (92)
 ltp/syscalls/getsockopt01
-
-## TFAIL: invalid-pathname: openat2() should fail with EFAULT: ENOENT (2)
-ltp/syscalls/openat203
 
 ## TFAIL: ioctl(fd, PROCMAP_QUERY, q) failed: ENOTTY (25)
 ltp/syscalls/ioctl10
@@ -355,10 +337,6 @@ ltp/syscalls/fcntl11_64
 ltp/syscalls/fcntl21
 ltp/syscalls/fcntl21_64
 
-## TFAIL: lstat() failed unexpectedly; expected: EFAULT - got: ENOENT (2)
-ltp/syscalls/lstat02
-ltp/syscalls/lstat02_64
-
 ## TFAIL: madvise succeeded unexpectedly
 ltp/syscalls/madvise02
 
@@ -379,9 +357,6 @@ ltp/syscalls/mmap15
 
 ## TFAIL: mprotect failed to exec: EACCES (13)
 ltp/syscalls/mprotect05
-
-## TFAIL: mq_timedreceive() failed unexpectedly, expected EFAULT: ETIMEDOUT (110)
-ltp/syscalls/mq_timedreceive01
 
 ## TFAIL: msgctl(4, 258, 0x825520) expected EACCES: EINVAL (22)
 ltp/syscalls-ipc/msgctl04
@@ -445,12 +420,6 @@ ltp/syscalls/pwrite02_64
 ltp/syscalls/pwritev202
 ltp/syscalls/pwritev202_64
 
-## TFAIL: readlink() sueeeeded unexpectedly
-ltp/syscalls/readlink03
-
-## TFAIL: readlinkat(3, symlink_file, NULL, 0) succeeded
-ltp/syscalls/readlinkat02
-
 ## TFAIL: recv() read 16 bytes, expected 0, step 1
 ltp/syscalls/send02
 
@@ -473,9 +442,6 @@ ltp/syscalls/select02
 ## TFAIL: semctl() with invalid union arg succeeded
 ltp/syscalls-ipc/semctl03
 ltp/syscalls/semctl03
-
-## TFAIL: sendmmsg() invalid msgvec address expected EFAULT: EDESTADDRREQ (89)
-ltp/syscalls/sendmmsg02
 
 ## TFAIL: sendto(fd, NULL, ...) succeeded unexpectedly
 ltp/syscalls/sendto02
@@ -525,7 +491,7 @@ ltp/math/float_exp_log
 ## TFAIL: thread 0 (j0) terminated unsuccessfully 0 errors/0 loops
 ltp/math/float_bessel
 
-## TFAIL: truncate(tc->pathname, tc->length) succeeded
+## TFAIL: truncate exceeds RLIMIT_FSIZE instead of returning EFBIG; low-guard EFAULT now passes
 ltp/syscalls/truncate03
 ltp/syscalls/truncate03_64
 
@@ -699,7 +665,6 @@ ltp/syscalls/ioctl02
 
 ## exit status 137
 ltp/syscalls-ipc/msgrcv05
-ltp/syscalls/epoll_wait08
 ltp/syscalls/futex_wait01
 ltp/syscalls/kill11
 ltp/syscalls/msgrcv05
@@ -761,9 +726,6 @@ ltp/mm/mtest06_3
 ltp/net.multicast/mc_commo
 ltp/net.multicast/mc_member
 ltp/sched/sched_stress
-ltp/syscalls/rt_sigtimedwait01
-ltp/syscalls/sigtimedwait01
-ltp/syscalls/sigwaitinfo01
 
 ## timeout: creates pid_max processes
 ltp/syscalls/fork13

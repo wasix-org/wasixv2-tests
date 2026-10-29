@@ -36,6 +36,10 @@ int main(void)
 	OK(symlink("f", "/tmp/s"));
 	ssize_t n = readlink("/tmp/s", buf, sizeof buf);
 	CHECK(n == 1 && buf[0] == 'f');
+	/* Linux fs/stat.c do_readlinkat rejects nonpositive buffer sizes before
+	 * looking up the path; libc must not replace an empty buffer with a dummy. */
+	FAILS(readlink("/tmp/s", buf, 0), EINVAL);
+	FAILS(readlink("/tmp/missing", buf, 0), EINVAL);
 	OK(symlink("abcdefgh", "/tmp/long"));
 	CHECK(readlink("/tmp/long", buf, 3) == 3 && memcmp(buf, "abc", 3) == 0);
 	FAILS(readlink("/tmp/f", buf, sizeof buf), EINVAL);
@@ -44,6 +48,8 @@ int main(void)
 	FAILS(symlink("", "/tmp/empty"), ENOENT);
 	int dfd = open("/tmp", O_RDONLY | O_DIRECTORY);
 	CHECK(readlinkat(dfd, "s", buf, sizeof buf) == 1);
+	FAILS(readlinkat(dfd, "s", buf, 0), EINVAL);
+	FAILS(readlinkat(-1, "s", buf, 0), EINVAL);
 	fd = open("/tmp/s", O_PATH | O_NOFOLLOW);
 	CHECK(readlinkat(fd, "", buf, sizeof buf) == 1 && buf[0] == 'f');
 	close(fd);

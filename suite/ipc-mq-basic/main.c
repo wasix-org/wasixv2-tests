@@ -10,6 +10,7 @@
 #include <mqueue.h>
 #include <poll.h>
 #include <spawn.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -83,6 +84,17 @@ int main(int argc, char **argv)
 	FAILS(mq_timedreceive(q, buf, sizeof buf, &prio, &ts), ETIMEDOUT);
 	struct timespec bad = {0, 1000000000};
 	FAILS(mq_timedreceive(q, buf, sizeof buf, &prio, &bad), EINVAL);
+	/* Linux ipc/mqueue.c copies time64 deadlines with get_timespec64 before
+	 * operating on the queue; a libc load must not hide an invalid pointer. */
+	const struct timespec *bad_deadlines[] = {
+		(const struct timespec *)(uintptr_t)1,
+		(const struct timespec *)(uintptr_t)UINTPTR_MAX,
+	};
+	for (unsigned i = 0; i < sizeof bad_deadlines / sizeof *bad_deadlines; i++) {
+		FAILS(mq_timedreceive(q, buf, sizeof buf, &prio, bad_deadlines[i]), EFAULT);
+		FAILS(mq_timedsend(q, "bad", 3, 0, bad_deadlines[i]), EFAULT);
+		if (fails) return 1;
+	}
 
 	/* A blocked receiver wakes when another process sends. */
 	char *argv2[] = {"/t/main", "child", NULL};
