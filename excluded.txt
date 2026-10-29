@@ -10,3 +10,53 @@ ltp/syscalls/delete_module* # unloads kernel modules
 ltp/syscalls/perf_event_open* # hardware performance counters
 ltp/syscalls/fmtmsg01 # glibc's addseverity, which musl does not have
 ltp/syscalls/timer_create01 # glibc's internal struct sigevent layout
+
+# libc policies and upstream tests that require glibc behavior.
+ltp/syscalls/gethostname02 # musl truncates gethostname output successfully; the test requires glibc's ENAMETOOLONG
+ltp/syscalls/ulimit01 # musl divides an unlimited 64-bit rlimit into a 32-bit long without glibc's LONG_MAX saturation
+posix/conformance/interfaces/sem_unlink/5-1 # musl uses /dev/shm/<name>, without glibc's sem. prefix; NAME_MAX is valid
+posix/conformance/interfaces/sem_init/7-1 # musl unnamed semaphores live in caller memory and do not enforce a global SEM_NSEMS_MAX count
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/* # musl does not implement priority-ceiling mutex attributes
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/* # musl does not implement priority-ceiling mutex attributes
+posix/conformance/interfaces/sched_setparam/25-* # POSIX sporadic-server scheduling is optional and musl does not advertise it
+posix/conformance/definitions/aio_h/4-1 # the test requires non-const sigevent*, whereas musl declares the POSIX lio_listio input const
+
+# musl POSIX AIO may report submission errors synchronously; POSIX permits both paths.
+posix/conformance/interfaces/aio_read/10-1 # the test requires asynchronous EBADF rather than accepting aio_read's immediate failure
+posix/conformance/interfaces/aio_read/11-2 # the test requires asynchronous EINVAL rather than accepting aio_read's immediate failure
+posix/conformance/interfaces/aio_write/8-1 # the test requires asynchronous EBADF rather than accepting aio_write's immediate failure
+posix/conformance/interfaces/aio_write/9-2 # the test requires asynchronous EINVAL rather than accepting aio_write's immediate failure
+posix/conformance/interfaces/aio_cancel/2-1 # musl may finish the request before cancellation and legitimately return AIO_ALLDONE
+posix/conformance/interfaces/aio_cancel/3-1 # the test assumes queued requests are still cancellable when aio_cancel runs
+posix/conformance/interfaces/aio_cancel/4-1 # the test assumes cancellation wins the race against I/O completion
+posix/conformance/interfaces/aio_cancel/5-1 # musl may finish the request before cancellation and legitimately return AIO_ALLDONE
+posix/conformance/interfaces/aio_cancel/6-1 # musl may finish the request before cancellation and legitimately return AIO_ALLDONE
+posix/conformance/interfaces/aio_cancel/7-1 # musl may finish the request before cancellation and legitimately return AIO_ALLDONE
+posix/conformance/interfaces/lio_listio/5-1 # musl lio_listio skips unknown opcodes rather than rejecting the list
+posix/conformance/interfaces/lio_listio/13-1 # musl lio_listio skips the invalid opcode that the test expects to fail with EIO
+posix/conformance/interfaces/lio_listio/14-1 # musl reports immediate submission failure for the invalid fd; the test requires asynchronous completion
+posix/conformance/interfaces/lio_listio/18-1 # musl treats unknown modes as nonblocking rather than rejecting them with EINVAL
+
+libc-test/functional/strptime # musl does not implement the non-POSIX %s conversion
+libc-test/functional/strtold # upstream musl's quad-precision conversion disagrees with this hexadecimal rounding reference
+libc-test/math/fmaf # upstream musl's software fmaf has a subnormal double-rounding discrepancy
+
+# Upstream/platform assumptions, rather than missing kernel functionality.
+ltp/net.sctp/* # the SCTP test programs require libsctp headers and helpers, which this test environment does not provide
+ltp/dio/dio04 # the test requires __builtin_return_address, which non-Emscripten WebAssembly does not implement
+ltp/dio/dio10 # the test requires __builtin_return_address, which non-Emscripten WebAssembly does not implement
+ltp/syscalls/timer_create03 # the test accesses glibc's private sigevent._sigev_un layout
+ltp/cve/cve-2017-18344 # the test accesses glibc's private sigevent._sigev_un layout
+ltp/syscalls/clone08 # musl clone() rejects CLONE_THREAD by policy; pthread_create is the supported libc thread API
+ltp/commands/unshare01_sh # the test assumes /tmp is a shared mount as on systemd hosts; the runtime starts with private mounts
+ltp/syscalls/nice05 # guest nice values are advisory to the host scheduler; the test requires proportional CPU execution
+
+# Exposed after correcting callback types: libc policies, invalid API uses, and guest scheduling limits.
+posix/conformance/interfaces/pthread_attr_setdetachstate/2-1 # joins and re-detaches a detached thread; musl deliberately traps on this invalid use
+posix/conformance/interfaces/pthread_detach/1-1 # joins a detached thread; musl deliberately traps on this invalid use
+posix/conformance/interfaces/pthread_detach/4-1 # detaches an already detached thread; musl deliberately traps on this invalid use
+posix/conformance/interfaces/pthread_join/speculative/6-1 # joins a detached thread and demands optional EINVAL detection; musl deliberately traps instead
+posix/conformance/interfaces/pthread_attr_setstack/1-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
+posix/conformance/interfaces/pthread_attr_setstack/2-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
+posix/conformance/interfaces/pthread_attr_setstack/4-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
+posix/conformance/interfaces/pthread_create/1-6 # assumes strict guest priority scheduling; guest priorities are advisory to the host scheduler

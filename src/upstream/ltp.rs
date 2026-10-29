@@ -98,9 +98,8 @@ const EXCLUDED_LISTS: &[(&str, &str)] = &[
     ("uevent", "device events"),
 ];
 
-/// The kernel options wasixv2's kernel has that tests ask for (`needs_kconfigs`): its pid, IPC,
-/// UTS, network and user namespaces, and dnotify. There are no time namespaces, and mount
-/// namespaces have no option of their own.
+/// The kernel options currently advertised to LTP: pid, IPC, UTS, network and user
+/// namespaces, dnotify, and AIO. Mount namespaces have no option of their own.
 const KCONFIGS: &[&str] = &[
     "CONFIG_PID_NS",
     "CONFIG_IPC_NS",
@@ -108,6 +107,7 @@ const KCONFIGS: &[&str] = &[
     "CONFIG_NET_NS",
     "CONFIG_DNOTIFY",
     "CONFIG_USER_NS",
+    "CONFIG_AIO",
 ];
 
 /// The kernel configuration LTP reads for the tests that need options, in the install.
@@ -115,8 +115,8 @@ const KCONFIG_FILE: &str = "wasixv2-kconfig";
 
 /// The version of what the runner builds in LTP's tree. A tree built by an older runner, with
 /// another version, is built again. 2: trunk directories too. 3: with libcap. 4: the network
-/// tests' data files.
-const BUILD_VERSION: u32 = 4;
+/// tests' data files. 5: with libaio.
+const BUILD_VERSION: u32 = 5;
 
 /// The version of which programs `links_fork` finds forking. An install prepared with another
 /// version is completed in place: the programs it finds now are built for asyncify too. 2: raw
@@ -633,6 +633,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
                 BuildConfig::ExceptionHandling,
                 uapi_for(suite, BuildConfig::ExceptionHandling)?.as_deref(),
                 &libcap(suite, BuildConfig::ExceptionHandling)?,
+                &libaio(suite, BuildConfig::ExceptionHandling)?,
                 None,
                 &logs_dir,
             )?;
@@ -680,15 +681,16 @@ fn leaf_log(logs_dir: &Path, leaf: &Path, config: BuildConfig) -> PathBuf {
     ))
 }
 
-/// libcap's static library, built for `config` from `upstream/libcap` in a copy of its own
-/// (`make -C libcap libcap.a`, its names table made by a host program, as its makefiles do):
-/// the directory of its headers (`sys/capability.h`) and of `libcap.a`.
-struct Libcap {
+/// The headers and archive directory of a statically built dependency.
+struct StaticLibrary {
     include: PathBuf,
     lib: PathBuf,
 }
 
-fn libcap(suite: &Suite, config: BuildConfig) -> Result<Libcap> {
+/// libcap's static library, built for `config` from `upstream/libcap` in a copy of its own
+/// (`make -C libcap libcap.a`, its names table made by a host program, as its makefiles do):
+/// the directory of its headers (`sys/capability.h`) and of `libcap.a`.
+fn libcap(suite: &Suite, config: BuildConfig) -> Result<StaticLibrary> {
     let variant = match config {
         BuildConfig::ExceptionHandling => "",
         BuildConfig::Asyncify => "asyncify",
@@ -714,20 +716,76 @@ fn libcap(suite: &Suite, config: BuildConfig) -> Result<Libcap> {
         );
         std::fs::write(&built, "")?;
     }
-    Ok(Libcap {
+    Ok(StaticLibrary {
         include: dir.join("include"),
         lib: dir,
     })
 }
 
-/// Configures LTP's `tree` for `config` with `libcap` and builds its library, then the
+/// Build libaio's static archive using its libc syscall fallback, the time64-only syscall
+/// table, and ordinary static aliases for the current API.
+fn libaio(suite: &Suite, config: BuildConfig) -> Result<StaticLibrary> {
+    let variant = match config {
+        BuildConfig::ExceptionHandling => "",
+        BuildConfig::Asyncify => "asyncify",
+    };
+    let tree = super::source_copy_as(suite, "libaio", variant)?;
+    let dir = tree.join("src");
+    let built = tree.join(".wasixv2-libaio-built");
+    if !built.exists() {
+        let patched = tree.join(".wasixv2-wasm-patched");
+        if !patched.exists() {
+            let mut patch = Command::new("patch");
+            let out = patch
+                .current_dir(&tree)
+                .args(["-p1", "--forward", "-i"])
+                .arg(crate::root().join("src/upstream/libaio-wasm.patch"))
+                .output()
+                .context("adapting libaio for WASM")?;
+            ensure!(
+                out.status.success(),
+                "libaio: patch failed:\n{}\n{}",
+                String::from_utf8_lossy(&out.stdout),
+                String::from_utf8_lossy(&out.stderr)
+            );
+            std::fs::write(patched, "")?;
+        }
+        let mut make = Command::new("make");
+        wasixcc_env_for(&mut make, config)
+            .arg("-C")
+            .arg(&dir)
+            .arg(format!("CC={}", suite.cc))
+            .args([
+                "AR=wasixar",
+                "RANLIB=wasixranlib",
+                "ENABLE_SHARED=0",
+                "libaio.a",
+                // Upstream normally checks the shared build's ABI layout only.
+                "struct_offsets.o",
+            ]);
+        let out = make.output().context("building libaio")?;
+        ensure!(
+            out.status.success(),
+            "libaio: make failed:\n{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        std::fs::write(&built, "")?;
+    }
+    Ok(StaticLibrary {
+        include: dir.clone(),
+        lib: dir,
+    })
+}
+
+/// Configures LTP's `tree` for `config` with libcap and libaio and builds its library, then the
 /// directories under `testcases/` with programs (`program_dirs`): each one's `targets` only,
 /// when given, else everything, installed.
 fn build_tree(
     tree: &Path,
     config: BuildConfig,
     uapi: Option<&Path>,
-    libcap: &Libcap,
+    libcap: &StaticLibrary,
+    libaio: &StaticLibrary,
     targets: Option<&BTreeMap<String, Vec<String>>>,
     logs_dir: &Path,
 ) -> Result<()> {
@@ -755,13 +813,19 @@ fn build_tree(
         ])
         .args(["NM=wasixnm", "HOSTCC=cc"])
         .env("WASIXCC_AUTOCONF_WORKAROUNDS", "yes");
-    let mut cppflags = format!("-isystem {}", libcap.include.display());
+    let mut cppflags = format!(
+        "-isystem {} -isystem {}",
+        libcap.include.display(),
+        libaio.include.display()
+    );
     if let Some(uapi) = uapi {
         cppflags.push_str(&format!(" -isystem {}", uapi.display()));
     }
-    configure
-        .arg(format!("CPPFLAGS={cppflags}"))
-        .arg(format!("LDFLAGS=-L{}", libcap.lib.display()));
+    configure.arg(format!("CPPFLAGS={cppflags}")).arg(format!(
+        "LDFLAGS=-L{} -L{}",
+        libcap.lib.display(),
+        libaio.lib.display()
+    ));
     let out = configure.output()?;
     ensure!(
         out.status.success(),
@@ -832,7 +896,8 @@ fn build_tree(
                     for args in steps {
                         let mut make = Command::new("make");
                         env(&mut make);
-                        make.arg("-k").arg("-C").arg(leaf).args(args);
+                        // Each worker builds one leaf at a time; do not multiply MAKEFLAGS=-j3.
+                        make.arg("-j1").arg("-k").arg("-C").arg(leaf).args(args);
                         if let Ok(out) = make.output() {
                             text.push_str(&String::from_utf8_lossy(&out.stdout));
                             text.push_str(&String::from_utf8_lossy(&out.stderr));
@@ -974,6 +1039,7 @@ fn build_asyncify(
         BuildConfig::Asyncify,
         uapi.as_deref(),
         &libcap(suite, BuildConfig::Asyncify)?,
+        &libaio(suite, BuildConfig::Asyncify)?,
         Some(&targets),
         logs_dir,
     )?;
@@ -996,30 +1062,7 @@ fn build_asyncify(
 }
 
 fn jobs() -> usize {
-    std::thread::available_parallelism().map_or(4, |n| n.get())
-}
-
-/// The v2 userland that shell tests run in: `WASIXV2_TESTS_USERLAND`, a directory with GNU bash,
-/// coreutils and the other commands LTP's shell tests use, built for wasixv2 (`out/bin` of a
-/// userland build), which is mounted at `/bin`. `None` when the variable is unset.
-fn userland() -> Result<Option<&'static Path>, Failure> {
-    static USERLAND: OnceLock<Result<Option<PathBuf>, String>> = OnceLock::new();
-    USERLAND
-        .get_or_init(|| {
-            let Some(bin) = crate::env_path("WASIXV2_TESTS_USERLAND") else {
-                return Ok(None);
-            };
-            if !bin.join("bash").is_file() {
-                return Err(format!(
-                    "WASIXV2_TESTS_USERLAND: {} has no bash",
-                    bin.display()
-                ));
-            }
-            Ok(Some(bin))
-        })
-        .as_ref()
-        .map(Option::as_deref)
-        .map_err(|e| Failure::harness(e.clone()))
+    std::thread::available_parallelism().map_or(3, |n| n.get().min(3))
 }
 
 impl Test {
@@ -1070,7 +1113,7 @@ impl Test {
             }) {
                 return Err(self.build_failure(prepared, script));
             }
-            let Some(userland) = userland()? else {
+            let Some(userland) = super::userland()? else {
                 return Ok(Outcome::Skipped(
                     "a shell test; set WASIXV2_TESTS_USERLAND to run it".to_owned(),
                 ));
@@ -1111,9 +1154,6 @@ impl Test {
     fn in_shell(&self, userland: &Path, invocation: &mut Invocation) {
         invocation.module = userland.join("bash");
         invocation.args = vec!["-c".to_owned(), format!("set -m; {}; exit $?", self.line)];
-        invocation
-            .volumes
-            .push((userland.to_owned(), "/bin".to_owned()));
     }
 
     /// Runs the test under `launcher` (`ltp-launch.c`), which starts it from `PATH` in a process
@@ -1181,6 +1221,45 @@ mod tests {
     };
 
     #[test]
+    #[ignore = "requires the WASIX v2 toolchain, sysroots, and release wasmer"]
+    fn libaio_build_and_syscalls() {
+        let suite = crate::Suite::from_env().unwrap();
+        for config in [
+            super::BuildConfig::ExceptionHandling,
+            super::BuildConfig::Asyncify,
+        ] {
+            let library = super::libaio(&suite, config).unwrap();
+            let main = library.lib.join("wasixv2-libaio-check.wasm");
+            let mut cc = std::process::Command::new(&suite.cc);
+            super::wasixcc_env_for(&mut cc, config)
+                .arg("-I")
+                .arg(&library.include)
+                .arg(crate::root().join("src/upstream/libaio-check.c"))
+                .arg("-L")
+                .arg(&library.lib)
+                .arg("-laio")
+                .arg("-o")
+                .arg(&main);
+            super::super::run_build(&mut cc).unwrap();
+            let ran = super::run_wasm(
+                &suite,
+                &super::Invocation {
+                    module: main,
+                    ..Default::default()
+                },
+                &library.lib,
+            )
+            .unwrap();
+            assert_eq!(ran.output.status, Some(0), "{}", ran.captured());
+        }
+    }
+
+    #[test]
+    fn build_parallelism_respects_the_shared_machine_limit() {
+        assert!(super::jobs() <= 3);
+    }
+
+    #[test]
     fn runtime_config_queries_work_without_declared_requirements() {
         // LTP lib/tst_cgroup.c tst_check_rt_group_sched_support queries configuration
         // from setup without declaring needs_kconfigs on sched_rr_get_interval01-03.
@@ -1202,16 +1281,19 @@ mod tests {
     fn tests_run_when_the_kernel_has_every_option_they_need() {
         let needs = |kconfigs: &[&str]| serde_json::json!({ "needs_kconfigs": kconfigs });
         assert!(kconfigs_supported(&needs(&["CONFIG_PID_NS"])));
+        assert!(kconfigs_supported(&needs(&["CONFIG_AIO=y"])));
         assert!(kconfigs_supported(&needs(&[
             "CONFIG_NET_NS=y",
             "CONFIG_UTS_NS"
         ])));
         assert!(kconfigs_supported(&needs(&[
             "CONFIG_USER_NS",
+            "CONFIG_AIO",
             "CONFIG_PID_NS"
         ])));
         assert!(!kconfigs_supported(&needs(&[
             "CONFIG_USER_NS",
+            "CONFIG_AIO",
             "CONFIG_TIME_NS"
         ])));
         assert!(!kconfigs_supported(&needs(&["CONFIG_TIME_NS=y"])));

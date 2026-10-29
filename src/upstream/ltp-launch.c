@@ -5,10 +5,11 @@
  * signal. COMMAND is looked up in PATH.
  *
  * The runner starts this as the program of `wasmer run`, which leads a session of its own, as
- * a process a service manager starts does. On wasixv2 the test library runs the test in its own
- * process, so without this the test would lead that session: a terminal it opens without
- * O_NOCTTY would become its controlling terminal, and that terminal's hangup would send it
- * SIGHUP, which never happens under runltp or kirk.
+ * a process a service manager starts does. Old-API tests execute directly in their library
+ * process, so they still need this launcher even though the new-API library forks testrun().
+ * Without it an old-API test would lead that session: a terminal opened without O_NOCTTY
+ * would become its controlling terminal, whose hangup sends SIGHUP. runltp and kirk start
+ * tests as children too.
  */
 #include <errno.h>
 #include <signal.h>
