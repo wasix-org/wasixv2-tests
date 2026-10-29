@@ -136,8 +136,6 @@ pub struct Test {
     /// The test needs root (`needs_root`, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old
     /// APIs): it runs as uid 0, which holds every capability.
     root: bool,
-    /// The test checks kernel options (`needs_kconfigs`), all of which the kernel has.
-    kconfigs: bool,
 }
 
 struct Prepared {
@@ -213,7 +211,6 @@ pub fn discover(
             let test = Test {
                 name: name.clone(),
                 root: declared.iter().any(|test| has(test, "needs_root")),
-                kconfigs: declared.iter().any(|test| has(test, "needs_kconfigs")),
                 command,
                 args,
                 line,
@@ -1026,6 +1023,22 @@ fn userland() -> Result<Option<&'static Path>, Failure> {
 }
 
 impl Test {
+    fn environment(&self) -> Vec<(String, String)> {
+        let mut env: Vec<(String, String)> = [
+            ("LTPROOT", "/opt/ltp"),
+            ("PATH", "/opt/ltp/testcases/bin:/usr/bin:/bin"),
+            ("TMPDIR", "/tmp"),
+            ("LTP_COLORIZE_OUTPUT", "0"),
+        ]
+        .iter()
+        .map(|(k, v)| (k.to_string(), v.to_string()))
+        .collect();
+        // LTP helpers can inspect configuration from setup without needs_kconfigs
+        // metadata (lib/tst_cgroup.c tst_check_rt_group_sched_support).
+        env.push(("KCONFIG_PATH".into(), format!("/opt/ltp/{KCONFIG_FILE}")));
+        env
+    }
+
     pub fn run(&self, suite: &Suite) -> Result<Outcome, Failure> {
         let prepared = PREPARED
             .get_or_init(|| prepare(suite).map_err(|e| format!("{e:#}")))
@@ -1040,18 +1053,7 @@ impl Test {
             };
             head.starts_with(b"#!")
         };
-        let mut env: Vec<(String, String)> = [
-            ("LTPROOT", "/opt/ltp"),
-            ("PATH", "/opt/ltp/testcases/bin:/usr/bin:/bin"),
-            ("TMPDIR", "/tmp"),
-            ("LTP_COLORIZE_OUTPUT", "0"),
-        ]
-        .iter()
-        .map(|(k, v)| (k.to_string(), v.to_string()))
-        .collect();
-        if self.kconfigs {
-            env.push(("KCONFIG_PATH".into(), format!("/opt/ltp/{KCONFIG_FILE}")));
-        }
+        let env = self.environment();
         let mut invocation = Invocation {
             module: binary,
             args: self.args.clone(),
@@ -1177,6 +1179,24 @@ mod tests {
         has, kconfig_text, kconfigs_supported, metadata_reason, old_api_line, script_metadata,
         script_reason,
     };
+
+    #[test]
+    fn runtime_config_queries_work_without_declared_requirements() {
+        // LTP lib/tst_cgroup.c tst_check_rt_group_sched_support queries configuration
+        // from setup without declaring needs_kconfigs on sched_rr_get_interval01-03.
+        let test = super::Test {
+            name: "ltp/syscalls/sched_rr_get_interval01".into(),
+            command: "sched_rr_get_interval01".into(),
+            args: Vec::new(),
+            line: "sched_rr_get_interval01".into(),
+            root: true,
+        };
+        assert!(
+            test.environment()
+                .iter()
+                .any(|(key, value)| key == "KCONFIG_PATH" && value == "/opt/ltp/wasixv2-kconfig")
+        );
+    }
 
     #[test]
     fn tests_run_when_the_kernel_has_every_option_they_need() {
