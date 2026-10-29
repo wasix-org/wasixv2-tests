@@ -1,5 +1,5 @@
-// uname (wasixv2 reports system wasixv2, machine wasm32, the Linux release of libc2's UAPI
-// headers and the ABI in the version), gethostname and getdomainname agreeing with it,
+// uname (wasixv2 reports system Linux, machine wasm32, the Linux release of libc2's UAPI
+// headers with a -wasixv2 flavour and the ABI in the version), gethostname and getdomainname agreeing with it,
 // sethostname needing privilege, and personality.
 //#ExpectedStdout: ok
 #define _GNU_SOURCE
@@ -31,9 +31,9 @@ int main(void)
 	CHECK(memchr(u.version, 0, sizeof u.version) && u.version[0]);
 	CHECK(memchr(u.machine, 0, sizeof u.machine) && u.machine[0]);
 #ifdef __wasixv2__
-	CHECK(strcmp(u.sysname, "wasixv2") == 0);
+	CHECK(strcmp(u.sysname, "Linux") == 0);
 	CHECK(strcmp(u.machine, "wasm32") == 0);
-	CHECK(strcmp(u.release, "7.2.0") == 0);
+	CHECK(strcmp(u.release, "7.2.0-wasixv2") == 0);
 	CHECK(strstr(u.version, "wasixv2") != NULL);
 #endif
 
