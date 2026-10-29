@@ -4,14 +4,8 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## "%s": for "683078400" expected 1991-08-25T00:00:00 but got 1900-01-00T00:00:00
-libc-test/functional/strptime
-
 ## ENOSYS: Clone
 libc-test/regression/raise-race
-
-## RN fmaf(-0x1.001p-81,0x1.ffe002p-70,0x1.0002p-133) want 0x1.0001p-133 got 0x1.0002p-133 ulperr 0.500 = 0x1p+0 + -0x1p-1
-libc-test/math/fmaf
 
 ## build: error: chained comparison 'X <= Y >= Z' does not behave the same as a mathematical expression [-Wparentheses]
 libc-test/musl/pleval
@@ -29,7 +23,7 @@ libc-test/api/sys_wait
 ## build: error: use of undeclared identifier '_SC_XOPEN_UUCP'
 libc-test/api/unistd
 
-## build: wasm-ld: error: /tmp/.tmpvSJ2Pm/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmpeHzzps/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## dlopen failed
@@ -41,23 +35,8 @@ libc-test/functional/tls_init_dlopen
 ## dlopen libc-test/functional/dlopen/dlopen_dso.so failed: Dynamic loading not supported
 libc-test/functional/dlopen
 
-## execl failed: No such file or directory
-libc-test/functional/vfork
-
-## execle failed: No such file or directory
-libc-test/regression/execle-env
-
-## f = popen("echo hello", "r") failed (errno = 2)
-libc-test/functional/popen
-
 ## mod = dlopen("tls_get_new-dtv_dso.so", RTLD_NOW) failed
 libc-test/regression/tls_get_new-dtv
 
-## posix_spawnp(&pid, "echo", &fa, 0, (char *[]){"echo","hello",0}, 0) failed, got 2 want 0
-libc-test/functional/spawn
-
-## strtold("0x1.111111111111111111111111111281") want 0x1.1111111111111111111111111113p+0 got 0x1.1111111111111111111111111112p+0
-libc-test/functional/strtold
-
-## wordexp("one two three", 0) returned WRDE_SYNTAX, want 0
+## wordexp("$1", 0) gave 1 [$1|], want 0 []
 libc-test/functional/wordexp
