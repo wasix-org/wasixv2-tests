@@ -197,14 +197,7 @@ impl Test {
                 .args(["-lpthread", "-lrt", "-lm"]);
             run_build(&mut cmd)
         })?;
-        let ran = run_wasm(
-            suite,
-            &Invocation {
-                module: main,
-                ..Default::default()
-            },
-            &dir,
-        )?;
+        let ran = run_wasm(suite, &invocation(main), &dir)?;
         let cause = match ran.output.status {
             Some(PTS_PASS) => return Ok(Outcome::Passed),
             Some(PTS_UNSUPPORTED) => return Ok(Outcome::Skipped("UNSUPPORTED".to_owned())),
@@ -228,5 +221,24 @@ impl Test {
             .unwrap_or_default();
         let cause = super::cause_from_line(&format!("{cause}: "), &line);
         Err(ran.fail(suite, cause))
+    }
+}
+
+fn invocation(module: PathBuf) -> Invocation {
+    Invocation {
+        module,
+        user: Some("0:0".to_owned()),
+        ..Default::default()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn posix_tests_run_as_root() {
+        assert_eq!(
+            super::invocation("main.wasm".into()).user.as_deref(),
+            Some("0:0")
+        );
     }
 }
