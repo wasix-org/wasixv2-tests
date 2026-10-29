@@ -10,6 +10,8 @@
 //#ExpectedStdout: PASS
 //#Config: tmpfile:default
 //#Args: tmpfile
+//#Config: rootfile:default
+//#Args: rootfile
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -121,12 +123,13 @@ int main(int argc, char **argv)
 {
 	int fd = -1;
 	int flags = MAP_SHARED | MAP_ANONYMOUS;
-	if (argc > 1 && !strcmp(argv[1], "tmpfile")) {
-		/* mm/shmem.c shmem_mmap_prepare and kernel/futex/core.c get_futex_key: a /tmp
+	if (argc > 1) {
+		const char *name = !strcmp(argv[1], "tmpfile") ? "/tmp/pshared" : "/pshared";
+		/* mm/shmem.c shmem_mmap_prepare and kernel/futex/core.c get_futex_key: a tmpfs
 		 * file supplies the same shared pages and futex key in both processes. */
-		fd = open("/tmp/pshared", O_CREAT | O_EXCL | O_RDWR, 0600);
+		fd = open(name, O_CREAT | O_EXCL | O_RDWR, 0600);
 		CHECK(fd >= 0);
-		CHECK(unlink("/tmp/pshared") == 0);
+		CHECK(unlink(name) == 0);
 		CHECK(ftruncate(fd, sizeof *s) == 0);
 		flags = MAP_SHARED;
 	}
