@@ -29,7 +29,7 @@ libc-test/api/sys_wait
 ## build: error: use of undeclared identifier '_PC_TIMESTAMP_RESOLUTION'
 libc-test/api/unistd
 
-## build: wasm-ld: error: /tmp/.tmpSibcHT/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmpLVCJ2d/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## dlopen failed

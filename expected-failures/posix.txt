@@ -380,23 +380,23 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmpGkM8V3/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmp9MVOiV/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
 
-## build: wasm-ld: error: /tmp/.tmpJS9Vzj/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
-
-## build: wasm-ld: error: /tmp/.tmpc0uE0A/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
-
-## build: wasm-ld: error: /tmp/.tmpeTQPmX/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+## build: wasm-ld: error: /tmp/.tmpFZhiiV/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
 
-## build: wasm-ld: error: /tmp/.tmpf864Wv/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpPsUCKq/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
+
+## build: wasm-ld: error: /tmp/.tmpdYaySE/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
 
-## build: wasm-ld: error: /tmp/.tmpubYcx1/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
+## build: wasm-ld: error: /tmp/.tmprd4eDW/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
+
+## build: wasm-ld: error: /tmp/.tmpyxa5fo/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
 
 ## exit status 132
 posix/conformance/interfaces/pthread_attr_setdetachstate/2-1

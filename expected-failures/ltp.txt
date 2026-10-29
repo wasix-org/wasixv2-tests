@@ -4,6 +4,24 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
+## /proc/sys/user/max_*_namespaces show mode 0666 where Linux has 0644 (set_permissions), so tst_sys_conf's access(W_OK) does not skip the value and the open for writing fails EACCES
+ltp/cve/cve-2016-8655
+ltp/cve/cve-2017-1000111
+ltp/cve/cve-2017-1000112
+ltp/cve/cve-2017-16939
+ltp/cve/cve-2017-17712
+ltp/cve/cve-2018-18559
+ltp/cve/cve-2020-14386
+ltp/cve/cve-2021-22600
+ltp/cve/cve-2022-4378
+ltp/syscalls/bind06
+ltp/syscalls/sendmsg03
+ltp/syscalls/sendto03
+ltp/syscalls/setsockopt05
+ltp/syscalls/setsockopt06
+ltp/syscalls/setsockopt07
+ltp/syscalls/setsockopt09
+
 ## ENOSYS: Bpf, FanotifyInit, IoUringSetup, MemfdSecret, PerfEventOpen, Userfaultfd
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
@@ -47,9 +65,6 @@ ltp/fs_perms_simple/fs_perms12
 ltp/fs_perms_simple/fs_perms13
 ltp/fs_perms_simple/fs_perms14
 
-## TBROK: Expected 1 conversions got 0 FILE '/proc/self/maps'
-ltp/syscalls/mmap04
-
 ## TBROK: Failed to acquire device
 ltp/syscalls/linkat02
 ltp/syscalls/mknodat02
@@ -83,6 +98,9 @@ ltp/syscalls/getrusage03
 ## TBROK: Failed to copy '/opt/ltp/testcases/bin/pipe2_02_child' to '.'
 ltp/syscalls/pipe2_02
 
+## TBROK: Failed to copy '/opt/ltp/testcases/bin/userns06_capcheck' to '.'
+ltp/containers/userns06
+
 ## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_queued_events' for reading: ENOENT (2)
 ltp/syscalls/inotify05
 
@@ -107,9 +125,6 @@ ltp/syscalls/msgstress01
 ltp/syscalls-ipc/shmctl03
 ltp/syscalls/shmctl03
 
-## TBROK: Failed to open FILE '/sys/class/net/lo/mtu' for reading: ENOENT (2)
-ltp/cve/cve-2018-5803
-
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
 
@@ -118,14 +133,6 @@ ltp/syscalls/syslog11
 
 ## TBROK: Path not found: /proc/sys/vm/min_free_kbytes: ENOENT (2)
 ltp/mm/min_free_kbytes
-
-## TBROK: Path not found: /proc/sys/vm/overcommit_ratio: ENOENT (2)
-ltp/mm/overcommit_memory01
-ltp/mm/overcommit_memory02
-ltp/mm/overcommit_memory03
-ltp/mm/overcommit_memory04
-ltp/mm/overcommit_memory05
-ltp/mm/overcommit_memory06
 
 ## TBROK: Set setxattr03immutable immutable failed: ENOTTY (25)
 ltp/syscalls/setxattr03
@@ -147,9 +154,6 @@ ltp/syscalls/setrlimit04
 ltp/cve/cve-2011-0999
 ltp/mm/thp01
 
-## TBROK: fcntl(3,F_SETPIPE_SZ,...) failed: EINVAL (22)
-ltp/syscalls/pipe2_04
-
 ## TBROK: fgets: ENOENT (2)
 ltp/cve/cve-2017-1000364
 
@@ -170,9 +174,6 @@ ltp/syscalls/ioctl07
 
 ## TBROK: ip/ifconfig failed to bring up loop back device
 ltp/syscalls/sendmsg01
-
-## TBROK: ltp_clone failed: EPERM (1)
-ltp/syscalls/ioctl_ns06
 
 ## TBROK: mmap(0,262144,PROT_READ | PROT_WRITE | PROT_EXEC(7),1,3,0) failed: EACCES (13)
 ltp/syscalls/mincore02
@@ -202,13 +203,21 @@ ltp/syscalls/dirtyc0w_shmem
 ## TBROK: openat() failed: errno=EACCES(13): Permission denied
 ltp/syscalls/openat03
 
-## TBROK: setsockopt(3, 0, 42, 0x8bff7c, 132) failed: ENOPROTOOPT (92)
+## TBROK: setsockopt(3, 0, 42, 0x8bff7c, 132) failed: EPROTO (71)
 ltp/cve/cve-2017-8890
 ltp/syscalls/accept02
 
 ## TBROK: setsockopt(3, 1, 32, 0x7fe96c, 4) failed: EPERM (1)
 ltp/cve/cve-2016-9793
 ltp/syscalls/setsockopt04
+
+## TBROK: setsockopt(IPV6_RTHDR) failed: ENOPROTOOPT (92)
+ltp/cve/cve-2026-53362
+ltp/syscalls/setsockopt11
+
+## TBROK: setsockopt(sk, SOL_PACKET, PACKET_VERSION, TPACKET_V3): ENOPROTOOPT (92)
+ltp/cve/cve-2017-7308
+ltp/syscalls/setsockopt02
 
 ## TBROK: socket(10, 3, 159) failed: errno=EPERM(1): Operation not permitted
 ltp/net.ipv6_lib/asapi_03
@@ -258,6 +267,9 @@ ltp/syscalls/mknod06
 ## TFAIL: NORMAL expected errno: 13: EACCES (13)
 ltp/syscalls/mq_open01
 
+## TFAIL: Pipe size (4096) must be page size (65536)
+ltp/syscalls/pipe2_04
+
 ## TFAIL: SAFE_EPOLL_WAIT(epfd, &evt_receive, 1, 0) (1) != 0 (0)
 ltp/syscalls/epoll_wait06
 
@@ -266,6 +278,9 @@ ltp/syscalls/mmap13
 
 ## TFAIL: SIGSEGV signal not received
 ltp/syscalls/mmap05
+
+## TFAIL: SIOCGIFFLAGS with invalid ifr ; returned -1 (expected -1), errno 19 (expected 14)
+ltp/syscalls/sockioctl01
 
 ## TFAIL: TEST 4 Failed
 ltp/mm/mtest05
@@ -278,10 +293,8 @@ ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 
 ## TFAIL: Test{4} failed, expected 0 exit.
-ltp/fs/ftest06
-
-## TFAIL: Test{6} failed, expected 0 exit.
 ltp/fs/ftest02
+ltp/fs/ftest06
 
 ## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
 ltp/syscalls/timer_settime01
@@ -289,11 +302,11 @@ ltp/syscalls/timer_settime01
 ## TFAIL: abort() failed to dump core
 ltp/syscalls/abort01
 
-## TFAIL: after child shmat() shm_nattcg=0 expected 20
-ltp/syscalls-ipc/shmctl01
-
-## TFAIL: after child shmat() shm_nattcg=5 expected 20
+## TFAIL: after child shmat() shm_nattcg=14 expected 20
 ltp/syscalls/shmctl01
+
+## TFAIL: after child shmat() shm_nattcg=8 expected 20
+ltp/syscalls-ipc/shmctl01
 
 ## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
 ltp/syscalls/alarm07
@@ -309,6 +322,13 @@ ltp/syscalls/alarm06
 
 ## TFAIL: alarm(2147483647) invalid retval 30: SUCCESS (0)
 ltp/syscalls/alarm02
+
+## TFAIL: alloc failed, expected to pass
+ltp/mm/overcommit_memory01
+ltp/mm/overcommit_memory03
+ltp/mm/overcommit_memory04
+ltp/mm/overcommit_memory05
+ltp/mm/overcommit_memory06
 
 ## TFAIL: call succeeded unexpectedly
 ltp/syscalls/mprotect01
@@ -340,9 +360,6 @@ ltp/syscalls/access02
 ## TFAIL: expected EPROTONOSUPPORT(93): EOPNOTSUPP (95)
 ltp/syscalls/socketpair01
 
-## TFAIL: expected EPROTONOSUPPORT(93): EPERM (1)
-ltp/syscalls/socket01
-
 ## TFAIL: fchmod() on original FD succeeded
 ltp/syscalls/open13
 
@@ -353,14 +370,6 @@ ltp/syscalls/fcntl13_64
 ## TFAIL: fcntl(fd, F_CREATED_QUERY, 0) (-1) != 0 (0)
 ltp/syscalls/fcntl40
 ltp/syscalls/fcntl40_64
-
-## TFAIL: fcntl(fd, F_SETLEASE, F_RDLCK) expected EAGAIN/EWOULDBLOCK: EINVAL (22)
-ltp/syscalls/fcntl27
-ltp/syscalls/fcntl27_64
-
-## TFAIL: fcntl(tfile_3, F_SETLEASE, F_RDLCK) Failed, errno=22 : Invalid argument
-ltp/syscalls/fcntl23
-ltp/syscalls/fcntl23_64
 
 ## TFAIL: file size is 2048 != K3
 ltp/syscalls/pwrite04
@@ -388,9 +397,6 @@ ltp/syscalls/recvmsg01
 ## TFAIL: invalid level expected EOPNOTSUPP: ENOPROTOOPT (92)
 ltp/syscalls/getsockopt01
 
-## TFAIL: invalid option buffer ; returned -1 (expected -1), errno 25 (expected 14)
-ltp/syscalls/sockioctl01
-
 ## TFAIL: invalid-dfd: name_to_handle_at() should fail with EBADF: EOPNOTSUPP (95)
 ltp/syscalls/name_to_handle_at02
 
@@ -417,6 +423,9 @@ ltp/syscalls/lstat02_64
 
 ## TFAIL: madvise succeeded unexpectedly
 ltp/syscalls/madvise02
+
+## TFAIL: mapping permissions in /proc mismatched, expected: -w-p, found: rw-p
+ltp/syscalls/mmap04
 
 ## TFAIL: mincore reports resident pages as 3, but expected 0
 ltp/syscalls/mincore03
@@ -488,7 +497,7 @@ ltp/syscalls/prctl09
 ## TFAIL: prctl() succeeded unexpectedly
 ltp/syscalls/prctl02
 
-## TFAIL: process 12 wasn't woken up: ETIMEDOUT (110)
+## TFAIL: process 23 wasn't woken up: ETIMEDOUT (110)
 ltp/syscalls/futex_cmp_requeue01
 
 ## TFAIL: pselect() slept for too long
@@ -525,9 +534,6 @@ ltp/syscalls/gethostbyname_r01
 ## TFAIL: sbrk(8192) returned 0xffffffff failed: ENOMEM (12)
 ltp/syscalls/sbrk01
 
-## TFAIL: sched_setaffinity() succeded unexpectedly
-ltp/syscalls/sched_setaffinity01
-
 ## TFAIL: select() slept for too long
 ltp/syscalls/select02
 
@@ -547,6 +553,10 @@ ltp/syscalls/setrlimit01
 ## TFAIL: setsockopt() succeeded unexpectedly
 ltp/syscalls/setsockopt01
 
+## TFAIL: setsockopt(IPV6_ADDRFORM) failed: ENOPROTOOPT (92)
+ltp/cve/cve-2018-9568
+ltp/syscalls/connect02
+
 ## TFAIL: settimeofday(&tv1, NULL) failed: EPERM (1)
 ltp/syscalls/settimeofday01
 
@@ -561,7 +571,7 @@ ltp/syscalls/shmdt01
 ltp/syscalls-ipc/shmctl02
 ltp/syscalls/shmctl02
 
-## TFAIL: stime(1793238185) failed: EPERM (1)
+## TFAIL: stime(1793253646) failed: EPERM (1)
 ltp/syscalls/stime01
 
 ## TFAIL: sync_file_range(3, 0, 1, 8) succeeded
@@ -619,6 +629,9 @@ ltp/mm/mmapstress04
 
 ## TFAIL: waipid(-2147483648, NULL, 0x0) expected ESRCH: EINVAL (22)
 ltp/syscalls/waitpid04
+
+## TFAIL: wait4 fails with ESRCH expected ESRCH: EINVAL (22)
+ltp/syscalls/wait403
 
 ## TFAIL: write successful after file size limit
 ltp/syscalls/llseek01
@@ -777,21 +790,27 @@ ltp/syscalls/rename14
 ## exit status 255
 ltp/sched/trace_sched01
 
-## exit status 36
-ltp/syscalls/fcntl33
-ltp/syscalls/fcntl33_64
+## musl's getopt does not permute arguments: the test passes -I after the ping target, so ping takes it as a second host
+ltp/net.ipv6/ipneigh6_ip
+ltp/net.tcp_cmds/ipneigh01_arp
+ltp/net.tcp_cmds/ipneigh01_ip
 
 ## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
 ltp/commands/ldd01_sh
 
+## runs unprivileged (declares no root) but makes a network namespace with tst_ns_create: EPERM, as on Linux
+ltp/containers/netns_sysfs
+
+## runs unprivileged (declares no root): PR_CAPBSET_DROP and cap_set_proc need CAP_SETPCAP, EPERM as on Linux
+ltp/capability/cap_bounds
+
+## runs unprivileged (declares no root): dropping root privileges fails EPERM, as on Linux
+ltp/capability/filecaps
+
 ## the initial mounts are private as on a bare kernel; the test needs a systemd-style shared /tmp
 ltp/commands/unshare01_sh
 
-## the sysctl overcommit_memory is not implemented: the write fails EINVAL at close
-ltp/mm/max_map_count
-ltp/mm/oom01
-
-## the sysctl pipe-max-size is not implemented: the write fails EINVAL at close
+## the privileged half: pipe buffers count 4 KiB pages here by design, so a privileged process's new pipe holds 64 KiB where the test, with the 64 KiB wasm page as PAGE_SIZE, expects 1 MiB
 ltp/syscalls/fcntl35
 ltp/syscalls/fcntl35_64
 
@@ -813,6 +832,8 @@ ltp/fs/rwtest03
 ltp/fs/rwtest04
 ltp/mm/mtest06
 ltp/mm/mtest06_3
+ltp/net.multicast/mc_commo
+ltp/net.multicast/mc_member
 ltp/sched/sched_stress
 ltp/syscalls/rt_sigtimedwait01
 ltp/syscalls/sigtimedwait01

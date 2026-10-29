@@ -35,3 +35,4 @@ ltp/syscalls/clock_gettime04                               # under load: success
 ltp/syscalls/inotify09                                     # times out under full-suite load (inotify vs. concurrent writers stress); passes alone
 ltp/mm/mallocstress01                                      # stress test near the timeout: times out or passes from run to run
 ltp/mm/shm_test01                                          # stress test near the timeout: times out or passes from run to run
+ltp/cve/cve-2014-0196                                      # pty write race: timed out (60 s) in one of two full runs of merge train 12 (and in none before), passes alone
