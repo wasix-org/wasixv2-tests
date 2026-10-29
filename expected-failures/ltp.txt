@@ -28,10 +28,6 @@ ltp/syscalls/pipe15
 ltp/syscalls-ipc/msgstress01
 ltp/syscalls/msgstress01
 
-## TBROK: Failed to open FILE '/proc/sys/kernel/shmmax' for reading: ENOENT (2)
-ltp/syscalls-ipc/shmctl03
-ltp/syscalls/shmctl03
-
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
 
@@ -40,8 +36,6 @@ ltp/syscalls-ipc/semctl09
 ltp/syscalls/semctl09
 
 ## TBROK: Test killed by SIGSEGV!
-ltp/syscalls-ipc/msgctl06
-ltp/syscalls/msgctl06
 ltp/syscalls/prctl08
 
 ## TBROK: Test killed! (timeout?)
@@ -50,12 +44,6 @@ ltp/watchqueue/wqueue04
 
 ## TBROK: fgets: SUCCESS (0)
 ltp/cve/cve-2017-1000364
-
-## TBROK: fopen(/proc/sysvipc/shm,r) failed: ENOENT (2)
-ltp/syscalls-ipc/shmctl04
-ltp/syscalls-ipc/shmget03
-ltp/syscalls/shmctl04
-ltp/syscalls/shmget03
 
 ## TBROK: getaddrinfo failed, Unrecognized service
 ltp/net.ipv6_lib/getaddrinfo_01
@@ -117,9 +105,6 @@ ltp/syscalls/madvise12
 
 ## TFAIL: Child: killed by SIGSEGV
 ltp/syscalls/mmap18
-
-## TFAIL: Could not parse inotify fdinfo
-ltp/syscalls/inotify12
 
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
@@ -198,32 +183,15 @@ ltp/syscalls/socketpair01
 ## TFAIL: fchmod() on original FD succeeded
 ltp/syscalls/open13
 
-## TFAIL: fcntl(1, F_SETLK, flock) expected EINVAL: EBADF (9)
-ltp/syscalls/fcntl13
-ltp/syscalls/fcntl13_64
-
 ## TFAIL: file size is 2048 != K3
 ltp/syscalls/pwrite04
 ltp/syscalls/pwrite04_64
 
-## TFAIL: first semop() failed errno 13
-ltp/syscalls-ipc/semctl06
-ltp/syscalls/semctl06
-
 ## TFAIL: futex_wait() slept for too long
 ltp/syscalls/futex_wait05
 
-## TFAIL: get event: wd=1 mask=00000004 (expected 40000004) cookie=0     len=0  name="" (expected "") -1
-ltp/syscalls/inotify02
-
 ## TFAIL: get unnecessary event: mask=40000000 pid=4 fd=6
 ltp/syscalls/fanotify02
-
-## TFAIL: got event: wd=2 (expected 1) mask=0004 (expected 40000004) len=0 name="" (expected "test_dir")
-ltp/syscalls/inotify10
-
-## TFAIL: got event: wd=2 mask=0400 (expected 4) cookie=0 len=0 name="" (expected "") 0
-ltp/syscalls/inotify04
 
 ## TFAIL: got unexpected event 40000020
 ltp/syscalls/fanotify04
@@ -246,14 +214,6 @@ ltp/watchqueue/wqueue02
 ## TFAIL: keyctl(KEYCTL_SEARCH, ring, "user", KEY_DESC, 0) (-1) != key (6)
 ltp/syscalls/keyctl19
 
-## TFAIL: lock type is wrong should be F_RDLCK is F_WRLCK
-ltp/syscalls/fcntl11
-ltp/syscalls/fcntl11_64
-
-## TFAIL: lock type is wrong should be F_WRLCK is F_RDLCK
-ltp/syscalls/fcntl21
-ltp/syscalls/fcntl21_64
-
 ## TFAIL: madvise succeeded unexpectedly
 ltp/syscalls/madvise02
 
@@ -274,10 +234,6 @@ ltp/syscalls/mmap15
 
 ## TFAIL: mprotect failed to exec: EACCES (13)
 ltp/syscalls/mprotect05
-
-## TFAIL: msgctl(4, 258, 0x8256e8) expected EACCES: EINVAL (22)
-ltp/syscalls-ipc/msgctl04
-ltp/syscalls/msgctl04
 
 ## TFAIL: munmap(maps[2] + page_sz, page_sz) succeeded
 ltp/syscalls/munmap04
@@ -310,10 +266,6 @@ ltp/syscalls/process_vm_readv03
 ltp/syscalls/pselect01
 ltp/syscalls/pselect01_64
 
-## TFAIL: pwritev2() failed unexpectedly, expected ESPIPE: EBADF (9)
-ltp/syscalls/pwritev202
-ltp/syscalls/pwritev202_64
-
 ## TFAIL: raw brk cannot expand into adjacent LTP fork-child mmap pages; restored fork_testrun reaches the syscall variant after libc brk TCONF (mm/mmap.c sys_brk collision rule)
 ltp/syscalls/brk01
 ltp/syscalls/brk02
@@ -334,15 +286,8 @@ ltp/syscalls/sbrk01
 ## TFAIL: select() slept for too long
 ltp/syscalls/select02
 
-## TFAIL: semctl() with invalid union arg succeeded
-ltp/syscalls-ipc/semctl03
-ltp/syscalls/semctl03
-
 ## TFAIL: setgroups(33, groups_list) succeeded
 ltp/syscalls/setgroups03
-
-## TFAIL: setrlimit failed, expected 10 got 26
-ltp/syscalls/setrlimit01
 
 ## TFAIL: setsockopt(IPV6_ADDRFORM) failed: ENOPROTOOPT (92)
 ltp/cve/cve-2018-9568
@@ -355,19 +300,8 @@ ltp/syscalls/setxattr02
 ltp/syscalls-ipc/shmdt01
 ltp/syscalls/shmdt01
 
-## TFAIL: shmctl(5, 258, 0x825738) expected EACCES: EINVAL (22)
-ltp/syscalls-ipc/shmctl02
-ltp/syscalls/shmctl02
-
-## TFAIL: sync_file_range(3, 0, 1, 8) succeeded
-ltp/syscalls/sync_file_range01
-
 ## TFAIL: test PROT_NONE for mprotect failed
 ltp/syscalls/mprotect04
-
-## TFAIL: truncate exceeds RLIMIT_FSIZE instead of returning EFBIG; low-guard EFAULT now passes
-ltp/syscalls/truncate03
-ltp/syscalls/truncate03_64
 
 ## TFAIL: tst_syscall(__NR_process_vm_writev, pid_alloc, &local, 1UL, &remote, 1UL, 0UL) failed: EPERM (1)
 ltp/syscalls/process_vm_writev02
@@ -386,9 +320,6 @@ ltp/syscalls/waitpid04
 
 ## TFAIL: wait4 fails with ESRCH expected ESRCH: EINVAL (22)
 ltp/syscalls/wait403
-
-## TFAIL: write successful after file size limit
-ltp/syscalls/llseek01
 
 ## TFAIL: x a 005 file owned by (99/99) as user/group (12/100)
 ltp/fs_perms_simple/fs_perms01
