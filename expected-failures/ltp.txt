@@ -143,7 +143,6 @@ ltp/syscalls/setsockopt11
 ltp/net.ipv6_lib/asapi_03
 
 ## TBROK: tst_checkpoint_wait(0, 10000) failed: ETIMEDOUT (110)
-ltp/syscalls/pidfd_open04
 
 ## TBROK: unshare(131072) failed: EPERM (1)
 ltp/syscalls/statmount03
