@@ -4,9 +4,6 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## timeout (137): setup spins until /proc/self/stat utime > 0, but exec's sampled CPU accounting can attribute a periodic syscall loop entirely to system time; being fixed (CPU attribution by execution mode, kernel/sched/cputime.c)
-ltp/syscalls/clock_gettime01
-
 ## ENOSYS: Bpf, MemfdSecret, PerfEventOpen, Userfaultfd
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
