@@ -3,7 +3,8 @@
 //!
 //! LTP is built once per commit: its own configure and makefiles with wasixcc, against Linux's
 //! UAPI headers: the sysroot's, or, for a sysroot without them, ones generated for LTP's build
-//! only. Tests whose metadata (or `excluded.txt`) shows they
+//! only; and with libcap (`upstream/libcap`), built for each configuration first, so the tests
+//! that use it (`HAVE_LIBCAP`) are built whole. Tests whose metadata (or `excluded.txt`) shows they
 //! cannot make sense on wasixv2 are excluded. Tests that need root run as uid 0.
 //!
 //! Shell tests (LTP's shell scripts, and runtest lines that need a shell) run as
@@ -113,8 +114,8 @@ const KCONFIGS: &[&str] = &[
 const KCONFIG_FILE: &str = "wasixv2-kconfig";
 
 /// The version of what the runner builds in LTP's tree. A tree built by an older runner, with
-/// another version, is built again. 2: trunk directories too.
-const BUILD_VERSION: u32 = 2;
+/// another version, is built again. 2: trunk directories too. 3: with libcap.
+const BUILD_VERSION: u32 = 3;
 
 /// The version of which programs `links_fork` finds forking. An install prepared with another
 /// version is completed in place: the programs it finds now are built for asyncify too. 2: raw
@@ -626,6 +627,7 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
                 &tree,
                 BuildConfig::ExceptionHandling,
                 uapi_for(suite, BuildConfig::ExceptionHandling)?.as_deref(),
+                &libcap(suite, BuildConfig::ExceptionHandling)?,
                 None,
                 &logs_dir,
             )?;
@@ -673,13 +675,54 @@ fn leaf_log(logs_dir: &Path, leaf: &Path, config: BuildConfig) -> PathBuf {
     ))
 }
 
-/// Configures LTP's `tree` for `config` and builds its library, then the directories under
-/// `testcases/` with programs (`program_dirs`): each one's `targets` only, when given, else
-/// everything, installed.
+/// libcap's static library, built for `config` from `upstream/libcap` in a copy of its own
+/// (`make -C libcap libcap.a`, its names table made by a host program, as its makefiles do):
+/// the directory of its headers (`sys/capability.h`) and of `libcap.a`.
+struct Libcap {
+    include: PathBuf,
+    lib: PathBuf,
+}
+
+fn libcap(suite: &Suite, config: BuildConfig) -> Result<Libcap> {
+    let variant = match config {
+        BuildConfig::ExceptionHandling => "",
+        BuildConfig::Asyncify => "asyncify",
+    };
+    let tree = super::source_copy_as(suite, "libcap", variant)?;
+    let dir = tree.join("libcap");
+    let built = tree.join(".wasixv2-libcap-built");
+    if !built.exists() {
+        let mut make = Command::new("make");
+        wasixcc_env_for(&mut make, config)
+            .arg("-C")
+            .arg(&dir)
+            .arg(format!("CC={}", suite.cc))
+            .args(["BUILD_CC=cc", "AR=wasixar", "RANLIB=wasixranlib"])
+            // No shared library, no libpsx (pthreads), no Go bindings, no gperf table.
+            .args(["SHARED=no", "PTHREADS=no", "GOLANG=no", "USE_GPERF=no"])
+            .arg("libcap.a");
+        let out = make.output().context("building libcap")?;
+        ensure!(
+            out.status.success(),
+            "libcap: make failed:\n{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        std::fs::write(&built, "")?;
+    }
+    Ok(Libcap {
+        include: dir.join("include"),
+        lib: dir,
+    })
+}
+
+/// Configures LTP's `tree` for `config` with `libcap` and builds its library, then the
+/// directories under `testcases/` with programs (`program_dirs`): each one's `targets` only,
+/// when given, else everything, installed.
 fn build_tree(
     tree: &Path,
     config: BuildConfig,
     uapi: Option<&Path>,
+    libcap: &Libcap,
     targets: Option<&BTreeMap<String, Vec<String>>>,
     logs_dir: &Path,
 ) -> Result<()> {
@@ -707,9 +750,13 @@ fn build_tree(
         ])
         .args(["NM=wasixnm", "HOSTCC=cc"])
         .env("WASIXCC_AUTOCONF_WORKAROUNDS", "yes");
+    let mut cppflags = format!("-isystem {}", libcap.include.display());
     if let Some(uapi) = uapi {
-        configure.arg(format!("CPPFLAGS=-isystem {}", uapi.display()));
+        cppflags.push_str(&format!(" -isystem {}", uapi.display()));
     }
+    configure
+        .arg(format!("CPPFLAGS={cppflags}"))
+        .arg(format!("LDFLAGS=-L{}", libcap.lib.display()));
     let out = configure.output()?;
     ensure!(
         out.status.success(),
@@ -913,6 +960,7 @@ fn build_asyncify(
         &tree,
         BuildConfig::Asyncify,
         uapi.as_deref(),
+        &libcap(suite, BuildConfig::Asyncify)?,
         Some(&targets),
         logs_dir,
     )?;
