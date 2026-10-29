@@ -4,9 +4,6 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## timeout (137): setup spins until /proc/self/stat utime > 0, but exec's sampled CPU accounting can attribute a periodic syscall loop entirely to system time; being fixed (CPU attribution by execution mode, kernel/sched/cputime.c)
-ltp/syscalls/clock_gettime01
-
 ## ENOSYS: Bpf, MemfdSecret, PerfEventOpen, Userfaultfd
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
@@ -226,19 +223,19 @@ ltp/mm/mmapstress05
 ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 
-## TFAIL: Test{5} failed, expected 0 exit.
+## TFAIL: Test{4} failed, expected 0 exit.
 ltp/fs/ftest06
 
 ## TFAIL: Test{8} failed, expected 0 exit.
 ltp/fs/ftest02
 
-## TFAIL: Timer CLOCK_THREAD_CPUTIME_ID expired too early
+## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
 ltp/syscalls/timer_settime01
 
 ## TFAIL: after child shmat() shm_nattcg=3 expected 20
 ltp/syscalls/shmctl01
 
-## TFAIL: after child shmat() shm_nattcg=7 expected 20
+## TFAIL: after child shmat() shm_nattcg=4 expected 20
 ltp/syscalls-ipc/shmctl01
 
 ## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
@@ -335,6 +332,15 @@ ltp/syscalls/openat203
 ## TFAIL: ioctl(fd, PROCMAP_QUERY, q) failed: ENOTTY (25)
 ltp/syscalls/ioctl10
 
+## TFAIL: keyctl clear has not been recognized
+ltp/watchqueue/wqueue06
+
+## TFAIL: keyctl invalidate has not been recognized
+ltp/watchqueue/wqueue05
+
+## TFAIL: keyctl unlink has not been recognized
+ltp/watchqueue/wqueue02
+
 ## TFAIL: keyctl(KEYCTL_SEARCH, ring, "user", KEY_DESC, 0) (-1) != key (6)
 ltp/syscalls/keyctl19
 
@@ -420,9 +426,6 @@ ltp/syscalls/poll02
 
 ## TFAIL: prctl() slept for too long
 ltp/syscalls/prctl09
-
-## TFAIL: prctl() succeeded unexpectedly
-ltp/syscalls/prctl02
 
 ## TFAIL: process 13 wasn't woken up: ETIMEDOUT (110)
 ltp/syscalls/futex_cmp_requeue01
@@ -700,6 +703,7 @@ ltp/syscalls/epoll_wait08
 ltp/syscalls/futex_wait01
 ltp/syscalls/kill11
 ltp/syscalls/msgrcv05
+ltp/watchqueue/wqueue04
 
 ## exit status 139
 ltp/mm/data_space
@@ -760,6 +764,9 @@ ltp/sched/sched_stress
 ltp/syscalls/rt_sigtimedwait01
 ltp/syscalls/sigtimedwait01
 ltp/syscalls/sigwaitinfo01
+
+## timeout (137): setup spins until /proc/self/stat utime > 0, but exec's sampled CPU accounting can attribute a periodic syscall loop entirely to system time; being fixed (CPU attribution by execution mode, kernel/sched/cputime.c)
+ltp/syscalls/clock_gettime01
 
 ## timeout: creates pid_max processes
 ltp/syscalls/fork13
