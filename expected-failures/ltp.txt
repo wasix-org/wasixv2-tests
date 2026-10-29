@@ -4,25 +4,11 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## ENOSYS: Bpf, MemfdSecret, PerfEventOpen, Userfaultfd
-ltp/syscalls/accept03
-ltp/syscalls/epoll_ctl06
-
-## ENOSYS: PkeyAlloc
+## mseal validates ranges but VM_SEALED is unavailable on ILP32 (Linux include/linux/mm.h); PkeyAlloc is diagnostic noise
 ltp/syscalls/mseal01
 
 ## TBROK: /dev/zero has no mmap backend; low-guard mprotect now correctly returns ENOMEM
 ltp/syscalls/mprotect01
-
-## TBROK: Failed to acquire device
-ltp/syscalls/linkat02
-ltp/syscalls/mknodat02
-ltp/syscalls/rename11
-ltp/syscalls/renameat01
-ltp/syscalls/umount2_01
-
-## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
-ltp/syscalls/pipe15
 
 ## TBROK: Failed to open FILE '/proc/sys/kernel/msgmni' for reading: ENOENT (2)
 ltp/syscalls-ipc/msgstress01
@@ -42,14 +28,10 @@ ltp/syscalls/semctl09
 ## TBROK: Test killed by SIGSEGV!
 ltp/syscalls-ipc/msgctl06
 ltp/syscalls/msgctl06
-ltp/syscalls/prctl08
 
 ## TBROK: Test killed! (timeout?)
 ltp/syscalls/futex_wait01
 ltp/watchqueue/wqueue04
-
-## TBROK: fgets: SUCCESS (0)
-ltp/cve/cve-2017-1000364
 
 ## TBROK: fopen(/proc/sysvipc/shm,r) failed: ENOENT (2)
 ltp/syscalls-ipc/shmctl04
@@ -57,14 +39,8 @@ ltp/syscalls-ipc/shmget03
 ltp/syscalls/shmctl04
 ltp/syscalls/shmget03
 
-## TBROK: getaddrinfo failed, Unrecognized service
-ltp/net.ipv6_lib/getaddrinfo_01
-
 ## TBROK: got unexpected signal: 65280
 ltp/syscalls/mprotect02
-
-## TBROK: ioctl(3,(( ((2U)<<30) | ((('R'))<<8) | ((0x00)) | ((sizeof(int))<<16) )),...) failed: ENOTTY (25)
-ltp/syscalls/ioctl07
 
 ## TBROK: mmap(0,262144,PROT_READ | PROT_WRITE | PROT_EXEC(7),1,3,0) failed: EACCES (13)
 ltp/syscalls/mincore02
@@ -78,9 +54,6 @@ ltp/syscalls/sendfile04_64
 
 ## TBROK: mremap() failed
 ltp/syscalls/mremap06
-
-## TBROK: openat() failed: errno=EACCES(13): Permission denied
-ltp/syscalls/openat03
 
 ## TBROK: process_vm_readv: EPERM
 ltp/syscalls/process_vm_readv02
@@ -99,15 +72,11 @@ ltp/net.ipv6_lib/asapi_03
 ## TBROK: unshare(131072) failed: EPERM (1)
 ltp/syscalls/statmount03
 
-## TFAIL: "hopopt" protocols entry
+## TBROK: IPv6 raw socket protocol 159 returns EPERM; hopopt lookup now succeeds (P6 raw-socket follow-up)
 ltp/net.ipv6_lib/asapi_01
 
 ## TFAIL: A single 6*ps VMA found.
 ltp/mm/vma01
-
-## TFAIL: Allowed access to .builtin_trusted_keys
-ltp/cve/cve-2016-9604
-ltp/syscalls/keyctl08
 
 ## TFAIL: Child succeeds to refer unmapped memory region
 ltp/syscalls/munmap01
@@ -115,20 +84,14 @@ ltp/syscalls/munmap01
 ## TFAIL: Child: exited with 0
 ltp/syscalls/madvise12
 
-## TFAIL: Child: killed by SIGSEGV
-ltp/syscalls/mmap18
-
 ## TFAIL: Could not parse inotify fdinfo
 ltp/syscalls/inotify12
 
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
 
-## TFAIL: Faulty timeout: select() passed unexpectedly with 1
+## select03 libc variant reads its timeval in guest code; invalid low-guard loads await the page-protection decision
 ltp/syscalls/select03
-
-## TFAIL: Found sequence in dump when MADV_DONTDUMP set
-ltp/syscalls/madvise08
 
 ## TFAIL: KEYCTL_GET_SECURITY with key without View permission expected ENOKEY: EACCES (13)
 ltp/syscalls/keyctl17
@@ -138,12 +101,6 @@ ltp/syscalls/keyctl22
 
 ## TFAIL: NORMAL expected errno: 13: EACCES (13)
 ltp/syscalls/mq_open01
-
-## TFAIL: Pipe size (4096) must be page size (65536)
-ltp/syscalls/pipe2_04
-
-## TFAIL: SAFE_EPOLL_WAIT(epfd, &evt_receive, 1, 0) (1) != 0 (0)
-ltp/syscalls/epoll_wait06
 
 ## TFAIL: SIGBUS signal not received
 ltp/syscalls/mmap13
@@ -161,12 +118,6 @@ ltp/mm/mmapstress05
 ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 
-## TFAIL: Test{7} failed, expected 0 exit.
-ltp/fs/ftest06
-
-## TFAIL: Test{8} failed, expected 0 exit.
-ltp/fs/ftest02
-
 ## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
 ltp/syscalls/timer_settime01
 
@@ -183,28 +134,15 @@ ltp/syscalls/mprotect03
 ## TFAIL: clock_nanosleep() slept for too long
 ltp/syscalls/clock_nanosleep02
 
-## TFAIL: description points outside the process's accessible address space expected EFAULT: ENODEV (19)
-ltp/syscalls/request_key06
-
 ## TFAIL: do_epoll_pwait() slept for too long
 ltp/syscalls/epoll_pwait03
 
 ## TFAIL: epoll_wait() slept for too long
 ltp/syscalls/epoll_wait02
 
-## TFAIL: expected EPROTONOSUPPORT(93): EOPNOTSUPP (95)
-ltp/syscalls/socketpair01
-
-## TFAIL: fchmod() on original FD succeeded
-ltp/syscalls/open13
-
 ## TFAIL: fcntl(1, F_SETLK, flock) expected EINVAL: EBADF (9)
 ltp/syscalls/fcntl13
 ltp/syscalls/fcntl13_64
-
-## TFAIL: file size is 2048 != K3
-ltp/syscalls/pwrite04
-ltp/syscalls/pwrite04_64
 
 ## TFAIL: first semop() failed errno 13
 ltp/syscalls-ipc/semctl06
@@ -216,20 +154,11 @@ ltp/syscalls/futex_wait05
 ## TFAIL: get event: wd=1 mask=00000004 (expected 40000004) cookie=0     len=0  name="" (expected "") -1
 ltp/syscalls/inotify02
 
-## TFAIL: get unnecessary event: mask=40000000 pid=4 fd=6
-ltp/syscalls/fanotify02
-
 ## TFAIL: got event: wd=2 (expected 1) mask=0004 (expected 40000004) len=0 name="" (expected "test_dir")
 ltp/syscalls/inotify10
 
 ## TFAIL: got event: wd=2 mask=0400 (expected 4) cookie=0 len=0 name="" (expected "") 0
 ltp/syscalls/inotify04
-
-## TFAIL: got unexpected event 40000020
-ltp/syscalls/fanotify04
-
-## TFAIL: invalid level expected EOPNOTSUPP: ENOPROTOOPT (92)
-ltp/syscalls/getsockopt01
 
 ## TFAIL: ioctl(fd, PROCMAP_QUERY, q) failed: ENOTTY (25)
 ltp/syscalls/ioctl10
@@ -254,9 +183,6 @@ ltp/syscalls/fcntl11_64
 ltp/syscalls/fcntl21
 ltp/syscalls/fcntl21_64
 
-## TFAIL: madvise succeeded unexpectedly
-ltp/syscalls/madvise02
-
 ## TFAIL: mapping permissions in /proc mismatched, expected: -w-p, found: rw-p
 ltp/syscalls/mmap04
 
@@ -269,9 +195,6 @@ ltp/syscalls/mlock201
 ## TFAIL: mmap Error, errno=22 : Invalid argument
 ltp/syscalls/remap_file_pages01
 
-## TFAIL: mmap() into high mem region succeeded unexpectedly
-ltp/syscalls/mmap15
-
 ## TFAIL: mprotect failed to exec: EACCES (13)
 ltp/syscalls/mprotect05
 
@@ -279,23 +202,11 @@ ltp/syscalls/mprotect05
 ltp/syscalls-ipc/msgctl04
 ltp/syscalls/msgctl04
 
-## TFAIL: munmap(maps[2] + page_sz, page_sz) succeeded
-ltp/syscalls/munmap04
-
-## TFAIL: name->version (#1 SMP wasixv2 2.0.0) != proc_val (Linux version 7.2.0-wasixv2 #1 SMP wasixv2 2.0.0)
-ltp/syscalls/newuname01
-
 ## TFAIL: nanosleep() slept for too long
 ltp/syscalls/nanosleep01
 
-## TFAIL: pathconf() fail with path prefix is not a directory invalid retval 8: SUCCESS (0)
-ltp/syscalls/pathconf02
-
 ## TFAIL: pen dev pagemap failed: ENOENT (2)
 ltp/syscalls/mmap12
-
-## TFAIL: pidfd_send_signal() did not fail with EPERM but: SUCCESS (0)
-ltp/syscalls/pidfd_send_signal02
 
 ## TFAIL: poll() slept for too long
 ltp/syscalls/poll02
@@ -321,9 +232,6 @@ ltp/syscalls/brk02
 ## TFAIL: recv() read 16 bytes, expected 0, step 1
 ltp/syscalls/send02
 
-## TFAIL: recvmmsg() negative seconds in timeout succeeded
-ltp/syscalls/recvmmsg01
-
 ## TFAIL: retval (0) != ERANGE (34)
 ltp/cve/cve-2015-0235
 ltp/syscalls/gethostbyname_r01
@@ -338,18 +246,12 @@ ltp/syscalls/select02
 ltp/syscalls-ipc/semctl03
 ltp/syscalls/semctl03
 
-## TFAIL: setgroups(33, groups_list) succeeded
-ltp/syscalls/setgroups03
-
 ## TFAIL: setrlimit failed, expected 10 got 26
 ltp/syscalls/setrlimit01
 
 ## TFAIL: setsockopt(IPV6_ADDRFORM) failed: ENOPROTOOPT (92)
 ltp/cve/cve-2018-9568
 ltp/syscalls/connect02
-
-## TFAIL: setxattr(2) on sock failed with -1: EPERM (1)
-ltp/syscalls/setxattr02
 
 ## TFAIL: shared memory was not detached correctly
 ltp/syscalls-ipc/shmdt01
@@ -381,12 +283,6 @@ ltp/syscalls/futex_cmp_requeue03
 ## TFAIL: unexpected value in map, i=0,val=0x0
 ltp/mm/mmapstress04
 
-## TFAIL: waipid(-2147483648, NULL, 0x0) expected ESRCH: EINVAL (22)
-ltp/syscalls/waitpid04
-
-## TFAIL: wait4 fails with ESRCH expected ESRCH: EINVAL (22)
-ltp/syscalls/wait403
-
 ## TFAIL: write successful after file size limit
 ltp/syscalls/llseek01
 
@@ -399,21 +295,10 @@ ltp/fs_perms_simple/fs_perms02
 ## TFAIL: x a 500 file owned by (99/99) as user/group (99/500)
 ltp/fs_perms_simple/fs_perms03
 
-## build: wasm-ld: error: unable to find library -lrealtime
-ltp/sched/sched_football
-
 ## exit status 127
 ltp/syscalls/ioctl02
 
-## exit status 139
-ltp/mm/data_space
-ltp/mm/page02
-ltp/syscalls/rename14
-
-## exit status 255
-ltp/sched/trace_sched01
-
-## musl's getopt does not permute arguments: the test passes -I after the ping target, so ping takes it as a second host
+## ARP/NDISC neighbor caches are not populated by ping; /proc/net/arp is absent for arp variant
 ltp/net.ipv6/ipneigh6_ip
 ltp/net.tcp_cmds/ipneigh01_arp
 ltp/net.tcp_cmds/ipneigh01_ip
@@ -429,10 +314,6 @@ ltp/capability/cap_bounds
 
 ## runs unprivileged (declares no root): dropping root privileges fails EPERM, as on Linux
 ltp/capability/filecaps
-
-## the privileged half: pipe buffers count 4 KiB pages here by design, so a privileged process's new pipe holds 64 KiB where the test, with the 64 KiB wasm page as PAGE_SIZE, expects 1 MiB
-ltp/syscalls/fcntl35
-ltp/syscalls/fcntl35_64
 
 ## timeout
 ltp/dma_thread_diotest/dma_thread_diotest1
@@ -452,13 +333,9 @@ ltp/fs/rwtest03
 ltp/fs/rwtest04
 ltp/mm/mtest06
 ltp/mm/mtest06_3
-ltp/mm/thp01
 ltp/net.multicast/mc_commo
 ltp/net.multicast/mc_member
 ltp/sched/sched_stress
 
 ## timeout: creates pid_max processes
 ltp/syscalls/fork13
-
-## timeout: thp01 declares min_runtime=120 seconds, exceeding the runner60-second budget; V2 isolated180-second diagnostic passed
-ltp/cve/cve-2011-0999
