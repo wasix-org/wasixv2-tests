@@ -14,9 +14,9 @@ built with [wasixcc](https://github.com/wasix-org/wasixcc) for `wasm32-wasixv2` 
 
 The upstream suites are submodules, so check out recursively:
 `git submodule update --init --recursive`. LTP is wasix-org's fork, whose `wasixv2` branch adds
-the few patches LTP needs here: its test library runs each test in its own process instead of a
-forked child sharing memory with the parent, it compares wasixv2 as newer than any kernel version,
-and its `__linux__` checks also accept `__wasixv2__`. The upstream code keeps its own licenses
+the few patches LTP needs here: it compares wasixv2 as newer than any kernel version, its
+`__linux__` checks also accept `__wasixv2__`, and callbacks have prototypes matching their APIs.
+The test library forks each test run as upstream does, sharing the IPC region with its parent. The upstream code keeps its own licenses
 (LTP and the Open POSIX suite are GPLv2+), separate from this repository's.
 
 This repository has no CI of its own. It is a submodule of wasmer (`tests/wasixv2`) and libc2
@@ -44,7 +44,11 @@ The runner builds and runs every test. It needs, from the environment:
 | `WASIXV2_TESTS_EXPECTED_FAILURES` | A directory of expected-failures files to use instead of `expected-failures/`. |
 | `WASIXV2_TESTS_BLESS` | Rewrite the expected-failures files from this run's results. |
 | `HOSTCC` | The host C compiler that builds LTP's metadata parser (default `cc`). |
-| `WASIXV2_TESTS_USERLAND` | A directory of v2 programs, mounted at `/bin` for LTP's shell tests (see [LTP shell tests](#ltp-shell-tests)). Without it, they are skipped. |
+| `WASIXV2_TESTS_USERLAND` | A directory of v2 programs, mounted at `/bin` for every upstream test, with `/bin` on PATH. C tests use it for `system`, `popen`, and executed helpers too. Without it, LTP shell tests are skipped. |
+
+LTP builds static libcap and libaio from the pinned `upstream/` sources for both compiler
+configurations, enabling the capability and Linux AIO test bodies. libaio uses its libc syscall
+fallback and ordinary static symbols on WebAssembly.
 
 LTP's build needs Linux's UAPI headers (`<linux/*.h>`, `<asm/*.h>`, `<asm-generic/*.h>`). It
 uses the sysroot's when the sysroot has them, as newer libc2 sysroots do. For an older sysroot,
@@ -130,6 +134,9 @@ cause, then take the test off the list.
 LTP tests run with LTP's install mounted at `/opt/ltp`, `LTPROOT=/opt/ltp` and its
 `testcases/bin` on `PATH`, so tests can execute their helper programs. They run as `wasmer run`'s
 default user, except tests that need root, which run as uid 0 (`wasmer run --user 0:0`).
+The Open POSIX suite always runs as uid 0, so its scheduling and resource-limit assertions have
+the capabilities they require. LTP always gets `KCONFIG_PATH`, including when setup queries
+configuration without declaring `needs_kconfigs`.
 
 ### LTP shell tests
 

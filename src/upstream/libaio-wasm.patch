@@ -1,0 +1,56 @@
+--- a/src/syscall.h
++++ b/src/syscall.h
+@@ -5,11 +5,19 @@
+ #define _SYMSTR(str)	#str
+ #define SYMSTR(str)	_SYMSTR(str)
+ 
++/* WASM static archives expose the current API under its ordinary name. */
++#ifdef __wasm__
++#define SYMVER(compat_sym, orig_sym, ver_sym)
++#define DEFSYMVER(compat_sym, orig_sym, ver_sym) \
++	extern __typeof__(compat_sym) orig_sym __attribute__((alias(SYMSTR(compat_sym))));
++#else
+ #define SYMVER(compat_sym, orig_sym, ver_sym)	\
+ 	__asm__(".symver " SYMSTR(compat_sym) "," SYMSTR(orig_sym) "@LIBAIO_" SYMSTR(ver_sym));
+ 
+ #define DEFSYMVER(compat_sym, orig_sym, ver_sym)	\
+ 	__asm__(".symver " SYMSTR(compat_sym) "," SYMSTR(orig_sym) "@@LIBAIO_" SYMSTR(ver_sym));
++
++#endif
+ 
+ #if defined(__i386__)
+ #include "syscall-i386.h"
+--- a/src/io_getevents.c
++++ b/src/io_getevents.c
+@@ -23,7 +23,17 @@
+ #include "syscall.h"
+ #include "aio_ring.h"
+ 
++#ifdef __wasm__
++/* asm-generic/unistd.h maps syscall 416 to fs/aio.c sys_io_pgetevents:
++ * time64-only ABIs retrieve events through it with no signal-mask change. */
++static int __io_getevents_0_4(io_context_t ctx, long min_nr, long nr,
++		struct io_event *events, struct timespec *timeout)
++{
++	return io_pgetevents(ctx, min_nr, nr, events, timeout, NULL);
++}
++#else
+ io_syscall5(int, __io_getevents_0_4, io_getevents, io_context_t, ctx, long, min_nr, long, nr, struct io_event *, events, struct timespec *, timeout)
++#endif
+ 
+ int io_getevents_0_4(io_context_t ctx, long min_nr, long nr, struct io_event * events, struct timespec * timeout)
+ {
+--- a/src/io_pgetevents.c
++++ b/src/io_pgetevents.c
+@@ -23,6 +23,11 @@
+ #include <signal.h>
+ #include "syscall.h"
+ #include "aio_ring.h"
++
++#ifdef __wasm__
++/* WASIX uses the riscv32 time64-only syscall table and 64-bit time_t. */
++#define __NR_io_pgetevents __NR_io_pgetevents_time64
++#endif
+ 
+ #ifdef __NR_io_pgetevents
+ io_syscall6(int, __io_pgetevents, io_pgetevents, io_context_t, ctx, long,
