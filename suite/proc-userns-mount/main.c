@@ -3,6 +3,7 @@
 // its parent's namespace stay over what they hide (umount is EINVAL) and keep their flags
 // (clearing /proc's nosuid, nodev, noexec is EPERM). Without the mount namespace, mounting is
 // EPERM: the initial one is not its namespace's.
+//#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no
 //#ExpectedStdout: PASS
 #define _GNU_SOURCE
 #include <dirent.h>
