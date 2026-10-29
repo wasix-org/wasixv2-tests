@@ -80,7 +80,6 @@ ltp/syscalls/shmctl03
 ltp/syscalls/prot_hsymlinks
 
 ## TBROK: Test haven't reported results!
-ltp/syscalls/futex_wait07
 
 ## TBROK: execlp(/bin/true, /bin/true, ...) failed: ENOENT (2)
 ltp/syscalls/setrlimit04
@@ -699,7 +698,6 @@ ltp/syscalls/ioctl02
 
 ## exit status 137
 ltp/syscalls-ipc/msgrcv05
-ltp/syscalls/epoll_wait08
 ltp/syscalls/futex_wait01
 ltp/syscalls/kill11
 ltp/syscalls/msgrcv05
