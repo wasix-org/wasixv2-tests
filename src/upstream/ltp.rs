@@ -300,6 +300,7 @@ fn declared(
 
 /// The metadata of a shell test on LTP's shell library (`tst_test.sh`), which declares what it
 /// needs in `TST_*` variables, or of an old-API one (`test.sh`), which calls `tst_require_root`.
+/// A network test (`tst_net.sh`) needs root.
 fn script_metadata(text: &str) -> serde_json::Value {
     const VARIABLES: &[(&str, &str)] = &[
         ("TST_NEEDS_ROOT", "needs_root"),
@@ -315,6 +316,12 @@ fn script_metadata(text: &str) -> serde_json::Value {
             continue;
         }
         if line.contains("tst_require_root") && !line.contains("tst_require_root()") {
+            test.insert("needs_root".to_owned(), true.into());
+        }
+        // The network library makes the test's second host, a network namespace joined by a
+        // veth pair, as root (`init_ltp_netspace` calls `tst_require_root`); the library is not
+        // among the scripts read here.
+        if line == ". tst_net.sh" {
             test.insert("needs_root".to_owned(), true.into());
         }
         let assignment = line.strip_prefix("export ").unwrap_or(line);
@@ -1213,6 +1220,10 @@ mod tests {
         assert!(!has(&test, "mount_device"));
         assert!(has(
             &script_metadata("setup()\n{\n\ttst_require_root\n}\n"),
+            "needs_root"
+        ));
+        assert!(has(
+            &script_metadata("do_test()\n{\n}\n. tst_net.sh\n"),
             "needs_root"
         ));
         assert!(script_reason(". tst_loader.sh\n").is_some());
