@@ -167,9 +167,6 @@ ltp/fs/ftest06
 ## TFAIL: Test{8} failed, expected 0 exit.
 ltp/fs/ftest02
 
-## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
-ltp/syscalls/timer_settime01
-
 ## TFAIL: alloc failed, expected to pass
 ltp/mm/overcommit_memory01
 ltp/mm/overcommit_memory03
