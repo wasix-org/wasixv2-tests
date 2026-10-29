@@ -235,6 +235,27 @@ fn invocation(module: PathBuf) -> Invocation {
 #[cfg(test)]
 mod tests {
     #[test]
+    #[ignore = "requires the WASIX v2 toolchain and sysroot"]
+    fn time_t_max_matches_the_time64_type() {
+        let suite = crate::Suite::from_env().unwrap();
+        std::fs::create_dir_all(&suite.build_root).unwrap();
+        let mut cc = std::process::Command::new(&suite.cc);
+        super::wasixcc_env(&mut cc)
+            .arg("-I")
+            .arg(
+                super::super::upstream_dir()
+                    .join("ltp")
+                    .join(super::SUITE_DIR)
+                    .join("include"),
+            )
+            .arg("-c")
+            .arg(crate::root().join("src/upstream/posix-timespec-check.c"))
+            .arg("-o")
+            .arg(suite.build_root.join("posix-timespec-check.o"));
+        super::run_build(&mut cc).unwrap();
+    }
+
+    #[test]
     fn posix_tests_run_as_root() {
         assert_eq!(
             super::invocation("main.wasm".into()).user.as_deref(),
