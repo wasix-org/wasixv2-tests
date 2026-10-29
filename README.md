@@ -39,7 +39,7 @@ The runner builds and runs every test. It needs, from the environment:
 | `PATH` | Must contain `wasixcc` and `wasix++` with wasixv2 support. The runner sets `WASIXCC_TARGET=wasm32-wasixv2`. |
 | `WASIXCC_*` | wasixcc's own settings, such as `WASIXCC_LLVM_LOCATION` and `WASIXCC_SYSROOT_PREFIX`, apply as usual. Without them, wasixcc uses its downloaded defaults. Tests that fork build for the asyncify configuration (`WASIXCC_WASM_EXCEPTIONS=no`; see [Tests that fork](#tests-that-fork)), which has its own sysroot, so give libc2's sysroots with `WASIXCC_SYSROOT_PREFIX` (its `build-wasixv2`) rather than one with `WASIXCC_SYSROOT`. |
 | `WASIXV2_TESTS_BUILD_DIR` | Where tests are built (default `target/suite`). |
-| `WASIXV2_TESTS_TIMEOUT_SECS` | Per-test timeout (default 60). |
+| `WASIXV2_TESTS_TIMEOUT_SECS` | Baseline per-test timeout in seconds (default 60). LTP cases allow their declared runtime plus timeout, once per declared variant, with 30 seconds of launcher grace; the baseline remains a floor. |
 | `WASIXV2_TESTS_WRAPPER` | A command line, split at whitespace, that every `wasmer` run goes through, e.g. `systemd-run --user --scope --quiet -p MemoryMax=4G` to cap each run's memory. Fork copies a process's whole linear memory, so tests that fork hundreds of processes (hackbench, `shm_open/23-1`) need many gigabytes; without a cap three of them at once can exhaust the host. |
 | `WASIXV2_TESTS_EXPECTED_FAILURES` | A directory of expected-failures files to use instead of `expected-failures/`. |
 | `WASIXV2_TESTS_BLESS` | Rewrite the expected-failures files from this run's results. |
@@ -106,7 +106,7 @@ particular CPU.
 - LTP tests are excluded by the requirements their metadata declares (`needs_device`,
   `needs_hugetlbfs`, ...), see `metadata_reason` in `src/upstream/ltp.rs`. Shell tests declare theirs
   in `TST_*` variables (`TST_NEEDS_DEVICE=1`, ...), which count the same. Tests that need root
-  (`needs_root`, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old APIs) are not excluded:
+  (`needs_root`, a `.caps` declaration, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old APIs) are not excluded:
   they run as uid 0. Tests that need kernel options (`needs_kconfigs`) run when the kernel has
   every one, which only namespaces' options (`CONFIG_PID_NS`, `CONFIG_IPC_NS`, `CONFIG_UTS_NS`,
   `CONFIG_NET_NS`) and `CONFIG_DNOTIFY` can be; LTP reads them from a kernel configuration the
