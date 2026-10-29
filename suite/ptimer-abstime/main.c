@@ -96,9 +96,10 @@ int main(void)
 	CHECK(timer_create(CLOCK_PROCESS_CPUTIME_ID, &sev, &t) == 0);
 	struct itimerspec spec = {.it_value = at(10 * MS)};
 	CHECK(timer_settime(t, 0, &spec, NULL) == 0);
-	/* Burn CPU: it counts as CPU time wherever CPU time is measured. */
-	long long until = now(CLOCK_MONOTONIC) + 20 * MS;
-	while (now(CLOCK_MONOTONIC) < until)
+	/* Burn 20 ms of the process's CPU time, not of wall time: on a loaded host 20 ms of
+	 * wall time can be less than the timer's 10 ms of CPU time. */
+	long long until = now(CLOCK_PROCESS_CPUTIME_ID) + 20 * MS;
+	while (now(CLOCK_PROCESS_CPUTIME_ID) < until)
 		;
 	CHECK(took(2000));
 	CHECK(timer_delete(t) == 0);
