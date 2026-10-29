@@ -100,7 +100,7 @@ filesystems (the module owns its whole filesystem), huge pages, cgroups, kernel 
 particular CPU.
 
 - LTP tests are excluded by the requirements their metadata declares (`needs_device`,
-  `taint_check`, ...), see `metadata_reason` in `src/upstream/ltp.rs`. Shell tests declare theirs
+  `needs_hugetlbfs`, ...), see `metadata_reason` in `src/upstream/ltp.rs`. Shell tests declare theirs
   in `TST_*` variables (`TST_NEEDS_DEVICE=1`, ...), which count the same. Tests that need root
   (`needs_root`, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old APIs) are not excluded:
   they run as uid 0. Tests that need kernel options (`needs_kconfigs`) run when the kernel has
