@@ -46,7 +46,6 @@ ltp/syscalls/prctl08
 
 ## TBROK: Test killed! (timeout?)
 ltp/syscalls/futex_wait01
-ltp/watchqueue/wqueue04
 
 ## TBROK: fgets: SUCCESS (0)
 ltp/cve/cve-2017-1000364
@@ -129,12 +128,6 @@ ltp/syscalls/select03
 
 ## TFAIL: Found sequence in dump when MADV_DONTDUMP set
 ltp/syscalls/madvise08
-
-## TFAIL: KEYCTL_GET_SECURITY with key without View permission expected ENOKEY: EACCES (13)
-ltp/syscalls/keyctl17
-
-## TFAIL: KEYCTL_RESTRICT_KEYRING reject-all failed: EOPNOTSUPP (95)
-ltp/syscalls/keyctl22
 
 ## TFAIL: NORMAL expected errno: 13: EACCES (13)
 ltp/syscalls/mq_open01
@@ -233,18 +226,6 @@ ltp/syscalls/getsockopt01
 
 ## TFAIL: ioctl(fd, PROCMAP_QUERY, q) failed: ENOTTY (25)
 ltp/syscalls/ioctl10
-
-## TFAIL: keyctl clear has not been recognized
-ltp/watchqueue/wqueue06
-
-## TFAIL: keyctl invalidate has not been recognized
-ltp/watchqueue/wqueue05
-
-## TFAIL: keyctl unlink has not been recognized
-ltp/watchqueue/wqueue02
-
-## TFAIL: keyctl(KEYCTL_SEARCH, ring, "user", KEY_DESC, 0) (-1) != key (6)
-ltp/syscalls/keyctl19
 
 ## TFAIL: lock type is wrong should be F_RDLCK is F_WRLCK
 ltp/syscalls/fcntl11
