@@ -180,17 +180,8 @@ ltp/mm/overcommit_memory06
 ## TFAIL: child returned unexpected status
 ltp/syscalls/mprotect03
 
-## TFAIL: clock_nanosleep() slept for too long
-ltp/syscalls/clock_nanosleep02
-
 ## TFAIL: description points outside the process's accessible address space expected EFAULT: ENODEV (19)
 ltp/syscalls/request_key06
-
-## TFAIL: do_epoll_pwait() slept for too long
-ltp/syscalls/epoll_pwait03
-
-## TFAIL: epoll_wait() slept for too long
-ltp/syscalls/epoll_wait02
 
 ## TFAIL: expected EPROTONOSUPPORT(93): EOPNOTSUPP (95)
 ltp/syscalls/socketpair01
@@ -209,9 +200,6 @@ ltp/syscalls/pwrite04_64
 ## TFAIL: first semop() failed errno 13
 ltp/syscalls-ipc/semctl06
 ltp/syscalls/semctl06
-
-## TFAIL: futex_wait() slept for too long
-ltp/syscalls/futex_wait05
 
 ## TFAIL: get event: wd=1 mask=00000004 (expected 40000004) cookie=0     len=0  name="" (expected "") -1
 ltp/syscalls/inotify02
@@ -285,9 +273,6 @@ ltp/syscalls/munmap04
 ## TFAIL: name->version (#1 SMP wasixv2 2.0.0) != proc_val (Linux version 7.2.0-wasixv2 #1 SMP wasixv2 2.0.0)
 ltp/syscalls/newuname01
 
-## TFAIL: nanosleep() slept for too long
-ltp/syscalls/nanosleep01
-
 ## TFAIL: pathconf() fail with path prefix is not a directory invalid retval 8: SUCCESS (0)
 ltp/syscalls/pathconf02
 
@@ -297,18 +282,8 @@ ltp/syscalls/mmap12
 ## TFAIL: pidfd_send_signal() did not fail with EPERM but: SUCCESS (0)
 ltp/syscalls/pidfd_send_signal02
 
-## TFAIL: poll() slept for too long
-ltp/syscalls/poll02
-
-## TFAIL: prctl() slept for too long
-ltp/syscalls/prctl09
-
 ## TFAIL: process_vm_read() failed: EPERM (1)
 ltp/syscalls/process_vm_readv03
-
-## TFAIL: pselect() slept for too long
-ltp/syscalls/pselect01
-ltp/syscalls/pselect01_64
 
 ## TFAIL: pwritev2() failed unexpectedly, expected ESPIPE: EBADF (9)
 ltp/syscalls/pwritev202
@@ -330,9 +305,6 @@ ltp/syscalls/gethostbyname_r01
 
 ## TFAIL: sbrk(8192) returned 0xffffffff failed: ENOMEM (12)
 ltp/syscalls/sbrk01
-
-## TFAIL: select() slept for too long
-ltp/syscalls/select02
 
 ## TFAIL: semctl() with invalid union arg succeeded
 ltp/syscalls-ipc/semctl03
