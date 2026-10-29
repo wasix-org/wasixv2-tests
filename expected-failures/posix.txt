@@ -4,6 +4,9 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
+## FAIL: /proc/<pid>/stat reports every live non-stopped task as S (sleeping), so the test's state wait sees the child's setup as the intended sleep; needs real task-state tracking (fs/proc/array.c get_task_state)
+posix/conformance/interfaces/clock_nanosleep/1-3
+
 ## FAIL: At least one test FAILED -- see output for status
 posix/conformance/interfaces/kill/2-2
 
