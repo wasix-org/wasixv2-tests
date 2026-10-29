@@ -68,13 +68,9 @@ ltp/containers/userns06
 ## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
 ltp/syscalls/pipe15
 
-## TBROK: Failed to open FILE '/proc/sys/kernel/msgmni' for reading: ENOENT (2)
+## timeout: msgstress01 declares a 180-second runtime, beyond the runner's 60-second bound; bounded IPC stress passes
 ltp/syscalls-ipc/msgstress01
 ltp/syscalls/msgstress01
-
-## TBROK: Failed to open FILE '/proc/sys/kernel/shmmax' for reading: ENOENT (2)
-ltp/syscalls-ipc/shmctl03
-ltp/syscalls/shmctl03
 
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
@@ -91,12 +87,6 @@ ltp/mm/thp01
 
 ## TBROK: fgets: SUCCESS (0)
 ltp/cve/cve-2017-1000364
-
-## TBROK: fopen(/proc/sysvipc/shm,r) failed: ENOENT (2)
-ltp/syscalls-ipc/shmctl04
-ltp/syscalls-ipc/shmget03
-ltp/syscalls/shmctl04
-ltp/syscalls/shmget03
 
 ## TBROK: got unexpected signal: 65280
 ltp/syscalls/mprotect02
@@ -168,9 +158,6 @@ ltp/syscalls/madvise12
 ## TFAIL: Child: killed by SIGSEGV
 ltp/syscalls/mmap18
 
-## TFAIL: Could not parse inotify fdinfo
-ltp/syscalls/inotify12
-
 ## TFAIL: Error: sbrk failed, errno = 12
 ltp/mm/shmt09
 
@@ -182,9 +169,6 @@ ltp/syscalls/select03
 
 ## TFAIL: Found sequence in dump when MADV_DONTDUMP set
 ltp/syscalls/madvise08
-
-## TFAIL: Invalid address expected EFAULT: ENOENT (2)
-ltp/syscalls/mknod06
 
 ## TFAIL: Invalid rule attr expected EFAULT: ENOMSG (42)
 ltp/syscalls/landlock02
@@ -275,9 +259,6 @@ ltp/syscalls/request_key06
 ## TFAIL: do_epoll_pwait() slept for too long
 ltp/syscalls/epoll_pwait03
 
-## TFAIL: epoll_ctl(...) if events is NULL succeeded
-ltp/syscalls/epoll_ctl02
-
 ## TFAIL: epoll_wait() slept for too long
 ltp/syscalls/epoll_wait02
 
@@ -290,44 +271,21 @@ ltp/syscalls/socketpair01
 ## TFAIL: fchmod() on original FD succeeded
 ltp/syscalls/open13
 
-## TFAIL: fcntl(1, F_SETLK, flock) expected EINVAL: EBADF (9)
-ltp/syscalls/fcntl13
-ltp/syscalls/fcntl13_64
-
 ## TFAIL: file size is 2048 != K3
 ltp/syscalls/pwrite04
 ltp/syscalls/pwrite04_64
 
-## TFAIL: first semop() failed errno 13
-ltp/syscalls-ipc/semctl06
-ltp/syscalls/semctl06
-
 ## TFAIL: futex_wait() slept for too long
 ltp/syscalls/futex_wait05
-
-## TFAIL: get event: wd=1 mask=00000004 (expected 40000004) cookie=0     len=0  name="" (expected "") -1
-ltp/syscalls/inotify02
 
 ## TFAIL: get unnecessary event: mask=40000000 pid=3 fd=6
 ltp/syscalls/fanotify02
 
-## TFAIL: got event: wd=2 (expected 1) mask=0004 (expected 40000004) len=0 name="" (expected "test_dir")
-ltp/syscalls/inotify10
-
-## TFAIL: got event: wd=2 mask=0400 (expected 4) cookie=0 len=0 name="" (expected "") 0
-ltp/syscalls/inotify04
-
 ## TFAIL: got unexpected event 40000020
 ltp/syscalls/fanotify04
 
-## TFAIL: invalid iovec buffer: expected -1, returned 0: SUCCESS (0)
-ltp/syscalls/recvmsg01
-
 ## TFAIL: invalid level expected EOPNOTSUPP: ENOPROTOOPT (92)
 ltp/syscalls/getsockopt01
-
-## TFAIL: invalid-pathname: openat2() should fail with EFAULT: ENOENT (2)
-ltp/syscalls/openat203
 
 ## TFAIL: ioctl(fd, PROCMAP_QUERY, q) failed: ENOTTY (25)
 ltp/syscalls/ioctl10
@@ -346,18 +304,6 @@ ltp/syscalls/keyctl19
 
 ## TFAIL: len is smaller than the actual size succeeded
 ltp/syscalls/gethostname02
-
-## TFAIL: lock type is wrong should be F_RDLCK is F_WRLCK
-ltp/syscalls/fcntl11
-ltp/syscalls/fcntl11_64
-
-## TFAIL: lock type is wrong should be F_WRLCK is F_RDLCK
-ltp/syscalls/fcntl21
-ltp/syscalls/fcntl21_64
-
-## TFAIL: lstat() failed unexpectedly; expected: EFAULT - got: ENOENT (2)
-ltp/syscalls/lstat02
-ltp/syscalls/lstat02_64
 
 ## TFAIL: madvise succeeded unexpectedly
 ltp/syscalls/madvise02
@@ -383,17 +329,9 @@ ltp/syscalls/mprotect05
 ## TFAIL: mq_timedreceive() failed unexpectedly, expected EFAULT: ETIMEDOUT (110)
 ltp/syscalls/mq_timedreceive01
 
-## TFAIL: msgctl(4, 258, 0x825520) expected EACCES: EINVAL (22)
-ltp/syscalls-ipc/msgctl04
-ltp/syscalls/msgctl04
-
 ## TFAIL: msgrcv(0, 0x809008, 1024, 1, 0) expected EIDRM: EINVAL (22)
 ltp/syscalls-ipc/msgrcv06
 ltp/syscalls/msgrcv06
-
-## TFAIL: msgsnd(0, 0, 1024, 0) expected EFAULT: EINVAL (22)
-ltp/syscalls-ipc/msgsnd02
-ltp/syscalls/msgsnd02
 
 ## TFAIL: msgsnd(0, 0x808ff8, 1024, 0) expected EIDRM: EINVAL (22)
 ltp/syscalls-ipc/msgsnd06
@@ -437,14 +375,6 @@ ltp/syscalls/process_vm_readv03
 ltp/syscalls/pselect01
 ltp/syscalls/pselect01_64
 
-## TFAIL: pwrite(5, 1024, 0) succeeded
-ltp/syscalls/pwrite02
-ltp/syscalls/pwrite02_64
-
-## TFAIL: pwritev2() failed unexpectedly, expected ESPIPE: EBADF (9)
-ltp/syscalls/pwritev202
-ltp/syscalls/pwritev202_64
-
 ## TFAIL: readlink() sueeeeded unexpectedly
 ltp/syscalls/readlink03
 
@@ -470,21 +400,11 @@ ltp/syscalls/sbrk01
 ## TFAIL: select() slept for too long
 ltp/syscalls/select02
 
-## TFAIL: semctl() with invalid union arg succeeded
-ltp/syscalls-ipc/semctl03
-ltp/syscalls/semctl03
-
-## TFAIL: sendmmsg() invalid msgvec address expected EFAULT: EDESTADDRREQ (89)
-ltp/syscalls/sendmmsg02
-
 ## TFAIL: sendto(fd, NULL, ...) succeeded unexpectedly
 ltp/syscalls/sendto02
 
 ## TFAIL: setgroups(33, groups_list) succeeded
 ltp/syscalls/setgroups03
-
-## TFAIL: setrlimit failed, expected 10 got 26
-ltp/syscalls/setrlimit01
 
 ## TFAIL: setsockopt() succeeded unexpectedly
 ltp/syscalls/setsockopt01
@@ -499,13 +419,6 @@ ltp/syscalls/setxattr02
 ## TFAIL: shared memory was not detached correctly
 ltp/syscalls-ipc/shmdt01
 ltp/syscalls/shmdt01
-
-## TFAIL: shmctl(5, 258, 0x825570) expected EACCES: EINVAL (22)
-ltp/syscalls-ipc/shmctl02
-ltp/syscalls/shmctl02
-
-## TFAIL: sync_file_range(3, 0, 1, 8) succeeded
-ltp/syscalls/sync_file_range01
 
 ## TFAIL: test PROT_NONE for mprotect failed
 ltp/syscalls/mprotect04
@@ -524,10 +437,6 @@ ltp/math/float_exp_log
 
 ## TFAIL: thread 0 (j0) terminated unsuccessfully 0 errors/0 loops
 ltp/math/float_bessel
-
-## TFAIL: truncate(tc->pathname, tc->length) succeeded
-ltp/syscalls/truncate03
-ltp/syscalls/truncate03_64
 
 ## TFAIL: tst_syscall(__NR_process_vm_writev, pid_alloc, &local, 1UL, &remote, 1UL, 0UL) failed: EPERM (1)
 ltp/syscalls/process_vm_writev02
@@ -556,9 +465,6 @@ ltp/syscalls/waitpid04
 
 ## TFAIL: wait4 fails with ESRCH expected ESRCH: EINVAL (22)
 ltp/syscalls/wait403
-
-## TFAIL: write successful after file size limit
-ltp/syscalls/llseek01
 
 ## build: `test_1_to_1_accept_close` is not built by LTP's makefiles
 ltp/net.sctp/test_1_to_1_accept_close
@@ -708,8 +614,6 @@ ltp/watchqueue/wqueue04
 ## exit status 139
 ltp/mm/data_space
 ltp/mm/page02
-ltp/syscalls-ipc/msgctl06
-ltp/syscalls/msgctl06
 ltp/syscalls/prctl08
 ltp/syscalls/rename14
 
