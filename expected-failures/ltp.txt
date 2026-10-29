@@ -145,9 +145,6 @@ ltp/fs/ftest06
 ## TFAIL: Test{8} failed, expected 0 exit.
 ltp/fs/ftest02
 
-## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
-ltp/syscalls/timer_settime01
-
 ## TFAIL: alloc failed, expected to pass
 ltp/mm/overcommit_memory01
 ltp/mm/overcommit_memory03
@@ -158,17 +155,8 @@ ltp/mm/overcommit_memory06
 ## TFAIL: child returned unexpected status
 ltp/syscalls/mprotect03
 
-## TFAIL: clock_nanosleep() slept for too long
-ltp/syscalls/clock_nanosleep02
-
 ## TFAIL: description points outside the process's accessible address space expected EFAULT: ENODEV (19)
 ltp/syscalls/request_key06
-
-## TFAIL: do_epoll_pwait() slept for too long
-ltp/syscalls/epoll_pwait03
-
-## TFAIL: epoll_wait() slept for too long
-ltp/syscalls/epoll_wait02
 
 ## TFAIL: expected EPROTONOSUPPORT(93): EOPNOTSUPP (95)
 ltp/syscalls/socketpair01
@@ -179,9 +167,6 @@ ltp/syscalls/open13
 ## TFAIL: file size is 2048 != K3
 ltp/syscalls/pwrite04
 ltp/syscalls/pwrite04_64
-
-## TFAIL: futex_wait() slept for too long
-ltp/syscalls/futex_wait05
 
 ## TFAIL: get unnecessary event: mask=40000000 pid=4 fd=6
 ltp/syscalls/fanotify02
@@ -222,9 +207,6 @@ ltp/syscalls/munmap04
 ## TFAIL: name->version (#1 SMP wasixv2 2.0.0) != proc_val (Linux version 7.2.0-wasixv2 #1 SMP wasixv2 2.0.0)
 ltp/syscalls/newuname01
 
-## TFAIL: nanosleep() slept for too long
-ltp/syscalls/nanosleep01
-
 ## TFAIL: pathconf() fail with path prefix is not a directory invalid retval 8: SUCCESS (0)
 ltp/syscalls/pathconf02
 
@@ -234,18 +216,8 @@ ltp/syscalls/mmap12
 ## TFAIL: pidfd_send_signal() did not fail with EPERM but: SUCCESS (0)
 ltp/syscalls/pidfd_send_signal02
 
-## TFAIL: poll() slept for too long
-ltp/syscalls/poll02
-
-## TFAIL: prctl() slept for too long
-ltp/syscalls/prctl09
-
 ## TFAIL: process_vm_read() failed: EPERM (1)
 ltp/syscalls/process_vm_readv03
-
-## TFAIL: pselect() slept for too long
-ltp/syscalls/pselect01
-ltp/syscalls/pselect01_64
 
 ## TFAIL: raw brk cannot expand into adjacent LTP fork-child mmap pages; restored fork_testrun reaches the syscall variant after libc brk TCONF (mm/mmap.c sys_brk collision rule)
 ltp/syscalls/brk01
@@ -263,9 +235,6 @@ ltp/syscalls/gethostbyname_r01
 
 ## TFAIL: sbrk(8192) returned 0xffffffff failed: ENOMEM (12)
 ltp/syscalls/sbrk01
-
-## TFAIL: select() slept for too long
-ltp/syscalls/select02
 
 ## TFAIL: setgroups(33, groups_list) succeeded
 ltp/syscalls/setgroups03
