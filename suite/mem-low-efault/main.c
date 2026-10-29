@@ -3,10 +3,9 @@
 // checked; fixed mappings there fail with EPERM, as below Linux's mmap_min_addr, which no
 // capability lowers; and /proc/sys/vm/mmap_min_addr says so.
 //
-// The guard is read-only for now, so syscalls that only read a buffer there succeed, where
-// Linux fails them with EFAULT: clang's wasm32 backend passes a null va_list buffer to variadic
-// calls without variadic arguments, which musl reads anyway. The follow-up in wasmer's
-// lib/wasixv2/DESIGN.md, "Guard page at 0", makes the guard inaccessible.
+// Kernel copies in either direction fault on the guard (Linux include/linux/uaccess.h
+// copy_from_user/copy_to_user). Guest loads remain readable for clang's null va_list
+// workaround; that does not make a low pointer valid for a kernel copy.
 //#ExpectedStdout: ok
 #define _GNU_SOURCE
 #include <errno.h>
@@ -60,8 +59,8 @@ int main(void)
 	CHECK_ERR(read(fds[0], at(0), 1), EFAULT);
 	FILL();
 	CHECK_ERR(read(fds[0], at(65535), 1), EFAULT);
-	/* By design for now: the kernel reads the zeros there (EFAULT on Linux). */
-	CHECK(write(fds[1], at(4096), 1) == 1);
+	/* Kernel reads fault even though guest loads can still read these zeros. */
+	CHECK_ERR(write(fds[1], at(4096), 1), EFAULT);
 	FILL();
 	struct iovec iov = {at(8192), 1};
 	CHECK_ERR(readv(fds[0], &iov, 1), EFAULT);
