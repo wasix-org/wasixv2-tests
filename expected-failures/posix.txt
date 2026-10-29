@@ -4,9 +4,6 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## FAIL: 
-posix/conformance/interfaces/sem_timedwait/9-1
-
 ## FAIL: At least one test FAILED -- see output for status
 posix/conformance/interfaces/kill/2-2
 
@@ -15,6 +12,9 @@ posix/conformance/interfaces/mmap/5-1
 
 ## FAIL: Failed: func: pthread_attr_setschedpolicy() rc: No error information (0)
 posix/conformance/interfaces/pthread_attr_setschedpolicy/4-1
+
+## FAIL: TEST FAILED: errno != EINTR
+posix/conformance/interfaces/sem_timedwait/9-1
 
 ## FAIL: TEST FAILED: semaphore does exist
 posix/conformance/interfaces/sem_unlink/4-1
@@ -335,23 +335,23 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmp2kOmyQ/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
-
-## build: wasm-ld: error: /tmp/.tmpAuPskx/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
-
-## build: wasm-ld: error: /tmp/.tmpDswElN/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpAI3lz6/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmpEGRyKL/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpDnrbb1/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
+
+## build: wasm-ld: error: /tmp/.tmpHaDwuj/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
 
-## build: wasm-ld: error: /tmp/.tmpW557r5/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+## build: wasm-ld: error: /tmp/.tmpl8vcKi/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
+
+## build: wasm-ld: error: /tmp/.tmpmqrxmD/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
 
-## build: wasm-ld: error: /tmp/.tmpaHRi3r/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
+## build: wasm-ld: error: /tmp/.tmpspaXAq/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
 
 ## exit status 132
 posix/conformance/interfaces/pthread_attr_setdetachstate/2-1
