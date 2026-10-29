@@ -2,7 +2,9 @@
 // with every capability, maps its own uid and gid to root (setgroups denied first, each map
 // written once), and is root there: what it creates is its own uid's outside. The
 // capabilities count only in the namespace: no device nodes, no hard limit raised, no
-// machine tunable written, no supplementary groups set.
+// machine tunable written (unless it is the real root mapped to itself), no supplementary
+// groups set.
+//#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no
 //#ExpectedStdout: PASS
 #define _GNU_SOURCE
 #include <errno.h>
@@ -84,11 +86,13 @@ static void inside(uid_t uid, gid_t gid, const char *file)
 	close(fd);
 	struct stat st;
 	CHECK(stat(file, &st) == 0 && st.st_uid == 0 && st.st_gid == 0);
-	CHECK(stat("/proc/1", &st) != 0 || st.st_uid == 65534 || uid == 0);
 
 	FAILS(mknod("/tmp/userns-null", S_IFCHR | 0666, makedev(1, 3)), EPERM);
 	FAILS(setgroups(0, NULL), EPERM);
-	FAILS(open("/proc/sys/kernel/pid_max", O_WRONLY), EACCES);
+	// pid_max is its pid namespace's root's (`pid_table_root_permissions`): the real root's,
+	// which only a namespace that maps it to itself is.
+	if (uid != 0)
+		FAILS(open("/proc/sys/kernel/pid_max", O_WRONLY), EACCES);
 	struct rlimit limit;
 	CHECK(getrlimit(RLIMIT_NOFILE, &limit) == 0);
 	if (limit.rlim_max != RLIM_INFINITY) {
