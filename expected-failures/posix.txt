@@ -88,6 +88,9 @@ posix/conformance/interfaces/sem_unlink/2-2
 posix/conformance/interfaces/mlock/12-1
 posix/conformance/interfaces/mlock/speculative/12-1
 
+## FAIL: aio_cancel/2-1.c Unexpected aio_cancel() return value: 2
+posix/conformance/interfaces/aio_cancel/2-1
+
 ## FAIL: aio_cancel/3-1.c 0 AIO requests got canceled, expected 5
 posix/conformance/interfaces/aio_cancel/3-1
 
@@ -141,6 +144,9 @@ posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-1
 
 ## FAIL: unexpected error: pthread_attr_setschedparam 3-2: pthread_attr_setschedparam did not fail
 posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-2
+
+## FAIL: wasixv2: thread 3 trapped, killing its process with SIGSEGV: RuntimeError: indirect call type mismatch
+posix/conformance/interfaces/pthread_getcpuclockid/speculative/3-1
 
 ## UNRESOLVED: Error at pthread_create(): Operation not permitted
 posix/conformance/interfaces/pthread_attr_setinheritsched/2-2
@@ -332,22 +338,22 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 ## build: error: incompatible function pointer types initializing 'int (*)(int, struct aiocb *const *restrict, int, struct sigevent *restrict)' with an expression of type
 posix/conformance/definitions/aio_h/4-1
 
-## build: wasm-ld: error: /tmp/.tmp3WlQlO/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
-
-## build: wasm-ld: error: /tmp/.tmpBYAgBS/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
-
-## build: wasm-ld: error: /tmp/.tmpEJDQL6/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
-posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
-
-## build: wasm-ld: error: /tmp/.tmpKs3igg/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+## build: wasm-ld: error: /tmp/.tmpCDL2vl/3-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
 posix/conformance/interfaces/pthread_mutexattr_getprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmpUDmz7N/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpIxxdL6/1-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_setprioceiling/1-1
+
+## build: wasm-ld: error: /tmp/.tmpTE0jmr/1-1.c.0.o: undefined symbol: pthread_mutexattr_getprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-1
+
+## build: wasm-ld: error: /tmp/.tmpb3xeiK/1-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+posix/conformance/interfaces/pthread_mutexattr_getprioceiling/1-2
+
+## build: wasm-ld: error: /tmp/.tmpjCSGr5/3-1.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-1
 
-## build: wasm-ld: error: /tmp/.tmpdZZALi/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
+## build: wasm-ld: error: /tmp/.tmpsgXOZu/3-2.c.0.o: undefined symbol: pthread_mutexattr_setprioceiling
 posix/conformance/interfaces/pthread_mutexattr_setprioceiling/3-2
 
 ## exit status 132
@@ -388,7 +394,6 @@ posix/conformance/interfaces/pthread_detach/4-2
 posix/conformance/interfaces/pthread_exit/1-1
 posix/conformance/interfaces/pthread_exit/2-1
 posix/conformance/interfaces/pthread_getcpuclockid/1-1
-posix/conformance/interfaces/pthread_getcpuclockid/speculative/3-1
 posix/conformance/interfaces/pthread_getschedparam/1-1
 posix/conformance/interfaces/pthread_join/1-1
 posix/conformance/interfaces/pthread_join/2-1
@@ -435,7 +440,6 @@ posix/conformance/interfaces/sigpause/3-1
 posix/conformance/interfaces/sem_unlink/5-1
 
 ## timeout
-posix/conformance/interfaces/aio_cancel/2-1
 posix/conformance/interfaces/pthread_cond_broadcast/2-3
 posix/conformance/interfaces/pthread_cond_destroy/2-1
 posix/conformance/interfaces/pthread_cond_signal/1-2

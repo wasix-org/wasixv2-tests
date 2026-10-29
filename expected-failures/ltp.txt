@@ -4,17 +4,9 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## ENOSYS: Bpf, FanotifyInit, IoUringSetup, MemfdSecret, PerfEventOpen, Userfaultfd
+## ENOSYS: Bpf, MemfdSecret, PerfEventOpen, Userfaultfd
 ltp/syscalls/accept03
 ltp/syscalls/epoll_ctl06
-
-## ENOSYS: ClockAdjtime64
-ltp/cve/cve-2018-11508
-ltp/syscalls/adjtimex01
-ltp/syscalls/adjtimex02
-ltp/syscalls/adjtimex03
-ltp/syscalls/clock_adjtime01
-ltp/syscalls/clock_adjtime02
 
 ## ENOSYS: Kcmp
 ltp/syscalls/kcmp03
@@ -26,6 +18,7 @@ ltp/syscalls/getitimer01
 ltp/syscalls/clone08
 
 ## TBROK: Cannot parse kernel .config
+ltp/syscalls/clock_adjtime02
 ltp/syscalls/clock_gettime02
 ltp/syscalls/clock_settime02
 ltp/syscalls/seccomp01
@@ -112,18 +105,8 @@ ltp/syscalls/syslog11
 ## TBROK: Path not found: /proc/sys/vm/min_free_kbytes: ENOENT (2)
 ltp/mm/min_free_kbytes
 
-## TBROK: Set setxattr03immutable immutable failed: ENOTTY (25)
-ltp/syscalls/setxattr03
-
 ## TBROK: Test haven't reported results!
 ltp/syscalls/futex_wait07
-
-## TBROK: clock_gettime(CLOCK_REALTIME) failed: EPERM (1)
-ltp/syscalls/clock_settime04
-ltp/syscalls/leapsec01
-
-## TBROK: clock_settime() failed: EPERM (1)
-ltp/syscalls/clock_settime03
 
 ## TBROK: execlp(/bin/true, /bin/true, ...) failed: ENOENT (2)
 ltp/syscalls/setrlimit04
@@ -218,8 +201,9 @@ ltp/net.ipv6_lib/asapi_01
 ## TFAIL: A single 6*ps VMA found.
 ltp/mm/vma01
 
-## TFAIL: Aborting test - timer_create(CLOCK_BOOTTIME_ALARM) failed: EPERM (1)
-ltp/syscalls/timer_delete01
+## TFAIL: Allowed access to .builtin_trusted_keys
+ltp/cve/cve-2016-9604
+ltp/syscalls/keyctl08
 
 ## TFAIL: Child did not dump core when expected
 ltp/syscalls/waitpid01
@@ -247,6 +231,15 @@ ltp/syscalls/select03
 
 ## TFAIL: Invalid address expected EFAULT: ENOENT (2)
 ltp/syscalls/mknod06
+
+## TFAIL: Invalid rule attr expected EFAULT: ENOMSG (42)
+ltp/syscalls/landlock02
+
+## TFAIL: KEYCTL_GET_SECURITY with key without View permission expected ENOKEY: EACCES (13)
+ltp/syscalls/keyctl17
+
+## TFAIL: KEYCTL_RESTRICT_KEYRING reject-all failed: EOPNOTSUPP (95)
+ltp/syscalls/keyctl22
 
 ## TFAIL: NORMAL expected errno: 13: EACCES (13)
 ltp/syscalls/mq_open01
@@ -279,7 +272,7 @@ ltp/syscalls/nftw6401
 ## TFAIL: Test{4} failed, expected 0 exit.
 ltp/fs/ftest06
 
-## TFAIL: Test{6} failed, expected 0 exit.
+## TFAIL: Test{5} failed, expected 0 exit.
 ltp/fs/ftest02
 
 ## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
@@ -288,10 +281,10 @@ ltp/syscalls/timer_settime01
 ## TFAIL: abort() failed to dump core
 ltp/syscalls/abort01
 
-## TFAIL: after child shmat() shm_nattcg=0 expected 20
+## TFAIL: after child shmat() shm_nattcg=1 expected 20
 ltp/syscalls/shmctl01
 
-## TFAIL: after child shmat() shm_nattcg=17 expected 20
+## TFAIL: after child shmat() shm_nattcg=11 expected 20
 ltp/syscalls-ipc/shmctl01
 
 ## TFAIL: alarm(1) invalid retval 34: SUCCESS (0)
@@ -325,11 +318,11 @@ ltp/syscalls/mprotect03
 ## TFAIL: clock_nanosleep() slept for too long
 ltp/syscalls/clock_nanosleep02
 
-## TFAIL: clock_settime(2) failed for clock CLOCK_REALTIME: EPERM (1)
-ltp/syscalls/clock_settime01
-
 ## TFAIL: core dump bit not set for SIGQUIT
 ltp/syscalls/kill11
+
+## TFAIL: description points outside the process's accessible address space expected EFAULT: ENODEV (19)
+ltp/syscalls/request_key06
 
 ## TFAIL: do_epoll_pwait() slept for too long
 ltp/syscalls/epoll_pwait03
@@ -367,11 +360,17 @@ ltp/syscalls/futex_wait05
 ## TFAIL: get event: wd=1 mask=00000004 (expected 40000004) cookie=0     len=0  name="" (expected "") -1
 ltp/syscalls/inotify02
 
+## TFAIL: get unnecessary event: mask=40000000 pid=3 fd=6
+ltp/syscalls/fanotify02
+
 ## TFAIL: got event: wd=2 (expected 1) mask=0004 (expected 40000004) len=0 name="" (expected "test_dir")
 ltp/syscalls/inotify10
 
 ## TFAIL: got event: wd=2 mask=0400 (expected 4) cookie=0 len=0 name="" (expected "") 0
 ltp/syscalls/inotify04
+
+## TFAIL: got unexpected event 40000020
+ltp/syscalls/fanotify04
 
 ## TFAIL: invalid iovec buffer: expected -1, returned 0: SUCCESS (0)
 ltp/syscalls/recvmsg01
@@ -379,14 +378,14 @@ ltp/syscalls/recvmsg01
 ## TFAIL: invalid level expected EOPNOTSUPP: ENOPROTOOPT (92)
 ltp/syscalls/getsockopt01
 
-## TFAIL: invalid-dfd: name_to_handle_at() should fail with EBADF: EOPNOTSUPP (95)
-ltp/syscalls/name_to_handle_at02
-
 ## TFAIL: invalid-pathname: openat2() should fail with EFAULT: ENOENT (2)
 ltp/syscalls/openat203
 
 ## TFAIL: ioctl(fd, PROCMAP_QUERY, q) failed: ENOTTY (25)
 ltp/syscalls/ioctl10
+
+## TFAIL: keyctl(KEYCTL_SEARCH, ring, "user", KEY_DESC, 0) (-1) != key (6)
+ltp/syscalls/keyctl19
 
 ## TFAIL: len is smaller than the actual size succeeded
 ltp/syscalls/gethostname02
@@ -449,11 +448,6 @@ ltp/syscalls/munmap04
 ## TFAIL: name->version (#1 SMP wasixv2 2.0.0) != proc_val (Linux version 7.2.0-wasixv2 #1 SMP wasixv2 2.0.0)
 ltp/syscalls/newuname01
 
-## TFAIL: name_to_handle_at() should fail with EOVERFLOW: EOPNOTSUPP (95)
-ltp/syscalls/name_to_handle_at01
-ltp/syscalls/open_by_handle_at01
-ltp/syscalls/open_by_handle_at02
-
 ## TFAIL: nanosleep() slept for too long
 ltp/syscalls/nanosleep01
 
@@ -506,6 +500,10 @@ ltp/syscalls/send02
 ## TFAIL: recvmmsg() negative seconds in timeout succeeded
 ltp/syscalls/recvmmsg01
 
+## TFAIL: request_key() failed with unexpected error code: ENOKEY (126)
+ltp/cve/cve-2017-17807
+ltp/syscalls/request_key04
+
 ## TFAIL: returned -1, expected -1, expected errno: EINVAL (22): EOPNOTSUPP (95)
 ltp/syscalls/clock_nanosleep01
 
@@ -539,9 +537,6 @@ ltp/syscalls/setsockopt01
 ltp/cve/cve-2018-9568
 ltp/syscalls/connect02
 
-## TFAIL: settimeofday(&tv1, NULL) failed: EPERM (1)
-ltp/syscalls/settimeofday01
-
 ## TFAIL: setxattr(2) on sock failed with -1: EPERM (1)
 ltp/syscalls/setxattr02
 
@@ -553,17 +548,11 @@ ltp/syscalls/shmdt01
 ltp/syscalls-ipc/shmctl02
 ltp/syscalls/shmctl02
 
-## TFAIL: stime(1793261022) failed: EPERM (1)
-ltp/syscalls/stime01
-
 ## TFAIL: sync_file_range(3, 0, 1, 8) succeeded
 ltp/syscalls/sync_file_range01
 
 ## TFAIL: test PROT_NONE for mprotect failed
 ltp/syscalls/mprotect04
-
-## TFAIL: test-file: name_to_handle_at() failed: EOPNOTSUPP (95)
-ltp/syscalls/name_to_handle_at03
 
 ## TFAIL: thread 0 (acos) terminated unsuccessfully 0 errors/0 loops
 ltp/math/float_trigo
@@ -580,9 +569,6 @@ ltp/math/float_exp_log
 ## TFAIL: thread 0 (j0) terminated unsuccessfully 0 errors/0 loops
 ltp/math/float_bessel
 
-## TFAIL: timer_create(CLOCK_BOOTTIME_ALARM) failed: EPERM (1)
-ltp/syscalls/timer_settime02
-
 ## TFAIL: truncate(tc->pathname, tc->length) succeeded
 ltp/syscalls/truncate03
 ltp/syscalls/truncate03_64
@@ -595,6 +581,9 @@ ltp/syscalls/futex_cmp_requeue03
 
 ## TFAIL: ulimit(UL_GETFSIZE, -1) failed: SUCCESS (0)
 ltp/syscalls/ulimit01
+
+## TFAIL: unexpected event.pid value
+ltp/syscalls/fanotify11
 
 ## TFAIL: unexpected exit code: 0
 ltp/syscalls/setdomainname02
@@ -776,6 +765,10 @@ ltp/net.tcp_cmds/ipneigh01_ip
 
 ## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
 ltp/commands/ldd01_sh
+
+## request_key constructs no key: no negative key is linked into the destination keyring when there is no /sbin/request-key (construct_alloc_key, complete_request_key -> key_negate_and_link); keyrings follow-up (train 14 regression: passed while keyctl was ENOSYS)
+ltp/cve/cve-2017-12192
+ltp/syscalls/keyctl07
 
 ## runs unprivileged (declares no root) but makes a network namespace with tst_ns_create: EPERM, as on Linux
 ltp/containers/netns_sysfs

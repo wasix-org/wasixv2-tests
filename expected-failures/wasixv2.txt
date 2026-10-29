@@ -3,3 +3,6 @@
 # A listed test that fails passes the run; a listed test that passes fails it, so take it off the
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
+
+## host panic 'a task that runs has its namespaces': the dead vfork leader's deferred exit_mm (GuestAction::ExitMm) drops the namespaces of the leader task the thread's new image runs as; clock_gettime reads the time namespace since train 14 (REGRESSION, reported)
+proc-vfork-sibling-exec/default

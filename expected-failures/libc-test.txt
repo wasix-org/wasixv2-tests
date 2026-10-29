@@ -29,7 +29,7 @@ libc-test/api/sys_wait
 ## build: error: use of undeclared identifier '_SC_XOPEN_UUCP'
 libc-test/api/unistd
 
-## build: wasm-ld: error: /tmp/.tmpMprb6i/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmpg5buJk/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## dlopen failed
