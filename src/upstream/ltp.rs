@@ -384,8 +384,6 @@ fn metadata_reason(test: &serde_json::Value) -> Option<String> {
         || has("filesystems")
     {
         "needs block devices or real filesystems; the module owns its whole filesystem"
-    } else if has("taint_check") {
-        "checks the kernel's taint flags"
     } else if has("needs_hugetlbfs") || has("hugepages") {
         "needs huge pages, which wasm memory does not have"
     } else if has("needs_cgroup_ctrls") || has("needs_cgroup_ver") || has("needs_cgroup_nsdelegate")
