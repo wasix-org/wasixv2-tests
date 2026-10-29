@@ -16,6 +16,9 @@ ltp/syscalls/adjtimex03
 ltp/syscalls/clock_adjtime01
 ltp/syscalls/clock_adjtime02
 
+## ENOSYS: Kcmp
+ltp/syscalls/kcmp03
+
 ## ENOSYS: Reboot
 ltp/syscalls/reboot01
 ltp/syscalls/reboot02
@@ -23,7 +26,7 @@ ltp/syscalls/reboot02
 ## ITIMER_REAL is not 0 at the start: the test runs in the LTP library's process (no fork_testrun on wasixv2), so it reads the library's own alarm(); ITIMER_VIRTUAL and ITIMER_PROF pass
 ltp/syscalls/getitimer01
 
-## TBROK: CLONE_PARENT clone() failed: ENOSYS (38)
+## TBROK: CLONE_THREAD clone() failed: EINVAL: musl's clone() refuses CLONE_THREAD, as it does natively; the cases before it pass
 ltp/syscalls/clone08
 
 ## TBROK: Cannot parse kernel .config
@@ -43,9 +46,6 @@ ltp/fs_perms_simple/fs_perms03
 ltp/fs_perms_simple/fs_perms12
 ltp/fs_perms_simple/fs_perms13
 ltp/fs_perms_simple/fs_perms14
-
-## TBROK: Could not lock memory using mlockall(): ENOMEM (12)
-ltp/syscalls/munlockall01
 
 ## TBROK: Expected 1 conversions got 0 FILE '/proc/self/maps'
 ltp/syscalls/mmap04
@@ -83,24 +83,11 @@ ltp/syscalls/getrusage03
 ## TBROK: Failed to copy '/opt/ltp/testcases/bin/pipe2_02_child' to '.'
 ltp/syscalls/pipe2_02
 
-## TBROK: Failed to open '/proc/sys/kernel/pid_max' for writing: EPERM (1)
-ltp/syscalls/fork13
-
-## TBROK: Failed to open '/proc/sys/vm/overcommit_memory' for writing: EPERM (1)
-ltp/mm/max_map_count
-
 ## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_queued_events' for reading: ENOENT (2)
 ltp/syscalls/inotify05
 
 ## TBROK: Failed to open FILE '/proc/sys/fs/inotify/max_user_instances' for reading: ENOENT (2)
 ltp/syscalls/inotify06
-
-## TBROK: Failed to open FILE '/proc/sys/fs/nr_open' for writing: EPERM (1)
-ltp/syscalls/unshare03
-
-## TBROK: Failed to open FILE '/proc/sys/fs/pipe-max-size' for writing: EPERM (1)
-ltp/syscalls/fcntl35
-ltp/syscalls/fcntl35_64
 
 ## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
 ltp/syscalls/pipe15
@@ -119,12 +106,6 @@ ltp/syscalls/msgstress01
 ## TBROK: Failed to open FILE '/proc/sys/kernel/shmmax' for reading: ENOENT (2)
 ltp/syscalls-ipc/shmctl03
 ltp/syscalls/shmctl03
-
-## TBROK: Failed to open FILE '/proc/sys/net/ipv4/conf/lo/tag' for reading: ENOENT (2)
-ltp/syscalls/clone09
-
-## TBROK: Failed to open FILE '/proc/sys/vm/overcommit_memory' for writing: EPERM (1)
-ltp/mm/oom01
 
 ## TBROK: Failed to open FILE '/sys/class/net/lo/mtu' for reading: ENOENT (2)
 ltp/cve/cve-2018-5803
@@ -190,12 +171,8 @@ ltp/syscalls/ioctl07
 ## TBROK: ip/ifconfig failed to bring up loop back device
 ltp/syscalls/sendmsg01
 
-## TBROK: ltp_clone failed: ENOSYS (38)
-ltp/syscalls/ioctl_ns01
+## TBROK: ltp_clone failed: EPERM (1)
 ltp/syscalls/ioctl_ns06
-
-## TBROK: ltp_clone: ENOSYS (38)
-ltp/syscalls/setns02
 
 ## TBROK: mmap(0,262144,PROT_READ | PROT_WRITE | PROT_EXEC(7),1,3,0) failed: EACCES (13)
 ltp/syscalls/mincore02
@@ -306,13 +283,13 @@ ltp/fs/ftest06
 ## TFAIL: Test{6} failed, expected 0 exit.
 ltp/fs/ftest02
 
-## TFAIL: Timer CLOCK_THREAD_CPUTIME_ID expired too early
+## TFAIL: Timer CLOCK_PROCESS_CPUTIME_ID expired too early
 ltp/syscalls/timer_settime01
 
 ## TFAIL: abort() failed to dump core
 ltp/syscalls/abort01
 
-## TFAIL: after child shmat() shm_nattcg=3 expected 20
+## TFAIL: after child shmat() shm_nattcg=0 expected 20
 ltp/syscalls-ipc/shmctl01
 
 ## TFAIL: after child shmat() shm_nattcg=5 expected 20
@@ -345,15 +322,6 @@ ltp/syscalls/clock_nanosleep02
 ## TFAIL: clock_settime(2) failed for clock CLOCK_REALTIME: EPERM (1)
 ltp/syscalls/clock_settime01
 
-## TFAIL: clone() Failed: ENOSYS (38)
-ltp/syscalls/kcmp03
-
-## TFAIL: clone() failed: ENOSYS (38)
-ltp/syscalls/clone01
-
-## TFAIL: clone() failed: TEST_ERRNO=ENOSYS(38): Function not implemented
-ltp/syscalls/clone02
-
 ## TFAIL: core dump bit not set for SIGQUIT
 ltp/syscalls/kill11
 
@@ -377,10 +345,6 @@ ltp/syscalls/socket01
 
 ## TFAIL: fchmod() on original FD succeeded
 ltp/syscalls/open13
-
-## TFAIL: fcntl get original f_owner_ex info failed: TEST_ERRNO=EINVAL(22): Invalid argument
-ltp/syscalls/fcntl31
-ltp/syscalls/fcntl31_64
 
 ## TFAIL: fcntl(1, F_SETLK, flock) expected EINVAL: EBADF (9)
 ltp/syscalls/fcntl13
@@ -451,15 +415,6 @@ ltp/syscalls/fcntl21_64
 ltp/syscalls/lstat02
 ltp/syscalls/lstat02_64
 
-## TFAIL: ltp_clone(SIGCHLD, child_environ, NULL, CHILD_STACK_SIZE, child_stack) failed: ENOSYS (38)
-ltp/syscalls/clone06
-
-## TFAIL: ltp_clone(SIGCHLD, child_fn, NULL, CHILD_STACK_SIZE, child_stack) failed: ENOSYS (38)
-ltp/syscalls/clone03
-
-## TFAIL: ltp_clone(SIGCHLD, do_child, NULL, CHILD_STACK_SIZE, child_stack) failed: ENOSYS (38)
-ltp/syscalls/clone07
-
 ## TFAIL: madvise succeeded unexpectedly
 ltp/syscalls/madvise02
 
@@ -496,9 +451,6 @@ ltp/syscalls/msgsnd02
 ## TFAIL: msgsnd(0, 0x808ff8, 1024, 0) expected EIDRM: EINVAL (22)
 ltp/syscalls-ipc/msgsnd06
 ltp/syscalls/msgsnd06
-
-## TFAIL: msync succeeded unexpectedly
-ltp/syscalls/msync03
 
 ## TFAIL: munmap(maps[2] + page_sz, page_sz) succeeded
 ltp/syscalls/munmap04
@@ -563,7 +515,7 @@ ltp/syscalls/send02
 ## TFAIL: recvmmsg() negative seconds in timeout succeeded
 ltp/syscalls/recvmmsg01
 
-## TFAIL: returned -1, expected -1, expected errno: EINVAL (22): EFAULT (14)
+## TFAIL: returned -1, expected -1, expected errno: EINVAL (22): EOPNOTSUPP (95)
 ltp/syscalls/clock_nanosleep01
 
 ## TFAIL: retval (0) != ERANGE (34)
@@ -609,7 +561,7 @@ ltp/syscalls/shmdt01
 ltp/syscalls-ipc/shmctl02
 ltp/syscalls/shmctl02
 
-## TFAIL: stime(1793230501) failed: EPERM (1)
+## TFAIL: stime(1793238185) failed: EPERM (1)
 ltp/syscalls/stime01
 
 ## TFAIL: sync_file_range(3, 0, 1, 8) succeeded
@@ -802,8 +754,8 @@ ltp/dio/dio10
 ltp/cve/cve-2017-18344
 ltp/syscalls/timer_create03
 
-## exit status -1
-ltp/fs/rwtest03
+## child_fn() has no prototype (K&R), so clone's call of it through int (*)(void *) is an indirect call type mismatch, which traps on wasm; with a prototype the test passes
+ltp/syscalls/clone02
 
 ## exit status 127
 ltp/syscalls/ioctl02
@@ -829,18 +781,19 @@ ltp/sched/trace_sched01
 ltp/syscalls/fcntl33
 ltp/syscalls/fcntl33_64
 
-## listmount checks mnt_id_req's contents before it can read it (EINVAL for an unreadable request instead of EFAULT) and accepts unknown flags
-ltp/syscalls/listmount04
-
 ## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
 ltp/commands/ldd01_sh
 
-## the LTP fork's in-process mode (no fork_testrun on wasixv2) frees the guarded buffers (tst_free_all) after the first iteration or variant; later ones use the stale pointers, which now fault (EFAULT) as on Linux for unmapped or PROT_NONE memory; follow-up: fix the LTP fork
-ltp/syscalls/accept4_01
-ltp/syscalls/chmod01
-ltp/syscalls/clock_getres01
-ltp/syscalls/sendmmsg01
-ltp/syscalls/setrlimit06
+## the initial mounts are private as on a bare kernel; the test needs a systemd-style shared /tmp
+ltp/commands/unshare01_sh
+
+## the sysctl overcommit_memory is not implemented: the write fails EINVAL at close
+ltp/mm/max_map_count
+ltp/mm/oom01
+
+## the sysctl pipe-max-size is not implemented: the write fails EINVAL at close
+ltp/syscalls/fcntl35
+ltp/syscalls/fcntl35_64
 
 ## timeout
 ltp/dma_thread_diotest/dma_thread_diotest1
@@ -856,6 +809,7 @@ ltp/fs/gf29
 ltp/fs/iogen01
 ltp/fs/rwtest01
 ltp/fs/rwtest02
+ltp/fs/rwtest03
 ltp/fs/rwtest04
 ltp/mm/mtest06
 ltp/mm/mtest06_3
@@ -864,13 +818,5 @@ ltp/syscalls/rt_sigtimedwait01
 ltp/syscalls/sigtimedwait01
 ltp/syscalls/sigwaitinfo01
 
-## timeout: umounting a mount that propagation or an rbind copied into its own subtree fails with EBUSY ("target is busy"), and the test's cleanup then never ends
-ltp/fs_bind/fs_bind_cloneNS05_sh
-ltp/fs_bind/fs_bind_cloneNS07_sh
-ltp/fs_bind/fs_bind_move21_sh
-ltp/fs_bind/fs_bind_move22_sh
-ltp/fs_bind/fs_bind_rbind34_sh
-ltp/fs_bind/fs_bind_rbind36_sh
-
-## unshare --mount --propagation shared: a bind mount made in the new namespace does not propagate back to the original one (the copies of shared mounts are not peers of their originals)
-ltp/commands/unshare01_sh
+## timeout: creates pid_max processes
+ltp/syscalls/fork13
