@@ -106,10 +106,6 @@ ltp/fs_perms_simple/fs_perms03
 ## TFAIL: pen dev pagemap failed: ENOENT (2)
 ltp/syscalls/mmap12
 
-## TFAIL: raw brk cannot expand into adjacent LTP fork-child mmap pages; restored fork_testrun reaches the syscall variant after libc brk TCONF (mm/mmap.c sys_brk collision rule)
-ltp/syscalls/brk01
-ltp/syscalls/brk02
-
 ## TFAIL: sbrk(8192) returned 0xffffffff failed: ENOMEM (12)
 ltp/syscalls/sbrk01
 
