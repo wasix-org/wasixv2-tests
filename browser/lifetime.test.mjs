@@ -22,8 +22,8 @@ test("RSS collection dips are reported without mistaking them for peak growth", 
     assert.equal(bounds.rssPeakGrowthBytes, 0);
 });
 for (const [field, increase, message] of [
-    ["heapBytes", 9 * 1024 ** 2, /heap/], ["workers", 1, /worker pool/],
-    ["rendererRssBytes", 257 * 1024 ** 2, /RSS/], ["rendererVirtualBytes", 129 * 1024 ** 3, /reservations/],
+    ["heapBytes", 17 * 1024 ** 2, /heap/], ["workers", 1, /worker pool/],
+    ["rendererRssBytes", 513 * 1024 ** 2, /RSS/], ["rendererVirtualBytes", 17 * 1024 ** 3, /reservations/],
 ]) {
     test(`${field} growth fails persistent-runtime acceptance`, () => {
         const data = samples();
@@ -31,3 +31,12 @@ for (const [field, increase, message] of [
         assert.throws(() => checkLifetimeBounds(data, true), message);
     });
 }
+test("debug-artifact budgets include staging high-water but bound total RSS", () => {
+    const data = samples();
+    data.at(-1).heapBytes += 16 * 1024 ** 2;
+    data.at(-1).rendererRssBytes += 512 * 1024 ** 2;
+    data.at(-1).rendererVirtualBytes += 16 * 1024 ** 3;
+    assert.doesNotThrow(() => checkLifetimeBounds(data, true));
+    for (const sample of data) sample.rendererRssBytes = 2 * 1024 ** 3 + 1;
+    assert.throws(() => checkLifetimeBounds(data, true), /RSS exceeded/);
+});
