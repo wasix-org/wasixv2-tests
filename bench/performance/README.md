@@ -48,4 +48,6 @@ other v2 cases. Guest loopback stays within the guest network namespace.
 `v1` means a v1-built program. When it runs on the v2 CLI, that is **v1 ABI on
 the v2 kernel**, not the legacy v1 runtime; label these comparisons accurately.
 For legacy-runtime comparisons run the same v1 binary with the old CLI separately.
+The runner passes `--net`: the legacy CLI requires explicit network access;
+the v2 CLI accepts the flag and already provides the network.
 No prebuilt Wasm belongs in this repository.

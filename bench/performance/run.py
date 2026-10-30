@@ -77,7 +77,7 @@ def main():
                         env["BENCH_TMPDIR"] = "/dev/shm"
                     else:
                         command[3] = f"/bench/{binary.name}"
-                        command = [wasmer, "run", f"--{backend}", "--compiler-threads", "3", "--no-tty",
+                        command = [wasmer, "run", "--net", f"--{backend}", "--compiler-threads", "3", "--no-tty",
                                    "--volume", f"{out}:/bench", *command[:1], "--", *command[1:]]
                     command = ["nice", "-n", "19", "taskset", "-c", args.cpus, *command]
                     row = {"config": f"{config}/{backend}", "workload": name,
