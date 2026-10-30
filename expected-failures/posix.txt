@@ -31,7 +31,7 @@ posix/conformance/interfaces/sem_unlink/4-1
 ## UNRESOLVED: Failed: execl() errno: No such file or directory
 posix/conformance/interfaces/sigaltstack/9-1
 
-## UNRESOLVED: Test upstream/ltp-27e0e1b5f4ae/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
+## UNRESOLVED: Test upstream/ltp-525608d49a6f/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
 
 ## build: error: call to undeclared function 'pthread_rwlockattr_setkind_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declara

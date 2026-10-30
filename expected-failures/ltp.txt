@@ -10,6 +10,11 @@ ltp/syscalls/prot_hsymlinks
 ## TBROK: Test killed! (timeout?)
 ltp/syscalls/futex_wait01
 
+## TBROK: Unexpected error: CommitLimit < Committed_AS
+ltp/mm/overcommit_memory04
+ltp/mm/overcommit_memory05
+ltp/mm/overcommit_memory06
+
 ## TBROK: got unexpected signal: 65280
 ltp/syscalls/mprotect02
 
@@ -30,11 +35,11 @@ ltp/syscalls/mremap06
 ltp/cve/cve-2020-14386
 ltp/syscalls/sendto03
 
+## TBROK: unexpected VMA found.
+ltp/mm/vma01
+
 ## TBROK: unshare(131072) failed: EPERM (1)
 ltp/syscalls/statmount03
-
-## TFAIL: A single 6*ps VMA found.
-ltp/mm/vma01
 
 ## TFAIL: ARP neighbor cache state is missing (ipneigh01.sh stress auto-creation); the fork fixes ping option order, but /proc/net/arp is absent and the address is not listed
 ltp/net.tcp_cmds/ipneigh01_arp
@@ -70,9 +75,6 @@ ltp/mm/mmapstress02
 ## TFAIL: alloc failed, expected to pass
 ltp/mm/overcommit_memory01
 ltp/mm/overcommit_memory03
-ltp/mm/overcommit_memory04
-ltp/mm/overcommit_memory05
-ltp/mm/overcommit_memory06
 
 ## TFAIL: child returned unexpected status
 ltp/syscalls/mprotect03
@@ -124,10 +126,6 @@ ltp/syscalls/futex_cmp_requeue03
 
 ## TFAIL: unexpected value in map, i=0,val=0x0
 ltp/mm/mmapstress04
-
-## exit status -1
-ltp/cve/cve-2026-53362
-ltp/syscalls/setsockopt11
 
 ## mseal validates ranges but VM_SEALED is unavailable on ILP32 (Linux include/linux/mm.h); PkeyAlloc is diagnostic noise
 ltp/syscalls/mseal01
