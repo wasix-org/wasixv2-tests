@@ -51,13 +51,6 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
         if (browserName === "chromium") cdp = await browser.newBrowserCDPSession();
         page = await browser.newPage();
         await page.goto(server.url + "/harness/index.html");
-        if (cdp) {
-            // Executing workers with an attached debugger can strand Chromium
-            // during nested-worker termination, even in a pure-JS reduction.
-            // Count actual browser targets below, including unattached ones.
-            const pageCdp = await page.context().newCDPSession(page);
-            await pageCdp.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
-        }
         report.capabilities = await page.evaluate(() => globalThis.probeLane());
         await page.exposeFunction("recordLifetime", async ({ result, heapBytes, stats, heartbeat }) => {
             if (entry === "run_fixture") checkResult(fixture, result);
