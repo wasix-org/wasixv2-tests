@@ -178,3 +178,27 @@ If any pinned source repository requires private access, configure
 `WASIXV2_TOOLCHAIN_TOKEN` with read access to those repositories. Missing tools,
 credentials, fixture builds and runtime capabilities fail the job; none are
 converted to skips or expected failures. No prebuilt guest Wasm is checked in.
+
+## Browser matrix and fork stress
+
+Select a required no-JSPI lane with `--browser chromium|firefox|webkit` (default
+Chromium). Install the lockfile-pinned engines with
+`npx playwright install chromium firefox webkit` from this directory. `CHROME`,
+`FIREFOX` and `WEBKIT` optionally select explicit executables for their matching
+engine. Browser name/version, page/worker capabilities and every failure remain
+in each run's artifacts; unsupported capabilities fail the lane.
+
+```sh
+node browser/run.mjs --browser firefox --manifest /exports/manifest.json \
+  --runtime /runtime/bundle --artifacts /results/firefox
+node browser/run.mjs --browser webkit --manifest /exports/manifest.json \
+  --runtime /runtime/bundle --artifacts /results/webkit
+node browser/run.mjs --manifest /exports/manifest.json --runtime /runtime/bundle \
+  --filter proc-fork/ --repeat 100 --artifacts /results/fork-stress
+```
+
+Filtering uses a literal name substring and an empty selection fails. Repetition
+preserves all fixture metadata and expectations; each iteration gets a fresh
+browser context/runtime heap and distinct artifacts. Stress therefore exercises
+worker startup, fork and complete TLS/worker retirement each time. Use ordinary
+same-runtime lifecycle tests separately to verify worker reuse.
