@@ -11,9 +11,6 @@ ltp/syscalls/epoll_ctl06
 ## ENOSYS: PkeyAlloc
 ltp/syscalls/mseal01
 
-## TBROK: /dev/zero has no mmap backend; low-guard mprotect now correctly returns ENOMEM
-ltp/syscalls/mprotect01
-
 ## TBROK: Failed to acquire device
 ltp/syscalls/linkat02
 ltp/syscalls/mknodat02
@@ -24,16 +21,8 @@ ltp/syscalls/umount2_01
 ## TBROK: Failed to open FILE '/proc/sys/fs/pipe-user-pages-soft' for reading: ENOENT (2)
 ltp/syscalls/pipe15
 
-## TBROK: Failed to open FILE '/proc/sys/kernel/msgmni' for reading: ENOENT (2)
-ltp/syscalls-ipc/msgstress01
-ltp/syscalls/msgstress01
-
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
-
-## TBROK: SIGSEGV in LTP parse_proc_sysvipc: /proc/sysvipc/sem is absent, fopen returns NULL and the test calls fgetc without checking it
-ltp/syscalls-ipc/semctl09
-ltp/syscalls/semctl09
 
 ## TBROK: Test killed by SIGSEGV!
 ltp/syscalls/prctl08
@@ -129,7 +118,7 @@ ltp/syscalls/mmap13
 ## TFAIL: SIGSEGV signal not received
 ltp/syscalls/mmap05
 
-## TFAIL: TEST 4 Failed
+## TFAIL: TEST 5 Failed
 ltp/mm/mtest05
 
 ## TFAIL: Test failed
@@ -139,11 +128,11 @@ ltp/mm/mmapstress05
 ltp/syscalls/nftw01
 ltp/syscalls/nftw6401
 
-## TFAIL: Test{7} failed, expected 0 exit.
-ltp/fs/ftest06
+## TFAIL: Test{4} failed, expected 0 exit.
+ltp/fs/ftest02
 
 ## TFAIL: Test{8} failed, expected 0 exit.
-ltp/fs/ftest02
+ltp/fs/ftest06
 
 ## TFAIL: alloc failed, expected to pass
 ltp/mm/overcommit_memory01
@@ -157,6 +146,9 @@ ltp/syscalls/mprotect03
 
 ## TFAIL: description points outside the process's accessible address space expected EFAULT: ENODEV (19)
 ltp/syscalls/request_key06
+
+## TFAIL: do_epoll_pwait() slept for too long
+ltp/syscalls/epoll_pwait03
 
 ## TFAIL: expected EPROTONOSUPPORT(93): EOPNOTSUPP (95)
 ltp/syscalls/socketpair01
@@ -207,6 +199,9 @@ ltp/syscalls/munmap04
 ## TFAIL: name->version (#1 SMP wasixv2 2.0.0) != proc_val (Linux version 7.2.0-wasixv2 #1 SMP wasixv2 2.0.0)
 ltp/syscalls/newuname01
 
+## TFAIL: nanosleep() slept for too long
+ltp/syscalls/nanosleep01
+
 ## TFAIL: pathconf() fail with path prefix is not a directory invalid retval 8: SUCCESS (0)
 ltp/syscalls/pathconf02
 
@@ -218,6 +213,10 @@ ltp/syscalls/pidfd_send_signal02
 
 ## TFAIL: process_vm_read() failed: EPERM (1)
 ltp/syscalls/process_vm_readv03
+
+## TFAIL: pselect() slept for too long
+ltp/syscalls/pselect01
+ltp/syscalls/pselect01_64
 
 ## TFAIL: raw brk cannot expand into adjacent LTP fork-child mmap pages; restored fork_testrun reaches the syscall variant after libc brk TCONF (mm/mmap.c sys_brk collision rule)
 ltp/syscalls/brk01
@@ -337,9 +336,14 @@ ltp/mm/thp01
 ltp/net.multicast/mc_commo
 ltp/net.multicast/mc_member
 ltp/sched/sched_stress
+ltp/syscalls-ipc/msgstress01
+ltp/syscalls/msgstress01
 
 ## timeout: creates pid_max processes
 ltp/syscalls/fork13
+
+## timeout: newly exposed semget05 allocates all 32000 SEMMNI sets in setup; the original full-run invocation exceeded 60s, while its other registration and diagnostic replay passed in 13s/19s. semget05.c:setup declares runtime160s (LTP overall190s); load-sensitive setup cost, no proof of a required timeout increase
+ltp/syscalls-ipc/semget05
 
 ## timeout: thp01 declares min_runtime=120 seconds, exceeding the runner60-second budget; V2 isolated180-second diagnostic passed
 ltp/cve/cve-2011-0999

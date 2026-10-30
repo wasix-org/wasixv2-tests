@@ -37,7 +37,7 @@ posix/conformance/interfaces/mmap/11-3
 ## FAIL: Test FAILED: The cause of the signal hasn't been stored in the si_code
 posix/conformance/interfaces/sigwaitinfo/6-1
 
-## FAIL: Test upstream/ltp-733f1688a26e/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c FAILED: Test failed in child
+## FAIL: Test upstream/ltp-801f6ad4b8ec/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c FAILED: Test failed in child
 posix/conformance/interfaces/sem_unlink/3-1
 
 ## FAIL: Testing with user 'nobody' (uid: 65534)
@@ -59,13 +59,10 @@ posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-2
 posix/conformance/interfaces/pthread_mutexattr_getprotocol/1-2
 posix/conformance/interfaces/pthread_mutexattr_setprotocol/1-1
 
-## UNRESOLVED: Failed to map memory: No such device (19)
-posix/conformance/interfaces/munmap/2-1
-
 ## UNRESOLVED: Failed: execl() errno: No such file or directory
 posix/conformance/interfaces/sigaltstack/9-1
 
-## UNRESOLVED: Test upstream/ltp-733f1688a26e/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
+## UNRESOLVED: Test upstream/ltp-801f6ad4b8ec/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
 
 ## UNRESOLVED: The difference between the processes is not representative.
