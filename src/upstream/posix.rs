@@ -161,6 +161,10 @@ fn dir_flags(suite: &Suite, dir: &Path, file: &str) -> Vec<String> {
 
 impl Test {
     pub fn run(&self, suite: &Suite) -> Result<Outcome, Failure> {
+        let suite = &Suite {
+            timeout: posix_budget(suite.timeout),
+            ..suite.clone()
+        };
         let prepared = PREPARED
             .get_or_init(|| prepare(suite).map_err(|e| format!("{e:#}")))
             .as_ref()
@@ -224,6 +228,11 @@ impl Test {
     }
 }
 
+fn posix_budget(configured: std::time::Duration) -> std::time::Duration {
+    // Upstream bin/run-tests.sh defaults TIMEOUT_VAL to 300 seconds.
+    configured.max(std::time::Duration::from_secs(300))
+}
+
 fn invocation(module: PathBuf) -> Invocation {
     // Tests such as sigaltstack/9-1 exec argv[0]. Keep that absolute path visible
     // inside the guest, as it is under the upstream native runner.
@@ -270,6 +279,20 @@ mod tests {
         assert!(inv.volumes.iter().any(|(host, guest)| {
             host == module.parent().unwrap() && guest == "/build/posix/test"
         }));
+    }
+
+    #[test]
+    fn upstream_timeout_allows_the_full_timer_settime_workload() {
+        use std::time::Duration;
+        // bin/run-tests.sh defaults TIMEOUT_VAL to 300; timer_settime/5-3 can sleep 30 * 5s.
+        assert_eq!(
+            super::posix_budget(Duration::from_secs(60)),
+            Duration::from_secs(300)
+        );
+        assert_eq!(
+            super::posix_budget(Duration::from_secs(600)),
+            Duration::from_secs(600)
+        );
     }
 
     #[test]
