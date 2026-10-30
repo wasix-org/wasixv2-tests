@@ -253,6 +253,14 @@ guest stack and asyncify/data; shared-memory allocator high-water cannot shrink.
 These explicit allowances cover the large debug module and JIT while rejecting
 per-run heap growth. Preserve reports from failed budgets when comparing runs.
 
+The Chromium execution lane disables worker debugger auto-attachment. Attached
+worker inspection can strand Chromium shutdown even in a pure-JS nested-worker
+control forwarding the runtime Module. The runner counts browser-wide CDP worker
+targets, including unattached targets, and checks a positive live inventory before
+requiring zero after shutdown. Detached Playwright handles never establish
+reclamation. Keep failed debugger-attached reports as a separate host limitation;
+Firefox retains its worker lifecycle inventory.
+
 ```sh
 CHROME=/usr/bin/google-chrome node browser/lifetime.mjs \
   /runtime /export/manifest.json /new/results 500 chromium

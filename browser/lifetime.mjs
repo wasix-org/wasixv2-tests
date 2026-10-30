@@ -8,6 +8,11 @@ import { serve } from "./server.mjs";
 import { browserOptions } from "./matrix.mjs";
 import { checkResult, validateManifest, within } from "./results.mjs";
 
+export async function liveWorkerCount(page, cdp) {
+    if (cdp) return (await cdp.send("Target.getTargets")).targetInfos.filter(({ type }) => type === "worker").length;
+    return page.workers().length;
+}
+
 export function checkLifetimeBounds(samples, chromium) {
     const tail = samples.filter(({ iteration }) => iteration >= 25);
     assert(tail.length >= 2, "need warmup and tail samples");
@@ -46,6 +51,13 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
         if (browserName === "chromium") cdp = await browser.newBrowserCDPSession();
         page = await browser.newPage();
         await page.goto(server.url + "/harness/index.html");
+        if (cdp) {
+            // Executing workers with an attached debugger can strand Chromium
+            // during nested-worker termination, even in a pure-JS reduction.
+            // Count actual browser targets below, including unattached ones.
+            const pageCdp = await page.context().newCDPSession(page);
+            await pageCdp.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+        }
         report.capabilities = await page.evaluate(() => globalThis.probeLane());
         await page.exposeFunction("recordLifetime", async ({ result, heapBytes, stats, heartbeat }) => {
             if (entry === "run_fixture") checkResult(fixture, result);
@@ -54,7 +66,9 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
             else throw new Error("unknown lifetime entry " + entry);
             ++report.completed;
             if (report.completed === 1 || report.completed % 25 === 0 || report.completed === repeat) {
-                const sample = { iteration: report.completed, heapBytes, workers: stats.workers.length, copyRotations: stats.copyRotations, heartbeat };
+                const workerTargets = await liveWorkerCount(page, cdp);
+                assert(workerTargets >= stats.workers.length + 1, "worker inventory lost live runtime targets");
+                const sample = { iteration: report.completed, heapBytes, workers: stats.workers.length, workerTargets, copyRotations: stats.copyRotations, heartbeat };
                 if (cdp) {
                     let rss = 0, virtual = 0;
                     const { processInfo } = await cdp.send("SystemInfo.getProcessInfo");
@@ -137,9 +151,9 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
             report.bounds = checkLifetimeBounds(report.samples, Boolean(cdp));
         }
         await within((async () => {
-            while (page.workers().length) await new Promise(resolve => setTimeout(resolve, 10));
+            while (await liveWorkerCount(page, cdp)) await new Promise(resolve => setTimeout(resolve, 10));
         })(), 5000);
-        report.liveWorkersAfterStop = page.workers().length;
+        report.liveWorkersAfterStop = await liveWorkerCount(page, cdp);
         report.passed = true;
     } catch (error) {
         report.error = error.stack ?? String(error);
@@ -152,9 +166,9 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
         if (report.passed) {
             try {
                 await within((async () => {
-                    while (page.workers().length) await new Promise(resolve => setTimeout(resolve, 10));
+                    while (await liveWorkerCount(page, cdp)) await new Promise(resolve => setTimeout(resolve, 10));
                 })(), 5000);
-                report.liveWorkersAfterStop = page.workers().length;
+                report.liveWorkersAfterStop = await liveWorkerCount(page, cdp);
             } catch (cleanup) { report.passed = false; report.error += "\n" + cleanup; }
         }
     } finally {
