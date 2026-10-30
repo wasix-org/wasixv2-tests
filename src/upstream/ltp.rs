@@ -1210,6 +1210,9 @@ impl Test {
     /// group, and refuses pid 1, which this way is never the test. The trailing `exit` keeps bash
     /// from executing the last command in place of itself.
     fn in_shell(&self, userland: &Path, invocation: &mut Invocation) {
+        // runltp executes from testcases/bin; legacy helpers use execl("check_pe", ...).
+        // Modern shell tests move to their own TMPDIR during library setup.
+        invocation.cwd = Some("/opt/ltp/testcases/bin".to_owned());
         invocation.module = userland.join("bash");
         invocation.args = vec!["-c".to_owned(), format!("set -m; {}; exit $?", self.line)];
     }
@@ -1331,6 +1334,21 @@ mod tests {
             text.contains(".needs_root = 1"),
             "statmount03 unshares a mount namespace"
         );
+    }
+
+    #[test]
+    fn legacy_shell_helpers_resolve_from_the_installed_binary_directory() {
+        let test = super::Test {
+            name: "ltp/capability/cap_bounds".into(),
+            command: "run_capbounds.sh".into(),
+            args: vec![],
+            line: "run_capbounds.sh".into(),
+            root: true,
+            budget: std::time::Duration::from_secs(60),
+        };
+        let mut inv = super::Invocation::default();
+        test.in_shell(std::path::Path::new("/host/bin"), &mut inv);
+        assert_eq!(inv.cwd.as_deref(), Some("/opt/ltp/testcases/bin"));
     }
 
     #[test]
