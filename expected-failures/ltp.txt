@@ -26,9 +26,6 @@ ltp/syscalls/sendfile04_64
 ## TBROK: mremap() failed
 ltp/syscalls/mremap06
 
-## TBROK: process_vm_readv: EPERM
-ltp/syscalls/process_vm_readv02
-
 ## TBROK: setsockopt(3, 263, 10, 0x7fe938, 4) failed: EINVAL (22)
 ltp/cve/cve-2020-14386
 ltp/syscalls/sendto03
@@ -69,10 +66,6 @@ ltp/mm/mtest05
 
 ## TFAIL: Test failed
 ltp/mm/mmapstress02
-ltp/mm/mmapstress03
-ltp/mm/mmapstress05
-ltp/syscalls/nftw01
-ltp/syscalls/nftw6401
 
 ## TFAIL: alloc failed, expected to pass
 ltp/mm/overcommit_memory01
@@ -113,9 +106,6 @@ ltp/fs_perms_simple/fs_perms03
 ## TFAIL: pen dev pagemap failed: ENOENT (2)
 ltp/syscalls/mmap12
 
-## TFAIL: process_vm_read() failed: EPERM (1)
-ltp/syscalls/process_vm_readv03
-
 ## TFAIL: raw brk cannot expand into adjacent LTP fork-child mmap pages; restored fork_testrun reaches the syscall variant after libc brk TCONF (mm/mmap.c sys_brk collision rule)
 ltp/syscalls/brk01
 ltp/syscalls/brk02
@@ -130,9 +120,6 @@ ltp/syscalls/shmdt01
 ## TFAIL: test PROT_NONE for mprotect failed
 ltp/syscalls/mprotect04
 
-## TFAIL: tst_syscall(__NR_process_vm_writev, pid_alloc, &local, 1UL, &remote, 1UL, 0UL) failed: EPERM (1)
-ltp/syscalls/process_vm_writev02
-
 ## TFAIL: uaddr unmapped succeeded
 ltp/syscalls/futex_wake05
 
@@ -145,9 +132,6 @@ ltp/mm/mmapstress04
 ## exit status -1
 ltp/cve/cve-2026-53362
 ltp/syscalls/setsockopt11
-
-## exit status 127
-ltp/syscalls/ioctl02
 
 ## mseal validates ranges but VM_SEALED is unavailable on ILP32 (Linux include/linux/mm.h); PkeyAlloc is diagnostic noise
 ltp/syscalls/mseal01

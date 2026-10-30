@@ -3,6 +3,7 @@
 //#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no
 #define _GNU_SOURCE
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -44,5 +45,12 @@ int main(void) {
   assert(msync(shared, page, MS_SYNC) == 0);
   assert(munmap(private, page) == 0 && munmap(shared, page) == 0 &&
          munmap(other, page) == 0);
+  fd = open("/dev/zero", O_RDONLY);
+  assert(fd >= 0);
+  char *readonly = mmap(NULL, page, PROT_READ, MAP_SHARED, fd, 0);
+  assert(readonly != MAP_FAILED && readonly[0] == 0);
+  errno = 0;
+  assert(mprotect(readonly, page, PROT_READ | PROT_WRITE) == -1 && errno == EACCES);
+  assert(munmap(readonly, page) == 0 && close(fd) == 0);
   puts("PASS");
 }
