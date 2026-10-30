@@ -55,3 +55,11 @@ test("v1 capabilities and command defaults are typed metadata",()=>{
         assert.throws(()=>validateManifest({...manifest,tests:[{...manifest.tests[0],...changes}]}));
     }
 });
+
+test("network profiles and local relay URLs are explicit typed metadata",()=>{
+    for(const network of [null,"classic","fidelity","absent","refused","disconnect","overflow","ingress","peer"]){
+        validateManifest({version:1,lane:"sab-isolated-no-jspi",tests:[{...fixture(),network}]});
+    }
+    for(const network of [true,{},"wisp","skip"]){assert.throws(()=>validateManifest({version:1,lane:"sab-isolated-no-jspi",tests:[{...fixture(),network}]}));}
+    for(const relayUrl of [1,"http://127.0.0.1:1","ws://example.com:1"]){assert.throws(()=>validateManifest({version:1,lane:"sab-isolated-no-jspi",tests:[{...fixture(),relayUrl}]}));}
+});

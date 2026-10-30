@@ -6,6 +6,7 @@ import { resolve, dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { serve } from "./server.mjs";
+import { serveNetwork } from "./network-server.mjs";
 import { serveHttp } from "./http-server.mjs";
 import { validateManifest, checkResult, within, bytes } from "./results.mjs";
 
@@ -83,6 +84,7 @@ const tests = selectCases(structuredClone(manifest.tests), { repeat, filter });
             const prefix = join(out, String(index).padStart(3, "0"));
             await writeFile(prefix + ".stdout", "");
             await writeFile(prefix + ".stderr", "");
+            let network;
             let context;
             let page;
             let log = "";
@@ -94,6 +96,11 @@ const tests = selectCases(structuredClone(manifest.tests), { repeat, filter });
             const start = Date.now();
             try {
                 await within((async () => {
+                    if (test.network && test.network !== "absent") {
+                        network = await serveNetwork(test.network);
+                        test.relayUrl = network.url;
+                        test.env.push(...Object.entries(network.env));
+                    }
                     context = await browser.newContext();
                     page = await context.newPage();
                     page.on("console", (message) => append(`[${message.type()}] ${message.text()}`));
@@ -138,6 +145,9 @@ const tests = selectCases(structuredClone(manifest.tests), { repeat, filter });
                     result.status = "failed";
                     result.error = `${result.error ?? ""}\ncontext cleanup failed: ${error}`;
                 }
+                try {
+                    if (network) { result.network = network.stats; await network.close(); }
+                } catch (error) { result.status = "failed"; result.error = `${result.error ?? ""}\nnetwork cleanup: ${error}`; }
                 result.durationMs = Date.now() - start;
                 result.logsTruncated = truncated;
                 await writeFile(prefix + ".console.log", log + (truncated ? "\n[console log truncated]\n" : ""));

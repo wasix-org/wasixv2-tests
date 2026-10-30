@@ -19,8 +19,10 @@ export function validateManifest(manifest) {
     assert(Array.isArray(manifest.tests) && manifest.tests.length > 0, "empty test selection");
     const names = new Set();
     for (const test of manifest.tests) {
-        knownKeys(test, ["name", "status", "assets", "module", "timeoutMs", "args", "env", "stdin", "cwd", "user", "programName", "buildEnv", "mounts", "expected", "error", "transportOnly", "console", "http", "commandDefaults"], "test");
+        knownKeys(test, ["name", "status", "assets", "module", "timeoutMs", "args", "env", "stdin", "cwd", "user", "programName", "buildEnv", "mounts", "expected", "error", "transportOnly", "console", "http", "commandDefaults", "network", "relayUrl"], "test");
         for (const key of ["console", "http"]) if (key in test) assert.equal(typeof test[key], "boolean", key + ": expected boolean");
+        if (test.network != null) assert(["classic","fidelity","absent","refused","disconnect","overflow","ingress","peer"].includes(test.network), "unknown network profile");
+        if ("relayUrl" in test) assert(typeof test.relayUrl === "string" && /^ws:\/\/127\.0\.0\.1:[0-9]+$/.test(test.relayUrl), "invalid local relay URL");
         if ("commandDefaults" in test) {
             assert(Array.isArray(test.commandDefaults), "commandDefaults: expected array");
             for (const command of test.commandDefaults) {

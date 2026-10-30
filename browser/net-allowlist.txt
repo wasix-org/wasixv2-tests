@@ -1,0 +1,17 @@
+relay/tcp4
+relay/tcp6
+relay/udp4
+relay/udp6
+relay/dns
+relay/half-close
+relay/reset
+relay/udp-error
+relay/urgent
+relay/queues
+relay/absent
+relay/refused
+relay/ws-refused
+relay/disconnect
+relay/overflow
+relay/ingress
+relay/peer

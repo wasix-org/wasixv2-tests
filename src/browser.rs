@@ -18,11 +18,17 @@ pub(crate) fn try_main() -> Result<Option<ExitCode>> {
     };
     if !matches!(
         mode,
-        "--browser-export" | "--browser-run" | "--browser-v1-export" | "--browser-v1-run"
+        "--browser-export"
+            | "--browser-run"
+            | "--browser-v1-export"
+            | "--browser-v1-run"
+            | "--browser-net-export"
+            | "--browser-net-run"
     ) {
         return Ok(None);
     }
     let v1 = mode.starts_with("--browser-v1-");
+    let net = mode.starts_with("--browser-net-");
     let run = mode.ends_with("-run");
     ensure!(args.len() >= 2, "{mode} needs an export directory");
     ensure!(
@@ -31,7 +37,7 @@ pub(crate) fn try_main() -> Result<Option<ExitCode>> {
     );
     let out = std::path::absolute(PathBuf::from(&args[1]))?;
     let suite = Suite::with_mode(true)?;
-    let ok = export(&suite, &out, v1)?;
+    let ok = export(&suite, &out, v1, net)?;
     if !run {
         return Ok(Some(if ok {
             ExitCode::SUCCESS
@@ -170,7 +176,7 @@ fn descriptor(config: &Config, timeout_ms: u128) -> Value {
         "name": config.test_name(), "status": "ready", "module": "main.wasm",
         "args": config.args, "env": config.env, "stdin": config.stdin.clone().unwrap_or_default(),
         "cwd": config.current_directory, "user": config.user, "programName": config.program_name,
-        "buildEnv": config.build_env, "console":config.browser_console, "http":config.browser_http, "commandDefaults":config.browser_command_defaults, "timeoutMs": timeout_ms,
+        "buildEnv": config.build_env, "console":config.browser_console, "http":config.browser_http, "network":config.browser_network, "commandDefaults":config.browser_command_defaults, "timeoutMs": timeout_ms,
         "expected": { "exitCode": config.expected_exit_code, "mustFail": config.must_fail,
             "stdout": config.expected_stdout, "stderr": config.expected_stderr, "files": [] },
         "mounts": []
@@ -219,12 +225,20 @@ fn export_case(suite: &Suite, config: &Config, out: &Path) -> Result<Value> {
     Ok(case)
 }
 
-fn export(suite: &Suite, out: &Path, v1: bool) -> Result<bool> {
+fn export(suite: &Suite, out: &Path, v1: bool, net: bool) -> Result<bool> {
     ensure!(!suite.timeout.is_zero(), "browser timeout must be positive");
     let configs = select(
-        fixture::discover(&root().join(if v1 { "browser/v1" } else { "suite" }))?,
+        fixture::discover(&root().join(if v1 {
+            "browser/v1"
+        } else if net {
+            "browser/net"
+        } else {
+            "suite"
+        }))?,
         if v1 {
             include_str!("../browser/v1-allowlist.txt")
+        } else if net {
+            include_str!("../browser/net-allowlist.txt")
         } else {
             include_str!("../browser/allowlist.txt")
         },
@@ -354,7 +368,7 @@ mod tests {
             timeout: std::time::Duration::from_secs(1),
         };
         let out = temp.path().join("export");
-        assert!(!export(&suite, &out, false).unwrap());
+        assert!(!export(&suite, &out, false, false).unwrap());
         let manifest: Value =
             serde_json::from_slice(&std::fs::read(out.join("manifest.json")).unwrap()).unwrap();
         let cases = manifest["tests"].as_array().unwrap();
@@ -368,7 +382,7 @@ mod tests {
             );
         }
         assert!(
-            export(&suite, &out, false).is_err(),
+            export(&suite, &out, false, false).is_err(),
             "must not reuse a stale export"
         );
     }
@@ -420,5 +434,21 @@ mod tests {
                 .iter()
                 .any(|e| e["kind"] == "symlink" && e["target"] == "nested/file")
         );
+    }
+    #[test]
+    fn network_metadata_and_required_cases_are_explicit() {
+        let config = configs("//#BrowserNetwork: fidelity");
+        assert_eq!(descriptor(&config[0], 1000)["network"], "fidelity");
+        assert!(std::panic::catch_unwind(|| configs("//#BrowserNetwork: unsupported")).is_err());
+        let cases = select(
+            fixture::discover(&root().join("browser/net")).unwrap(),
+            include_str!("../browser/net-allowlist.txt"),
+        )
+        .unwrap();
+        assert_eq!(cases.len(), 17);
+        for config in cases {
+            assert!(config.browser_network.is_some());
+            validate(&config).unwrap();
+        }
     }
 }

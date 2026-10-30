@@ -110,6 +110,7 @@ pub struct Config {
     pub browser_unsupported: Vec<String>,
     pub browser_console: bool,
     pub browser_http: bool,
+    pub browser_network: Option<String>,
     pub browser_command_defaults: Vec<BrowserCommandDefaults>,
 }
 
@@ -142,6 +143,7 @@ impl Config {
             browser_unsupported: Vec::new(),
             browser_console: false,
             browser_http: false,
+            browser_network: None,
             browser_command_defaults: Vec::new(),
         }
     }
@@ -354,6 +356,23 @@ impl Parser<'_> {
             "BuildEnv" => self.build_env.push(key_value(arg, "BuildEnv")?),
             "BrowserConsole" => c.browser_console = arg.parse()?,
             "BrowserHttp" => c.browser_http = arg.parse()?,
+            "BrowserNetwork" => {
+                ensure!(
+                    [
+                        "classic",
+                        "fidelity",
+                        "absent",
+                        "refused",
+                        "disconnect",
+                        "overflow",
+                        "ingress",
+                        "peer"
+                    ]
+                    .contains(&arg),
+                    "unknown browser network profile"
+                );
+                c.browser_network = Some(arg.to_owned());
+            }
             "BrowserCommandDefaults" => c.browser_command_defaults = serde_json::from_str(arg)?,
             "Env" => c.env.push(key_value(arg, "Env")?),
             "MustFail" => c.must_fail = arg.parse()?,
