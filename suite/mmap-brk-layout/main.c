@@ -29,7 +29,13 @@ int main(void) {
   char* b = mmap(NULL, page, PROT_READ | PROT_WRITE,
                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   assert(a != MAP_FAILED && b != MAP_FAILED);
-  assert((uintptr_t)b < (uintptr_t)a);
+  assert((uintptr_t)a >= start + 3 * page);
+  assert((uintptr_t)b > (uintptr_t)a);
+#ifdef __wasm__
+  /* Sparse Linux VMAs do not require their intervening holes to be backed.
+   * On wasm use a bounded brk gap and grow only through the mappings. */
+  assert(__builtin_wasm_memory_size(0) * page < 256UL * 1024 * 1024);
+#endif
   assert((uintptr_t)syscall(SYS_brk, start + 3 * page) == start + 3 * page);
   char* heap = (char*)(start + page);
   *heap = 42;
@@ -48,8 +54,7 @@ int main(void) {
   assert((uintptr_t)syscall(SYS_brk, start) == start);
   assert((uintptr_t)syscall(SYS_brk, start + 3 * page) == start + 3 * page);
   assert(*heap == 0);
-  /* A new instance must reserve its unwind buffer even after mmap grew memory
-   * close to the linear-memory ceiling. */
+  /* A new instance uses its own unwind buffer on this shared memory. */
   pthread_t thread;
   assert(!pthread_create(&thread, NULL, unwind_thread, NULL));
   assert(!pthread_join(thread, NULL));
