@@ -335,6 +335,13 @@ and requires all workers to disappear after normal or injected fatal shutdown.
 Chromium on Linux also records renderer RSS and virtual address reservations via
 its process IDs. RSS collection dips are reported separately from later peak
 growth; these numbers include browser/JIT costs, not just the shared Rust heap.
+After iteration 25 the debug-artifact gates allow a 16 MiB shared-heap range
+(one additional dense fork-copy staging allocation), require a fixed worker
+pool, cap RSS at 2 GiB with at most 512 MiB later peak growth, and bound the
+virtual-address range to 16 GiB. Dense browser fork copies include the 8 MiB
+guest stack and asyncify/data; shared-memory allocator high-water cannot shrink.
+These explicit allowances cover the large debug module and JIT while rejecting
+per-run heap growth. Preserve reports from failed budgets when comparing runs.
 
 ```sh
 CHROME=/usr/bin/google-chrome node browser/lifetime.mjs \

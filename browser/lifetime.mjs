@@ -13,11 +13,16 @@ export function checkLifetimeBounds(samples, chromium) {
     assert(tail.length >= 2, "need warmup and tail samples");
     const range = key => Math.max(...tail.map(s => s[key])) - Math.min(...tail.map(s => s[key]));
     const peakGrowth = key => Math.max(...tail.map(s => s[key])) - Math.max(...tail.filter(s => s.iteration <= 50).map(s => s[key]));
-    assert(range("heapBytes") <= 8 * 1024 * 1024, "shared runtime heap did not plateau");
+    // Browser MemoryImage::Full copies include the 8 MiB guest stack and
+    // asyncify/data; allocator high-water can retain one additional staging slab.
+    assert(range("heapBytes") <= 16 * 1024 * 1024, "shared runtime heap did not plateau");
     assert(tail.every(s => s.workers === tail[0].workers), "worker pool grew after warmup");
     if (chromium) {
-        assert(peakGrowth("rendererRssBytes") <= 256 * 1024 * 1024, "renderer RSS peak did not stay bounded");
-        assert(range("rendererVirtualBytes") <= 128 * 1024 ** 3, "address reservations did not stay bounded");
+        // Debug builds include a large compiled module plus browser/JIT costs.
+        // Bound total RSS as well as later peaks; collection dips are separate.
+        assert(Math.max(...tail.map(s => s.rendererRssBytes)) <= 2 * 1024 ** 3, "renderer RSS exceeded the debug-artifact budget");
+        assert(peakGrowth("rendererRssBytes") <= 512 * 1024 * 1024, "renderer RSS peak did not stay bounded");
+        assert(range("rendererVirtualBytes") <= 16 * 1024 ** 3, "address reservations did not stay bounded");
     }
     return { maxHeapBytes: Math.max(...tail.map(s => s.heapBytes)), workers: tail[0].workers,
         ...(chromium ? { maxRssBytes: Math.max(...tail.map(s => s.rendererRssBytes)), rssPeakGrowthBytes: peakGrowth("rendererRssBytes"), rssRangeBytes: range("rendererRssBytes"), virtualRangeBytes: range("rendererVirtualBytes") } : {}) };
@@ -138,6 +143,11 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
         report.passed = true;
     } catch (error) {
         report.error = error.stack ?? String(error);
+        if (page) report.workersAtFailure = await Promise.all(page.workers().map(async worker => ({
+            url: worker.url(),
+            evaluation: await within(worker.evaluate(() => true), 250).catch(error => String(error)),
+        })));
+        if (cdp) report.workerTargetsAtFailure = (await cdp.send("Target.getTargets")).targetInfos.filter(({ type }) => type === "worker");
         report.passed = Boolean(workerFault && /B13 injected/.test(report.error));
         if (report.passed) {
             try {
