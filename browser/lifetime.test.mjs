@@ -1,6 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { checkLifetimeBounds, liveWorkerCount } from "./lifetime.mjs";
+import { checkLifetimeBounds, checkLifetimeResult, liveWorkerCount } from "./lifetime.mjs";
+
+test("relay lifetime acceptance requires exact success and empty process outputs", () => {
+    const result = { exitCode: 0, stdout: [], stderr: [], files: [], relayTcp: true };
+    assert.doesNotThrow(() => checkLifetimeResult("relay_smoke", null, result));
+    for (const patch of [{ relayTcp: false }, { exitCode: 1 }, { stdout: [1] }, { stderr: [1] }, { files: [1] }]) {
+        assert.throws(() => checkLifetimeResult("relay_smoke", null, { ...result, ...patch }));
+    }
+    assert.throws(() => checkLifetimeResult("unknown", null, result), /unknown lifetime entry/);
+});
 
 test("worker inventory counts unattached native targets after debugger detachment", async () => {
     const page = { workers: () => [] };
