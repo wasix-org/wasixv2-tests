@@ -274,3 +274,42 @@ the session, so an EOF racing ahead of SIGHUP must still wait for the signal.
 The reused PTY/shell fixtures add TOSTOP/SIGTTOU, stop/continue and foreground swaps.
 EOF, output and guest exit expectations use the existing strict result checker;
 there are no browser expected failures or skips.
+
+## Deterministic browser networking
+
+`--browser-net-export DIR` / `--browser-net-run DIR` reuse the fixture compiler,
+metadata checker and ordinary B8 facade for `net-allowlist.txt` (17 cases under
+`browser/net`). Set the usual source compiler/sysroot environment, then run:
+
+```sh
+cargo run -p wasixv2-tests -- --browser-net-export /exports/network
+CHROME=/usr/bin/google-chrome node browser/run.mjs --manifest /exports/network/manifest.json \
+  --runtime /runtime/bundle --artifacts /results/network
+node browser/run.mjs --browser firefox --manifest /exports/network/manifest.json \
+  --runtime /runtime/bundle --artifacts /results/network-firefox
+```
+
+`BrowserNetwork` is an explicit profile (`classic`, `fidelity`, `absent`,
+`refused`, `disconnect`, `overflow`, `ingress`, `peer`). The runner starts fresh
+local services per case, injects ephemeral service ports and a local relay URL,
+and retains service counts/maxima in each result. Unknown profiles fail export
+and validation. The required lane still removes JSPI in page and all workers.
+No external DNS or internet is used. Linux and Python 3 provide the deterministic
+urgent host service; its two localhost TCP sockets use real MSG_OOB/SO_OOBINLINE
+and SIOCATMARK. There are no prebuilt Wasm fixtures.
+
+Coverage: IPv4/IPv6 classic TCP and UDP (including empty datagrams, peek and
+truncation), deterministic A/AAAA/PTR/raw TXT DNS, FIN with a writable reverse
+half and confirmed remote delivery, reset, actual host UDP-send error with a
+usable endpoint afterward, urgent mark/peek/POLLPRI, bounded nonblocking writes
+and ingress overflow, no provider, peer refusal, transport refusal/disconnect,
+TCP+UDP publication with reply source-port verification and two distinct
+Machines/Nets exchanging peer bytes via an explicit relay publication.
+Refusal before flow creation returns ENETDOWN; a flow already accepted by a
+failed transport returns ECONNABORTED. Neither is silently treated as peer RST.
+
+Peer acceptance proves the supplied-Net/relay-publication path; it does not
+implement the separate vnet-switch's address routing or the SDK service-worker
+HTTP/WISP adapters. The matching runtime must expose the opt-in classic-fidelity
+profile. Stock relay changes and unsupported port-zero/connected-UDP error-queue
+features are documented in Wasmer's vnet-web/RELAY-FIDELITY.md.
