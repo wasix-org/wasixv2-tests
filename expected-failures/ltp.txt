@@ -187,9 +187,6 @@ ltp/syscalls/mlock201
 ## TFAIL: mmap Error, errno=22 : Invalid argument
 ltp/syscalls/remap_file_pages01
 
-## TFAIL: mmap() into high mem region succeeded unexpectedly
-ltp/syscalls/mmap15
-
 ## TFAIL: mprotect failed to exec: EACCES (13)
 ltp/syscalls/mprotect05
 
