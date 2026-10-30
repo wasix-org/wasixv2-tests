@@ -160,16 +160,21 @@ An empty run never passes; startup failure records every selected test as failed
 
 ## CI integration
 
-Wasmer's `.github/workflows/wasixv2-browser.yaml` runs the pinned headless adapter
-checks and infrastructure smoke on pull requests. Its B2 threaded debug smoke
-uses B2's recipe and is allowed to fail until the runtime work lands. It uploads
-logs/capabilities/results even when a step fails.
+Wasmer's B8 facade now supplies `fixture-adapter.js` through
+`lib/wasixv2/api/tests/browser/build.sh`, which reuses the B2 debug/std/TLS recipe.
+The runtime bundle also includes B4's timer event worker and C1's pure-JS copy
+worker. The adapter waits for final kernel exit, descendant shutdown, bounded
+stdio drain and normal worker/TLS retirement. It uses byte-backed module sources,
+B6 provider mounts and fixture args/env/cwd/credentials; no JSPI APIs are required.
 
-The manually dispatched fixture job consumes two artifacts from the specified
-integration run: `wasixv2-browser-fixtures` (manifest.json plus cases/ from
-`--browser-export`) and `wasixv2-browser-runtime` (B2 build output plus B8's
-fixture-adapter.js at its root). It invokes this same runner, allows failure
-until B8 lands, and uploads every per-test result. B8/integration must provide
-those source-built bundles and connect their producer to automatic PR fixture
-coverage before making this a required parity gate. Infrastructure smoke alone
-must never be advertised as fixture success.
+The B8 workflow replaces dispatched, allowed-to-fail fixture consumption with an
+automatic required `fixtures` job depending on a source-built runtime and a
+source-built reviewed export. The exporter job uses Wasmer's pinned
+`api/tests/browser/toolchain.env` and isolated debug toolchain producer (LLVM,
+wasixcc, libc2 EH/asyncify C sysroots and Binaryen). The ABI pin is verified before
+building. A cold source-toolchain job is intentionally separate from the faster
+runtime/adapter checks; subsequent runs cache it by exact pins and recipe.
+If any pinned source repository requires private access, configure
+`WASIXV2_TOOLCHAIN_TOKEN` with read access to those repositories. Missing tools,
+credentials, fixture builds and runtime capabilities fail the job; none are
+converted to skips or expected failures. No prebuilt guest Wasm is checked in.
