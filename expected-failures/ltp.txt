@@ -58,9 +58,6 @@ ltp/syscalls/mremap06
 ## TBROK: openat() failed: errno=EACCES(13): Permission denied
 ltp/syscalls/openat03
 
-## TBROK: process_vm_readv: EPERM
-ltp/syscalls/process_vm_readv02
-
 ## TBROK: setsockopt(3, 263, 10, 0x7fe938, 4) failed: EINVAL (22)
 ltp/cve/cve-2020-14386
 ltp/syscalls/sendto03
@@ -99,6 +96,7 @@ ltp/mm/shmt09
 
 ## TFAIL: Faulty timeout: select() passed unexpectedly with 1
 ltp/syscalls/select03
+# Blocked: libc reads the invalid timeout in the readable low guard before pselect6; pending host page-protection decision.
 
 ## TFAIL: Found sequence in dump when MADV_DONTDUMP set
 ltp/syscalls/madvise08
@@ -120,13 +118,10 @@ ltp/syscalls/mmap05
 
 ## TFAIL: TEST 5 Failed
 ltp/mm/mtest05
+# Cases 1-4 pass; cases 5-6 call nonzero sbrk, which native musl intentionally refuses.
 
 ## TFAIL: Test failed
 ltp/mm/mmapstress02
-ltp/mm/mmapstress03
-ltp/mm/mmapstress05
-ltp/syscalls/nftw01
-ltp/syscalls/nftw6401
 
 ## TFAIL: Test{4} failed, expected 0 exit.
 ltp/fs/ftest02
@@ -211,9 +206,6 @@ ltp/syscalls/mmap12
 ## TFAIL: pidfd_send_signal() did not fail with EPERM but: SUCCESS (0)
 ltp/syscalls/pidfd_send_signal02
 
-## TFAIL: process_vm_read() failed: EPERM (1)
-ltp/syscalls/process_vm_readv03
-
 ## TFAIL: pselect() slept for too long
 ltp/syscalls/pselect01
 ltp/syscalls/pselect01_64
@@ -252,9 +244,6 @@ ltp/syscalls/shmdt01
 ## TFAIL: test PROT_NONE for mprotect failed
 ltp/syscalls/mprotect04
 
-## TFAIL: tst_syscall(__NR_process_vm_writev, pid_alloc, &local, 1UL, &remote, 1UL, 0UL) failed: EPERM (1)
-ltp/syscalls/process_vm_writev02
-
 ## TFAIL: uaddr unmapped succeeded
 ltp/syscalls/futex_wake05
 
@@ -263,6 +252,7 @@ ltp/syscalls/futex_cmp_requeue03
 
 ## TFAIL: unexpected value in map, i=0,val=0x0
 ltp/mm/mmapstress04
+# Blocked: private file mappings need page-cache/COW coherence after file growth; requires a memory/exec contract decision.
 
 ## TFAIL: waipid(-2147483648, NULL, 0x0) expected ESRCH: EINVAL (22)
 ltp/syscalls/waitpid04
@@ -281,9 +271,6 @@ ltp/fs_perms_simple/fs_perms03
 
 ## build: wasm-ld: error: unable to find library -lrealtime
 ltp/sched/sched_football
-
-## exit status 127
-ltp/syscalls/ioctl02
 
 ## exit status 139
 ltp/mm/data_space

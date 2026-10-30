@@ -23,9 +23,6 @@ posix/conformance/interfaces/mmap/6-3
 posix/conformance/interfaces/mq_close/2-1
 posix/conformance/interfaces/sigismember/5-1
 
-## FAIL: Test FAILED: Cancel request timed out
-posix/conformance/interfaces/pthread_setcanceltype/1-1
-
 ## FAIL: Test FAILED: Did not trigger SIGSEGV
 posix/conformance/interfaces/munmap/1-1
 posix/conformance/interfaces/munmap/1-2
@@ -86,6 +83,4 @@ posix/conformance/interfaces/pthread_rwlock_rdlock/2-1
 posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
 
 ## timeout
-posix/conformance/interfaces/pthread_mutex_init/3-2
-posix/conformance/interfaces/pthread_rwlock_wrlock/3-1
 posix/conformance/interfaces/timer_settime/5-3

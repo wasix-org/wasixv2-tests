@@ -60,3 +60,8 @@ posix/conformance/interfaces/pthread_attr_setstack/1-1 # queries an unset stack 
 posix/conformance/interfaces/pthread_attr_setstack/2-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
 posix/conformance/interfaces/pthread_attr_setstack/4-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
 posix/conformance/interfaces/pthread_create/1-6 # assumes strict guest priority scheduling; guest priorities are advisory to the host scheduler
+ltp/mm/mmapstress03 # musl src/linux/sbrk.c:sbrk deliberately rejects nonzero increments, matching native Linux musl
+ltp/mm/mmapstress05 # musl src/linux/sbrk.c:sbrk deliberately rejects nonzero increments, matching native Linux musl
+posix/conformance/interfaces/pthread_rwlock_wrlock/3-1 # requires optional EDEADLK detection for a recursive write lock; native musl permits the calling thread to deadlock
+posix/conformance/interfaces/pthread_mutex_init/3-2 # cancels inside non-async-cancel-safe pthread_mutex_lock; native musl disables cancellation in __timedwait and waits indefinitely
+posix/conformance/interfaces/pthread_setcanceltype/1-1 # expects asynchronous cancellation inside non-async-cancel-safe pthread_mutex_lock; native musl masks cancellation in __timedwait
