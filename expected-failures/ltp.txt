@@ -118,6 +118,3 @@ ltp/commands/ldd01_sh
 ## LTP setsockopt11 calls lib/tst_memutils.c:tst_pollute_memory to commit all reported guest free memory; the 2 GiB host scope OOM-kills the embedder. Exact module/argv also OOM-kill landed fix22 e62bcd36 twice; broader memory accounting remains paused. No cap increase or runtime workaround.
 ltp/cve/cve-2026-53362
 ltp/syscalls/setsockopt11
-
-## Unreaped zombie scheduler metadata is lost at execution release: Linux kernel/sched/syscalls.c find_process_by_pid and sched_getscheduler/sched_getparam keep the task nameable until kernel/exit.c release_task. Child exit before the parent query yields ESRCH and an unchanged priority buffer, not a broken RESET_ON_FORK flag. Deterministic native Linux control passes; identical Wasm fails on landed train28 and train29. Reviewed metadata retention required; train29 remains NO-GO.
-ltp/syscalls/sched_setscheduler04
