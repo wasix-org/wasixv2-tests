@@ -18,11 +18,17 @@ pub(crate) fn try_main() -> Result<Option<ExitCode>> {
     };
     if !matches!(
         mode,
-        "--browser-export" | "--browser-run" | "--browser-v1-export" | "--browser-v1-run"
+        "--browser-accept-export"
+            | "--browser-accept-run"
+            | "--browser-export"
+            | "--browser-run"
+            | "--browser-v1-export"
+            | "--browser-v1-run"
     ) {
         return Ok(None);
     }
     let v1 = mode.starts_with("--browser-v1-");
+    let acceptance = mode.starts_with("--browser-accept-");
     let run = mode.ends_with("-run");
     ensure!(args.len() >= 2, "{mode} needs an export directory");
     ensure!(
@@ -31,7 +37,7 @@ pub(crate) fn try_main() -> Result<Option<ExitCode>> {
     );
     let out = std::path::absolute(PathBuf::from(&args[1]))?;
     let suite = Suite::with_mode(true)?;
-    let ok = export(&suite, &out, v1)?;
+    let ok = export(&suite, &out, v1, acceptance)?;
     if !run {
         return Ok(Some(if ok {
             ExitCode::SUCCESS
@@ -170,7 +176,7 @@ fn descriptor(config: &Config, timeout_ms: u128) -> Value {
         "name": config.test_name(), "status": "ready", "module": "main.wasm",
         "args": config.args, "env": config.env, "stdin": config.stdin.clone().unwrap_or_default(),
         "cwd": config.current_directory, "user": config.user, "programName": config.program_name,
-        "buildEnv": config.build_env, "console":config.browser_console, "http":config.browser_http, "commandDefaults":config.browser_command_defaults, "timeoutMs": timeout_ms,
+        "acceptance": config.browser_acceptance, "buildEnv": config.build_env, "console":config.browser_console, "http":config.browser_http, "commandDefaults":config.browser_command_defaults, "timeoutMs": timeout_ms,
         "expected": { "exitCode": config.expected_exit_code, "mustFail": config.must_fail,
             "stdout": config.expected_stdout, "stderr": config.expected_stderr, "files": [] },
         "mounts": []
@@ -219,11 +225,23 @@ fn export_case(suite: &Suite, config: &Config, out: &Path) -> Result<Value> {
     Ok(case)
 }
 
-fn export(suite: &Suite, out: &Path, v1: bool) -> Result<bool> {
+fn export(suite: &Suite, out: &Path, v1: bool, acceptance: bool) -> Result<bool> {
     ensure!(!suite.timeout.is_zero(), "browser timeout must be positive");
+    let mut candidates = fixture::discover(&root().join(if acceptance {
+        "browser/accept"
+    } else if v1 {
+        "browser/v1"
+    } else {
+        "suite"
+    }))?;
+    if acceptance {
+        candidates.extend(fixture::discover(&root().join("suite"))?);
+    }
     let configs = select(
-        fixture::discover(&root().join(if v1 { "browser/v1" } else { "suite" }))?,
-        if v1 {
+        candidates,
+        if acceptance {
+            include_str!("../browser/accept-allowlist.txt")
+        } else if v1 {
             include_str!("../browser/v1-allowlist.txt")
         } else {
             include_str!("../browser/allowlist.txt")
@@ -276,6 +294,15 @@ mod tests {
         std::fs::create_dir(&fixture).unwrap();
         std::fs::write(fixture.join("main.c"), source).unwrap();
         fixture::discover(dir.path()).unwrap()
+    }
+
+    #[test]
+    fn acceptance_metadata_survives_source_export() {
+        let config = configs(r#"//#BrowserAcceptance: {"packageVersion":2,"command":"named","actions":[{"after":"ready","input":[4]}]}
+"#).remove(0);
+        let case = descriptor(&config, 1000);
+        assert_eq!(case["acceptance"]["packageVersion"], 2);
+        assert_eq!(case["acceptance"]["actions"][0]["input"], json!([4]));
     }
 
     #[test]
@@ -354,7 +381,7 @@ mod tests {
             timeout: std::time::Duration::from_secs(1),
         };
         let out = temp.path().join("export");
-        assert!(!export(&suite, &out, false).unwrap());
+        assert!(!export(&suite, &out, false, false).unwrap());
         let manifest: Value =
             serde_json::from_slice(&std::fs::read(out.join("manifest.json")).unwrap()).unwrap();
         let cases = manifest["tests"].as_array().unwrap();
@@ -368,7 +395,7 @@ mod tests {
             );
         }
         assert!(
-            export(&suite, &out, false).is_err(),
+            export(&suite, &out, false, false).is_err(),
             "must not reuse a stale export"
         );
     }
