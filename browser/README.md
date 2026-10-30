@@ -234,3 +234,39 @@ run both modes and retain failing results rather than treating process isolation
 as proof that repeated-context lifecycle works. Local Playwright WebKit 27.2
 showed repeated-context crashes even in transport-only smoke; its WASIX lane is
 therefore additionally exercised with explicit process isolation.
+
+## Persistent runtime lifetime
+
+`lifetime.mjs` uses the same B11 capability checks, isolated server, source export
+and expectation checker as `run.mjs`, while keeping **one** B8 runtime heap and
+coordinator alive across every iteration. It prewarms a bounded eight-task pool,
+records worker count, copy-service retirements, shared heap size and UI heartbeat,
+and requires all workers to disappear after normal or injected fatal shutdown.
+Chromium on Linux also records renderer RSS and virtual address reservations via
+its process IDs. RSS collection dips are reported separately from later peak
+growth; these numbers include browser/JIT costs, not just the shared Rust heap.
+
+```sh
+CHROME=/usr/bin/google-chrome node browser/lifetime.mjs \
+  /runtime /export/manifest.json /new/results 500 chromium
+node browser/lifetime.mjs /runtime /export/manifest.json /new/firefox 60 firefox
+CHROME=/usr/bin/google-chrome node browser/lifetime.mjs \
+  /runtime /export/manifest.json /new/continuous 1 chromium proc-fork-lifetime/default
+```
+
+The source `proc-fork-lifetime` fixture also forks and reaps 500 children inside
+one continuing guest parent, checking memory isolation and `ECHILD` after reap.
+The existing `proc-fork/default` fixture creates ten children/grandchildren per
+iteration; the 500-iteration lane exercises 5,000 copied address spaces.
+
+With the matching facade example, append `proc-fork/default lifetime_smoke` to
+exercise 2,048 canceled waits, 1,000 timer cancellations, 1,000 notify-before-wait
+parks and 16 canceled/deadline/concurrent kills per iteration. Use
+`proc-fork/default admission_smoke` for coordinator capacity rejection and exact
+closure destruction. Append `bootstrap`, `task` or `timer` as the final argument
+for real worker failure injection; only the named injected error plus complete
+worker reclamation counts as success. `throttled` delays timer callbacks by
+50 ms and must pass normal deadline/no-early-completion assertions.
+
+No GC API or browser GC flag is used in these acceptance lanes. Keep the JSON
+from failed resource gates; completion alone does not establish bounded memory.
