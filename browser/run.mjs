@@ -1,4 +1,5 @@
-import { chromium } from "playwright";
+import { chromium, firefox, webkit } from "playwright";
+import { browserOptions, selectCases } from "./matrix.mjs";
 import wabtFactory from "wabt";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { resolve, dirname, join } from "node:path";
@@ -32,7 +33,7 @@ async function smokeInput(out) {
     };
 }
 
-export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke = false, executablePath, isolated = true }) {
+export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke = false, executablePath, isolated = true, browserName = "chromium", repeat = 1, filter }) {
     out = resolve(out);
     await mkdir(dirname(out), { recursive: true });
     await mkdir(out); // Never mix a previous run's successful artifacts with this run.
@@ -53,7 +54,7 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
         }
         validateManifest(manifest);
         if (!smoke && manifest.tests.some((test) => test.transportOnly)) throw new Error("transportOnly is reserved for --smoke");
-        const tests = structuredClone(manifest.tests);
+        const tests = selectCases(structuredClone(manifest.tests), { repeat, filter });
         if (tests.some(test=>test.http)) {
             http = await serveHttp();
             for (const test of tests) if (test.http) test.env.push(["HTTP_BASE",http.url]);
@@ -65,13 +66,11 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
         if (smoke) { await mkdir(join(out, "smoke")); await writeFile(join(out, "smoke/main.wasm"), await readFile(join(input, "main.wasm"))); }
         if (runtime) mounts["/runtime/"] = resolve(runtime);
         server = await serve(mounts, { isolated });
-        browser = await chromium.launch({
-            headless: true,
-            executablePath,
-            args: ["--disable-dev-shm-usage"],
-        });
+        const launchOptions = browserOptions(browserName, executablePath);
+        browser = await ({ chromium, firefox, webkit })[browserName].launch(launchOptions);
+        evidence.browserName = browserName;
         evidence.browser = browser.version();
-        evidence.executable = executablePath ?? "Playwright pinned Chromium";
+        evidence.executable = executablePath ?? `Playwright pinned ${browserName}`;
         for (let index = 0; index < tests.length; index++) {
             const test = tests[index];
             const result = report.tests[index];
@@ -155,10 +154,11 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
 async function main() {
     const { values } = parseArgs({ options: {
         manifest: { type: "string" }, runtime: { type: "string" }, artifacts: { type: "string", default: "artifacts/run" },
+        browser: { type: "string", default: "chromium" }, repeat: { type: "string", default: "1" }, filter: { type: "string" },
         smoke: { type: "boolean", default: false }, "b2-smoke": { type: "boolean", default: false },
     } });
     if (values.smoke === Boolean(values.manifest)) throw new Error("choose exactly one of --smoke or --manifest PATH");
-    const report = await run({ manifestPath: values.manifest, runtime: values.runtime, out: values.artifacts, smoke: values.smoke, b2Smoke: values["b2-smoke"], executablePath: process.env.CHROME });
+    const report = await run({ manifestPath: values.manifest, runtime: values.runtime, out: values.artifacts, smoke: values.smoke, b2Smoke: values["b2-smoke"], executablePath: process.env[values.browser === "chromium" ? "CHROME" : values.browser.toUpperCase()], browserName: values.browser, repeat: Number(values.repeat), filter: values.filter });
     if (!report.passed) { console.error(report.error ?? "browser cases failed; see results.json"); process.exitCode = 1; }
 }
 
