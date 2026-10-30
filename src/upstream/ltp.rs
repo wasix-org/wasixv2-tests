@@ -273,6 +273,24 @@ fn needs_root(declared: &[serde_json::Value]) -> bool {
         .any(|test| has(test, "needs_root") || has(test, "caps"))
 }
 
+/// lib/tst_test.c:tst_set_runtime changes the watchdog during setup (semget05).
+fn timeout_from_line(line: &str) -> Option<std::time::Duration> {
+    let (_, time) = line.split_once("TINFO: Overall timeout per run is ")?;
+    let mut words = time.split_whitespace();
+    let hours: u64 = words.next()?.strip_suffix('h')?.parse().ok()?;
+    let minutes: u64 = words.next()?.strip_suffix('m')?.parse().ok()?;
+    let seconds: u64 = words.next()?.strip_suffix('s')?.parse().ok()?;
+    if words.next().is_some() || minutes >= 60 || seconds >= 60 {
+        return None;
+    }
+    let seconds = hours
+        .checked_mul(3600)?
+        .checked_add(minutes * 60)?
+        .checked_add(seconds)?
+        .checked_add(30)?;
+    Some(std::time::Duration::from_secs(seconds))
+}
+
 fn runtest_budget(
     declared: &[serde_json::Value],
     line: &str,
@@ -1216,6 +1234,7 @@ impl Test {
             volumes: vec![(prepared.ltproot.clone(), "/opt/ltp".to_owned())],
             cwd: None,
             user: self.root.then(|| "0:0".to_owned()),
+            timeout_from_line: Some(timeout_from_line),
         };
         if shell {
             // A script the runtest line names is LTP's to install.
@@ -1406,6 +1425,15 @@ mod tests {
     }
 
     #[test]
+    fn capability_declarations_require_root() {
+        assert!(super::needs_root(&[
+            serde_json::json!({"caps": ["TST_CAP(TST_CAP_DROP, CAP_NET_RAW)"]})
+        ]));
+        assert!(super::needs_root(&[serde_json::json!({"needs_root": 1})]));
+        assert!(!super::needs_root(&[serde_json::json!({})]));
+    }
+
+    #[test]
     fn legacy_workloads_use_their_requested_duration() {
         use std::time::Duration;
         let entries = super::runtest_entries(&super::src().join("runtest/fs")).unwrap();
@@ -1440,15 +1468,6 @@ mod tests {
     }
 
     #[test]
-    fn capability_declarations_require_root() {
-        assert!(super::needs_root(&[
-            serde_json::json!({"caps": ["TST_CAP(TST_CAP_DROP, CAP_NET_RAW)"]})
-        ]));
-        assert!(super::needs_root(&[serde_json::json!({"needs_root": 1})]));
-        assert!(!super::needs_root(&[serde_json::json!({})]));
-    }
-
-    #[test]
     fn declared_runtime_is_allowed_to_finish() {
         use std::time::Duration;
         let budget = |value| super::declared_budget(&[value], Duration::from_secs(60));
@@ -1469,6 +1488,31 @@ mod tests {
         assert_eq!(
             budget(serde_json::json!({"min_runtime": 180})),
             Duration::from_secs(240)
+        );
+    }
+
+    #[test]
+    fn dynamic_ltp_watchdog_declaration_extends_the_budget() {
+        use std::time::Duration;
+        assert_eq!(
+            super::timeout_from_line(
+                "tst_test.c:1895: TINFO: Overall timeout per run is 0h 03m 10s"
+            ),
+            Some(Duration::from_secs(220))
+        );
+        assert_eq!(
+            super::timeout_from_line("TINFO: Updating runtime to 0h 02m 40s"),
+            None
+        );
+        assert_eq!(
+            super::timeout_from_line("TINFO: Overall timeout per run is 0h 00m invalid"),
+            None
+        );
+        assert_eq!(
+            super::timeout_from_line(
+                "TINFO: Overall timeout per run is 999999999999999999999h 00m 00s"
+            ),
+            None
         );
     }
 
