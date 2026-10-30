@@ -38,14 +38,16 @@ test("non-CDP browser inventory retains its worker lifecycle check", async () =>
 
 function samples() {
     return [1, 25, 50, 500].map(iteration => ({ iteration, heapBytes: 32 * 1024 ** 2,
-        workers: 10, rendererRssBytes: 150 * 1024 ** 2, rendererVirtualBytes: 2 * 1024 ** 4 }));
+        workers: 10, workerTargets: 12, workerTargetLimit: 18,
+        rendererRssBytes: 150 * 1024 ** 2, rendererVirtualBytes: 2 * 1024 ** 4 }));
 }
 test("lifetime resource accounting ignores cold-start allocation and bounds warm samples", () => {
     const data = samples();
     data[0].heapBytes = 1;
     assert.deepEqual(checkLifetimeBounds(data, true), { maxHeapBytes: 32 * 1024 ** 2,
-        workers: 10, maxRssBytes: 150 * 1024 ** 2, rssPeakGrowthBytes: 0, rssRangeBytes: 0, virtualRangeBytes: 0 });
-    assert.deepEqual(checkLifetimeBounds(data, false), { maxHeapBytes: 32 * 1024 ** 2, workers: 10 });
+        workers: 10, maxWorkerTargets: 12, workerTargetLimit: 18,
+        maxRssBytes: 150 * 1024 ** 2, rssPeakGrowthBytes: 0, rssRangeBytes: 0, virtualRangeBytes: 0 });
+    assert.deepEqual(checkLifetimeBounds(data, false), { maxHeapBytes: 32 * 1024 ** 2, workers: 10, maxWorkerTargets: 12, workerTargetLimit: 18 });
     assert.throws(() => checkLifetimeBounds(data.slice(0, 1), true), /warmup/);
 });
 test("RSS collection dips are reported without mistaking them for peak growth", () => {
@@ -57,7 +59,8 @@ test("RSS collection dips are reported without mistaking them for peak growth", 
 });
 for (const [field, increase, message] of [
     ["heapBytes", 17 * 1024 ** 2, /heap/], ["workers", 1, /worker pool/],
-    ["rendererRssBytes", 513 * 1024 ** 2, /RSS/], ["rendererVirtualBytes", 17 * 1024 ** 3, /reservations/],
+    ["rendererRssBytes", 1900 * 1024 ** 2, /RSS/], ["rendererVirtualBytes", 17 * 1024 ** 3, /reservations/],
+    ["workerTargets", 7, /native worker/],
 ]) {
     test(`${field} growth fails persistent-runtime acceptance`, () => {
         const data = samples();
@@ -65,6 +68,13 @@ for (const [field, increase, message] of [
         assert.throws(() => checkLifetimeBounds(data, true), message);
     });
 }
+test("late RSS peaks stay diagnostic within the fixed process-memory ceiling", () => {
+    const data = samples();
+    data.at(-1).rendererRssBytes += 768 * 1024 ** 2;
+    const bounds = checkLifetimeBounds(data, true);
+    assert.equal(bounds.rssPeakGrowthBytes, 768 * 1024 ** 2);
+    assert.equal(bounds.maxRssBytes, 918 * 1024 ** 2);
+});
 test("debug-artifact budgets include staging high-water but bound total RSS", () => {
     const data = samples();
     data.at(-1).heapBytes += 16 * 1024 ** 2;
