@@ -4,7 +4,7 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## build: wasm-ld: error: /tmp/.tmpcN6P6O/tls_align.c.0.o: undefined symbol: t
+## build: wasm-ld: error: /tmp/.tmpYZZhUV/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
 
 ## wordexp("$1", 0) gave 1 [$1|], want 0 []

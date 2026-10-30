@@ -7,9 +7,6 @@
 ## FAIL: Combination of PROT_READ PROT_WRITE PROT_EXEC with MAP_PRIVATE has failed: Permission denied
 posix/conformance/interfaces/mmap/5-1
 
-## FAIL: TEST FAILED: semaphore does exist
-posix/conformance/interfaces/sem_unlink/4-1
-
 ## FAIL: Test FAILED
 posix/conformance/interfaces/mmap/6-1
 posix/conformance/interfaces/mmap/6-2
@@ -27,16 +24,17 @@ posix/conformance/interfaces/munmap/1-2
 posix/conformance/interfaces/mmap/11-2
 posix/conformance/interfaces/mmap/11-3
 
-## FAIL: Test upstream/ltp-801f6ad4b8ec/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c FAILED: Test failed in child
+## FAIL: musl forwards Linux sticky-directory EPERM; this test expects glibc EACCES mapping (Linux fs/namei.c may_delete). Separate sticky fsuid/ownership regression passes
 posix/conformance/interfaces/sem_unlink/3-1
-
-## FAIL: Testing with user 'nobody' (uid: 65534)
 posix/conformance/interfaces/shm_unlink/9-1
+
+## FAIL: upstream sem_unlink4-1 uses an uninitialized semaphore name before any syscall; not evidence of a kernel permission failure
+posix/conformance/interfaces/sem_unlink/4-1
 
 ## UNRESOLVED: Failed: execl() errno: No such file or directory
 posix/conformance/interfaces/sigaltstack/9-1
 
-## UNRESOLVED: Test upstream/ltp-801f6ad4b8ec/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
+## UNRESOLVED: Test upstream/ltp-27e0e1b5f4ae/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
 
 ## build: error: call to undeclared function 'pthread_rwlockattr_setkind_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declara
