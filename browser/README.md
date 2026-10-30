@@ -396,3 +396,49 @@ runtime, exact empty process outputs and zero workers after I/O retirement.
 
 No GC API or browser GC flag is used in these acceptance lanes. Keep the JSON
 from failed resource gates; completion alone does not establish bounded memory.
+
+## Repeated shutdown regressions
+
+Run the no-Rust small/large-module control and real Machine/fork teardown plus
+injected timer-driver death in both required engines:
+
+```sh
+node browser/shutdown.mjs /runtime /export/manifest.json /new/shutdown chromium,firefox 3
+```
+
+Every repetition retains the zero-native-worker gate; a completed guest or an
+observed injected error cannot override disposal failure. `worker-close.mjs`
+accepts a final repetition count (default five) and remains independently usable.
+The Chromium failures recorded by B18 remain failures; no expected-failure list
+or weaker worker count is used.
+
+## Real background-tab timers
+
+Build the matching facade example containing `background_sleep_smoke`, install
+the lockfile-pinned full Chromium and Firefox, and provide Xvfb and xdotool on
+Linux. Run each engine with its own fresh results directory:
+
+```sh
+xvfb-run -a node browser/background.mjs /runtime /new/background-chromium chromium
+xvfb-run -a node browser/background.mjs /runtime /new/background-firefox firefox
+```
+
+The harness opens a native tab with Ctrl+T, selects that tab and requires the
+measurement document to remain `hidden` throughout 80 requested 500 ms sleeps.
+Ten requested 100 ms sleeps before and after are foreground controls. Every
+elapsed duration must reach its monotonic deadline; missing samples, visibility
+changes and nonzero final worker counts fail. Summary statistics remain in the
+JSON even if the separate disposal gate fails.
+
+Playwright normally forces pages focused/active. For this measurement only,
+`native-tabs.mjs` copies the pinned driver into a private temporary directory and
+removes its one Chromium `setFocusEmulationEnabled(true)` call; it also restores
+the three Chromium background scheduling switches. Firefox uses a private browser
+copy whose Juggler `content/main.js` omits only `overrideHasFocus = true` and
+`forceActiveState = true`. The installed tools and browser timer/visibility engine
+code remain unchanged. Both preparations reject unknown source layouts; unit
+regressions verify unchanged surrounding source and installed archive bytes.
+No JavaScript visibility property override, fake visibility event, lifecycle
+freeze, synthetic driver delay or forced GC participates in the measurement.
+The roughly 40-second window does not measure long-hidden intensive throttling,
+page freezing, suspension or discard.
