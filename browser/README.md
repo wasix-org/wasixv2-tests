@@ -350,6 +350,17 @@ main-frame-only control still reproduced the lingering coordinator without any
 attached worker debugger; this is not classified as a debugger-only failure.
 Keep failed shutdown reports visible. Firefox retains its worker lifecycle inventory.
 
+Reduce shutdown without executing runtime Rust using the same source-built assets:
+
+```sh
+node browser/worker-close.mjs /runtime /new/close-control chromium
+node browser/worker-close.mjs /runtime /new/close-control-firefox firefox
+```
+
+Both empty and large compiled-Module controls require zero remaining workers;
+the latter only transfers the Module to fake boot/retire workers. A failing
+control remains a failure and does not establish a kernel fault or an engine fix.
+
 ```sh
 CHROME=/usr/bin/google-chrome node browser/lifetime.mjs \
   /runtime /export/manifest.json /new/results 500 chromium
@@ -371,6 +382,11 @@ closure destruction. Append `bootstrap`, `task` or `timer` as the final argument
 for real worker failure injection; only the named injected error plus complete
 worker reclamation counts as success. `throttled` delays timer callbacks by
 50 ms and must pass normal deadline/no-early-completion assertions.
+
+The embedding repository's `lib/wasixv2/api/tests/browser/relay-lifetime.mjs`
+reuses its existing deterministic relay fixture with this runner's `relay_smoke`
+entry and explicit arguments. It checks 50 repeated connections/sends in one
+runtime, exact empty process outputs and zero workers after I/O retirement.
 
 No GC API or browser GC flag is used in these acceptance lanes. Keep the JSON
 from failed resource gates; completion alone does not establish bounded memory.

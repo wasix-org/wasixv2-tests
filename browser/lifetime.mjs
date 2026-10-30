@@ -13,6 +13,14 @@ export async function liveWorkerCount(page, cdp) {
     return page.workers().length;
 }
 
+export function checkLifetimeResult(entry, fixture, result) {
+    if (entry === "run_fixture") checkResult(fixture, result);
+    else if (entry === "lifetime_smoke") assert.deepEqual(result, { cancelledWaits: 2048, timerCancels: 1000, wakeBeforeWait: 1000, deadlineKills: 16 });
+    else if (entry === "admission_smoke") assert.deepEqual(result, { admissionRejected: true, droppedOnce: true });
+    else if (entry === "relay_smoke") assert.deepEqual(result, { exitCode: 0, stdout: [], stderr: [], files: [], relayTcp: true });
+    else throw new Error("unknown lifetime entry " + entry);
+}
+
 export function checkLifetimeBounds(samples, chromium) {
     const tail = samples.filter(({ iteration }) => iteration >= 25);
     assert(tail.length >= 2, "need warmup and tail samples");
@@ -33,7 +41,7 @@ export function checkLifetimeBounds(samples, chromium) {
         ...(chromium ? { maxRssBytes: Math.max(...tail.map(s => s.rendererRssBytes)), rssPeakGrowthBytes: peakGrowth("rendererRssBytes"), rssRangeBytes: range("rendererRssBytes"), virtualRangeBytes: range("rendererVirtualBytes") } : {}) };
 }
 
-export async function runLifetime({ manifestPath, runtime, out, repeat = 500, browserName = "chromium", filter = "proc-fork/default", entry = "run_fixture", workerFault }) {
+export async function runLifetime({ manifestPath, runtime, out, repeat = 500, browserName = "chromium", filter = "proc-fork/default", entry = "run_fixture", entryArgs = [], workerFault }) {
     assert(Number.isSafeInteger(repeat) && repeat > 0);
     const manifest = validateManifest(JSON.parse(await readFile(manifestPath, "utf8")));
     const fixture = manifest.tests.find(({ name }) => name === filter);
@@ -53,10 +61,7 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
         await page.goto(server.url + "/harness/index.html");
         report.capabilities = await page.evaluate(() => globalThis.probeLane());
         await page.exposeFunction("recordLifetime", async ({ result, heapBytes, stats, heartbeat }) => {
-            if (entry === "run_fixture") checkResult(fixture, result);
-            else if (entry === "lifetime_smoke") assert.deepEqual(result, { cancelledWaits: 2048, timerCancels: 1000, wakeBeforeWait: 1000, deadlineKills: 16 });
-            else if (entry === "admission_smoke") assert.deepEqual(result, { admissionRejected: true, droppedOnce: true });
-            else throw new Error("unknown lifetime entry " + entry);
+            checkLifetimeResult(entry, fixture, result);
             ++report.completed;
             if (report.completed === 1 || report.completed % 25 === 0 || report.completed === repeat) {
                 const workerTargets = await liveWorkerCount(page, cdp);
@@ -77,7 +82,7 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
                 console.log(JSON.stringify(sample));
             }
         });
-        report.runtime = await within(page.evaluate(async ({ fixture, repeat, entry, workerFault }) => {
+        report.runtime = await within(page.evaluate(async ({ fixture, repeat, entry, entryArgs, workerFault }) => {
             const baseUrl = new URL("/runtime/", location.href);
             const { startCoordinator } = await import("/runtime/bootstrap.js");
             const { default: descriptor } = await import("/runtime/limits.js");
@@ -119,7 +124,7 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
                 }, receive);
                 for (let iteration = 0; iteration < repeat; ++iteration) {
                     const before = heartbeat;
-                    coordinator.postMessage({ type: "entry", entry, args: entry === "run_fixture" ? [JSON.stringify(fixture), bytes] : [] });
+                    coordinator.postMessage({ type: "entry", entry, args: entry === "run_fixture" ? [JSON.stringify(fixture), bytes] : entryArgs });
                     const result = JSON.parse((await until("result")).result);
                     if (entry === "lifetime_smoke" && heartbeat <= before) throw new Error("UI heartbeat stalled while guests and timers ran");
                     let stats;
@@ -135,7 +140,7 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
                 await until("stopped");
                 return { stopped: true, heartbeat };
             } finally { clearInterval(beat); coordinator?.terminate(); }
-        }, { fixture, repeat, entry, workerFault }), Math.max(60000, repeat * fixture.timeoutMs));
+        }, { fixture, repeat, entry, entryArgs, workerFault }), Math.max(60000, repeat * fixture.timeoutMs));
         assert.equal(report.completed, repeat);
         assert(report.runtime.stopped && report.runtime.heartbeat > 0);
         // After warmup, bounds include runtime allocator high-water space and browser
