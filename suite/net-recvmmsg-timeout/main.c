@@ -1,6 +1,6 @@
 // Linux net/socket.c __sys_recvmmsg validates the actual timeout pointer and
 // copies time back.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
@@ -12,7 +12,7 @@
 int main(void) {
   int failed = 0;
   errno = 0;
-  int r = recvmmsg(-1, 0, 0, 0, (struct timespec *)(uintptr_t)0x100);
+  int r = recvmmsg(-1, 0, 0, 0, (struct timespec*)(uintptr_t)0x100);
   if (r != -1 || errno != EFAULT) {
     printf("bad timeout: result %d errno %d, want EFAULT\n", r, errno);
     failed++;
@@ -33,7 +33,6 @@ int main(void) {
     failed++;
   }
   assert(close(fd[0]) == 0 && close(fd[1]) == 0);
-  if (failed)
-    return 1;
+  if (failed) return 1;
   puts("ok");
 }

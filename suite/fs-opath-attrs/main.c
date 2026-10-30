@@ -1,5 +1,5 @@
 // Linux fs/open.c fchmod/fchown use fdget, which rejects FMODE_PATH.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>

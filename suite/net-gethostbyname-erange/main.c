@@ -1,6 +1,6 @@
 // glibc nss/digits_dots.c __nss_hostname_digits_dots_context checks the
 // numeric result's storage before parsing it; a small buffer is ERANGE.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
@@ -25,12 +25,12 @@ int main(void) {
                          &error) == ERANGE);
   assert(result == NULL && error == -1 /* NETDB_INTERNAL */);
   for (unsigned i = 0; i < sizeof storage; ++i)
-    assert(((char *)&storage)[i] == 'X');
+    assert(((char*)&storage)[i] == 'X');
   char large[4096];
   assert(gethostbyname_r(name, &h, large, sizeof large, &result, &error) == 0);
   assert(result == &h && strcmp(h.h_name, name) == 0);
   assert(memcmp(h.h_addr_list[0], "\0\0\0\0", 4) == 0);
-  const char *names[] = {"127.0.0.1", "::1", "localhost"};
+  const char* names[] = {"127.0.0.1", "::1", "localhost"};
   for (unsigned i = 0; i < 3; ++i) {
     int family = i == 1 ? AF_INET6 : AF_INET;
     result = &h;

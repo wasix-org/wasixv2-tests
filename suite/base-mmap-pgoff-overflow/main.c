@@ -1,6 +1,6 @@
 // Linux mm/mmap.c do_mmap rejects 32-bit pgoff + pages overflow before
 // allocation.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
@@ -19,16 +19,14 @@ int main(void) {
   size_t lengths[] = {page, UINT32_MAX & ~(page - 1)};
   for (unsigned i = 0; i < 2; i++) {
     errno = 0;
-    void *p = mmap(0, lengths[i], PROT_READ, MAP_PRIVATE, fd, offset);
+    void* p = mmap(0, lengths[i], PROT_READ, MAP_PRIVATE, fd, offset);
     if (p != MAP_FAILED || errno != EOVERFLOW) {
       printf("mmap length %zu: errno %d, want EOVERFLOW\n", lengths[i], errno);
       failed++;
-      if (p != MAP_FAILED)
-        munmap(p, lengths[i]);
+      if (p != MAP_FAILED) munmap(p, lengths[i]);
     }
   }
   assert(close(fd) == 0);
-  if (failed)
-    return 1;
+  if (failed) return 1;
   puts("ok");
 }

@@ -1,5 +1,5 @@
 // POSIX sigismember errors and the corresponding sigaddset validation.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>

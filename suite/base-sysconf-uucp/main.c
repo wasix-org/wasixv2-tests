@@ -1,5 +1,5 @@
 // POSIX names the unsupported XSI UUCP option; unsupported keeps errno intact.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>

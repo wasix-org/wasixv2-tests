@@ -1,8 +1,8 @@
 // kernel/sys.c __sys_setresuid/__sys_setresgid leave distinct filesystem ids
 // intact on a no-op. fs/namei.c generic_permission must continue to use those
 // per-thread ids.
-// #User: 0:0
-// #ExpectedStdout: PASS
+//#User: 0:0
+//#ExpectedStdout: PASS
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -16,13 +16,13 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-#define CHECK(c)                                                               \
-  do {                                                                         \
-    if (!(c)) {                                                                \
-      fprintf(stderr, "line %d: %s (errno %d: %s)\n", __LINE__, #c, errno,     \
-              strerror(errno));                                                \
-      exit(1);                                                                 \
-    }                                                                          \
+#define CHECK(c)                                                           \
+  do {                                                                     \
+    if (!(c)) {                                                            \
+      fprintf(stderr, "line %d: %s (errno %d: %s)\n", __LINE__, #c, errno, \
+              strerror(errno));                                            \
+      exit(1);                                                             \
+    }                                                                      \
   } while (0)
 
 static pthread_barrier_t barrier;
@@ -32,7 +32,7 @@ static void rendezvous(void) {
   CHECK(rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD);
 }
 
-static void *worker(void *unused) {
+static void* worker(void* unused) {
   (void)unused;
   CHECK(syscall(SYS_setfsuid, 1000) == 0);
   CHECK(syscall(SYS_setfsgid, 1000) == 0);

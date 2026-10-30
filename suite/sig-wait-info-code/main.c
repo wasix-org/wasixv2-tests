@@ -1,5 +1,5 @@
 // glibc sigtimedwait folds Linux SI_TKILL from raise to POSIX SI_USER.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #define _GNU_SOURCE
 #include <assert.h>
 #include <signal.h>

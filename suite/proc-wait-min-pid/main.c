@@ -1,6 +1,6 @@
 // Linux kernel/exit.c kernel_wait4 validates options, then rejects INT_MIN
 // before negating a pgid.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>

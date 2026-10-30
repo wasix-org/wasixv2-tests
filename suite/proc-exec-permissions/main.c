@@ -1,10 +1,10 @@
 // fs/exec.c do_open_execat requests only MAY_EXEC. fs/namei.c
 // generic_permission chooses owner/group/other using filesystem ids, with root
 // requiring at least one execute bit.
-// #User: 0:0
-// #MappedDirectory: .:/t
-// #BuildEnv: WASIXCC_WASM_EXCEPTIONS=no
-// #ExpectedStdout: PASS
+//#User: 0:0
+//#MappedDirectory: .:/t
+//#BuildEnv: WASIXCC_WASM_EXCEPTIONS=no
+//#ExpectedStdout: PASS
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -16,13 +16,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define CHECK(c)                                                               \
-  do {                                                                         \
-    if (!(c)) {                                                                \
-      fprintf(stderr, "line %d: %s (errno %d: %s)\n", __LINE__, #c, errno,     \
-              strerror(errno));                                                \
-      exit(1);                                                                 \
-    }                                                                          \
+#define CHECK(c)                                                           \
+  do {                                                                     \
+    if (!(c)) {                                                            \
+      fprintf(stderr, "line %d: %s (errno %d: %s)\n", __LINE__, #c, errno, \
+              strerror(errno));                                            \
+      exit(1);                                                             \
+    }                                                                      \
   } while (0)
 
 static const struct {
@@ -56,9 +56,8 @@ static void copy_program(void) {
   CHECK(close(in) == 0 && close(out) == 0);
 }
 
-int main(int argc, char **argv) {
-  if (argc == 2)
-    return strcmp(argv[1], "child") != 0;
+int main(int argc, char** argv) {
+  if (argc == 2) return strcmp(argv[1], "child") != 0;
   CHECK(getuid() == 0);
   copy_program();
   for (unsigned i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
@@ -69,12 +68,11 @@ int main(int argc, char **argv) {
       CHECK(setgroups(0, NULL) == 0);
       CHECK(setgid(cases[i].gid) == 0);
       CHECK(setuid(cases[i].uid) == 0);
-      char *args[] = {"exec-permissions",
+      char* args[] = {"exec-permissions",
                       cases[i].allowed ? "child" : "unexpected", NULL};
-      char *env[] = {NULL};
+      char* env[] = {NULL};
       execve("/tmp/exec-permissions", args, env);
-      if (!cases[i].allowed && errno == EACCES)
-        _exit(0);
+      if (!cases[i].allowed && errno == EACCES) _exit(0);
       fprintf(stderr, "exec case %u mode %o uid %u gid %u: errno %d\n", i,
               cases[i].mode, cases[i].uid, cases[i].gid, errno);
       _exit(1);

@@ -1,6 +1,6 @@
 // Linux fs/read_write.c kiocb_set_rw_flags retains O_APPEND for positional
 // writes.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #define _GNU_SOURCE
 #include <assert.h>
 #include <fcntl.h>

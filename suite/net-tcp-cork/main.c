@@ -1,7 +1,7 @@
 // net/ipv4/tcp.c tcp_push, tcp_output.c tcp_write_xmit, and include/net/tcp.h
 // tcp_check_probe_timer: MSG_MORE withholds a partial segment until push or
 // probe.
-// #ExpectedStdout: ok
+//#ExpectedStdout: ok
 #include <assert.h>
 #include <errno.h>
 #include <netinet/in.h>
@@ -16,13 +16,12 @@ int main(void) {
   int listener = socket(AF_INET, SOCK_STREAM, 0);
   struct sockaddr_in address = {.sin_family = AF_INET,
                                 .sin_addr.s_addr = htonl(INADDR_LOOPBACK)};
-  assert(listener >= 0 &&
-         bind(listener, (void *)&address, sizeof address) == 0);
+  assert(listener >= 0 && bind(listener, (void*)&address, sizeof address) == 0);
   assert(listen(listener, 1) == 0);
   socklen_t size = sizeof address;
-  assert(getsockname(listener, (void *)&address, &size) == 0);
+  assert(getsockname(listener, (void*)&address, &size) == 0);
   int sender = socket(AF_INET, SOCK_STREAM, 0);
-  assert(sender >= 0 && connect(sender, (void *)&address, size) == 0);
+  assert(sender >= 0 && connect(sender, (void*)&address, size) == 0);
   int receiver = accept(listener, NULL, NULL);
   assert(receiver >= 0);
   char buf[16];

@@ -1,8 +1,8 @@
 // security/commoncap.c cap_task_fix_setuid uses
 // cap_drop_fs_set/cap_raise_fs_set. include/linux/capability.h CAP_FS_SET
 // includes CAP_LINUX_IMMUTABLE.
-// #User: 0:0
-// #ExpectedStdout: PASS
+//#User: 0:0
+//#ExpectedStdout: PASS
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -14,13 +14,13 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#define CHECK(c)                                                               \
-  do {                                                                         \
-    if (!(c)) {                                                                \
-      fprintf(stderr, "line %d: %s (errno %d: %s)\n", __LINE__, #c, errno,     \
-              strerror(errno));                                                \
-      exit(1);                                                                 \
-    }                                                                          \
+#define CHECK(c)                                                           \
+  do {                                                                     \
+    if (!(c)) {                                                            \
+      fprintf(stderr, "line %d: %s (errno %d: %s)\n", __LINE__, #c, errno, \
+              strerror(errno));                                            \
+      exit(1);                                                             \
+    }                                                                      \
   } while (0)
 
 int main(void) {
