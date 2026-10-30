@@ -96,7 +96,7 @@ const tests = selectCases(structuredClone(manifest.tests), { repeat, filter });
             const start = Date.now();
             try {
                 await within((async () => {
-                    if (test.network && test.network !== "absent") {
+                    if (test.network && test.network !== "absent" && !test.network.startsWith("switch")) {
                         network = await serveNetwork(test.network);
                         test.relayUrl = network.url;
                         test.env.push(...Object.entries(network.env));
