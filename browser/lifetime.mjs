@@ -21,6 +21,16 @@ export function checkLifetimeResult(entry, fixture, result) {
     else throw new Error("unknown lifetime entry " + entry);
 }
 
+export function recordLifetimeResult(report, entry, fixture, result) {
+    try { checkLifetimeResult(entry, fixture, result); }
+    catch (error) {
+        report.failedIteration = report.completed + 1;
+        report.failedResult = result;
+        throw error;
+    }
+    ++report.completed;
+}
+
 export function checkLifetimeBounds(samples, chromium) {
     const tail = samples.filter(({ iteration }) => iteration >= 25);
     assert(tail.length >= 2, "need warmup and tail samples");
@@ -61,8 +71,7 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
         await page.goto(server.url + "/harness/index.html");
         report.capabilities = await page.evaluate(() => globalThis.probeLane());
         await page.exposeFunction("recordLifetime", async ({ result, heapBytes, stats, heartbeat }) => {
-            checkLifetimeResult(entry, fixture, result);
-            ++report.completed;
+            recordLifetimeResult(report, entry, fixture, result);
             if (report.completed === 1 || report.completed % 25 === 0 || report.completed === repeat) {
                 const workerTargets = await liveWorkerCount(page, cdp);
                 assert(workerTargets >= stats.workers.length + 1, "worker inventory lost live runtime targets");

@@ -1,6 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { checkLifetimeBounds, checkLifetimeResult, liveWorkerCount } from "./lifetime.mjs";
+import { checkLifetimeBounds, checkLifetimeResult, recordLifetimeResult, liveWorkerCount } from "./lifetime.mjs";
+
+test("failed lifetime assertions preserve actual output without counting a completion", () => {
+    const report = { completed: 7 };
+    const result = { exitCode: 1, stdout: [98, 97, 100], stderr: [], files: [], relayTcp: false };
+    assert.throws(() => recordLifetimeResult(report, "relay_smoke", null, result));
+    assert.equal(report.completed, 7);
+    assert.equal(report.failedIteration, 8);
+    assert.deepEqual(report.failedResult, result);
+    const good = { completed: 0 };
+    recordLifetimeResult(good, "admission_smoke", null, { admissionRejected: true, droppedOnce: true });
+    assert.deepEqual(good, { completed: 1 });
+});
 
 test("relay lifetime acceptance requires exact success and empty process outputs", () => {
     const result = { exitCode: 0, stdout: [], stderr: [], files: [], relayTcp: true };
