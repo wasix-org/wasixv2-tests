@@ -202,3 +202,34 @@ served module as in the v2 lane; no fixtures are skipped or expected failures
 accepted. Linux behavior remains in the v2 kernel (`kernel/fork.c:copy_process`,
 `drivers/tty/n_tty.c:n_tty_set_termios`, `net/socket.c:__sys_socket`); HTTP layouts
 follow the historical WASIX v1 WAI binding.
+## Browser matrix and fork stress
+
+Select a required no-JSPI lane with `--browser chromium|firefox|webkit` (default
+Chromium). Install the lockfile-pinned engines with
+`npx playwright install chromium firefox webkit` from this directory. `CHROME`,
+`FIREFOX` and `WEBKIT` optionally select explicit executables for their matching
+engine. Browser name/version, page/worker capabilities and every failure remain
+in each run's artifacts; unsupported capabilities fail the lane.
+
+```sh
+node browser/run.mjs --browser firefox --manifest /exports/manifest.json \
+  --runtime /runtime/bundle --artifacts /results/firefox
+node browser/run.mjs --browser webkit --manifest /exports/manifest.json \
+  --runtime /runtime/bundle --artifacts /results/webkit
+node browser/run.mjs --manifest /exports/manifest.json --runtime /runtime/bundle \
+  --filter proc-fork/ --repeat 100 --artifacts /results/fork-stress
+```
+
+Filtering uses a literal name substring and an empty selection fails. Repetition
+preserves all fixture metadata and expectations; each iteration gets a fresh
+browser context/runtime heap and distinct artifacts. Stress therefore exercises
+worker startup, fork and complete TLS/worker retirement each time. Use ordinary
+same-runtime lifecycle tests separately to verify worker reuse.
+
+`--fresh-browser` starts a distinct browser process for each case and records
+`isolation: process-per-case` in capabilities.json. The default uses a distinct
+context per case. This is useful when diagnosing engine process/context reuse:
+run both modes and retain failing results rather than treating process isolation
+as proof that repeated-context lifecycle works. Local Playwright WebKit 27.2
+showed repeated-context crashes even in transport-only smoke; its WASIX lane is
+therefore additionally exercised with explicit process isolation.
