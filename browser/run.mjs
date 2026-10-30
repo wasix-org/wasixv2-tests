@@ -32,7 +32,7 @@ async function smokeInput(out) {
     };
 }
 
-export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke = false, executablePath, isolated = true, browserName = "chromium", repeat = 1, filter }) {
+export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke = false, executablePath, isolated = true, browserName = "chromium", repeat = 1, filter, launch, freshBrowser = false }) {
     out = resolve(out);
     await mkdir(dirname(out), { recursive: true });
     await mkdir(out); // Never mix a previous run's successful artifacts with this run.
@@ -61,30 +61,38 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
         if (runtime) mounts["/runtime/"] = resolve(runtime);
         server = await serve(mounts, { isolated });
         const launchOptions = browserOptions(browserName, executablePath);
-        browser = await ({ chromium, firefox, webkit })[browserName].launch(launchOptions);
+        const launchBrowser = () => (launch ?? ((options) => ({ chromium, firefox, webkit })[browserName].launch(options)))(launchOptions);
+        browser = await launchBrowser();
+        evidence.isolation = freshBrowser ? "process-per-case" : "context-per-case";
         evidence.browserName = browserName;
         evidence.browser = browser.version();
         evidence.executable = executablePath ?? `Playwright pinned ${browserName}`;
         for (let index = 0; index < tests.length; index++) {
+            if (freshBrowser && index > 0) {
+                await browser.close();
+                browser = await launchBrowser();
+            }
             const test = tests[index];
             const result = report.tests[index];
             const prefix = join(out, String(index).padStart(3, "0"));
             await writeFile(prefix + ".stdout", "");
             await writeFile(prefix + ".stderr", "");
-            const context = await browser.newContext();
+            let context;
+            let page;
             let log = "";
             let truncated = false;
             const append = (line) => {
                 if (log.length < MAX_LOG) log += line.slice(0, MAX_LOG - log.length) + "\n";
                 else truncated = true;
             };
-            const page = await context.newPage();
-            page.on("console", (message) => append(`[${message.type()}] ${message.text()}`));
-            page.on("pageerror", (error) => append(`[pageerror] ${error.stack}`));
-            page.on("requestfailed", (request) => append(`[requestfailed] ${request.url()} ${request.failure()?.errorText}`));
             const start = Date.now();
             try {
                 await within((async () => {
+                    context = await browser.newContext();
+                    page = await context.newPage();
+                    page.on("console", (message) => append(`[${message.type()}] ${message.text()}`));
+                    page.on("pageerror", (error) => append(`[pageerror] ${error.stack}`));
+                    page.on("requestfailed", (request) => append(`[requestfailed] ${request.url()} ${request.failure()?.errorText}`));
                     await page.goto(server.url + "/harness/index.html");
                     await page.waitForFunction(() => typeof globalThis.probeLane === "function");
                     try {
@@ -119,7 +127,11 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
                 result.error = error.stack ?? String(error);
             } finally {
                 // Closing the context terminates its dedicated workers, including a hung guest.
-                await context.close();
+                try { await context?.close(); }
+                catch (error) {
+                    result.status = "failed";
+                    result.error = `${result.error ?? ""}\ncontext cleanup failed: ${error}`;
+                }
                 result.durationMs = Date.now() - start;
                 result.logsTruncated = truncated;
                 await writeFile(prefix + ".console.log", log + (truncated ? "\n[console log truncated]\n" : ""));
@@ -149,10 +161,11 @@ async function main() {
     const { values } = parseArgs({ options: {
         manifest: { type: "string" }, runtime: { type: "string" }, artifacts: { type: "string", default: "artifacts/run" },
         browser: { type: "string", default: "chromium" }, repeat: { type: "string", default: "1" }, filter: { type: "string" },
+        "fresh-browser": { type: "boolean", default: false },
         smoke: { type: "boolean", default: false }, "b2-smoke": { type: "boolean", default: false },
     } });
     if (values.smoke === Boolean(values.manifest)) throw new Error("choose exactly one of --smoke or --manifest PATH");
-    const report = await run({ manifestPath: values.manifest, runtime: values.runtime, out: values.artifacts, smoke: values.smoke, b2Smoke: values["b2-smoke"], executablePath: process.env[values.browser === "chromium" ? "CHROME" : values.browser.toUpperCase()], browserName: values.browser, repeat: Number(values.repeat), filter: values.filter });
+    const report = await run({ manifestPath: values.manifest, runtime: values.runtime, out: values.artifacts, smoke: values.smoke, b2Smoke: values["b2-smoke"], executablePath: process.env[values.browser === "chromium" ? "CHROME" : values.browser.toUpperCase()], browserName: values.browser, repeat: Number(values.repeat), filter: values.filter, freshBrowser: values["fresh-browser"] });
     if (!report.passed) { console.error(report.error ?? "browser cases failed; see results.json"); process.exitCode = 1; }
 }
 

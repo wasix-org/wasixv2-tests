@@ -202,3 +202,11 @@ preserves all fixture metadata and expectations; each iteration gets a fresh
 browser context/runtime heap and distinct artifacts. Stress therefore exercises
 worker startup, fork and complete TLS/worker retirement each time. Use ordinary
 same-runtime lifecycle tests separately to verify worker reuse.
+
+`--fresh-browser` starts a distinct browser process for each case and records
+`isolation: process-per-case` in capabilities.json. The default uses a distinct
+context per case. This is useful when diagnosing engine process/context reuse:
+run both modes and retain failing results rather than treating process isolation
+as proof that repeated-context lifecycle works. Local Playwright WebKit 27.2
+showed repeated-context crashes even in transport-only smoke; its WASIX lane is
+therefore additionally exercised with explicit process isolation.
