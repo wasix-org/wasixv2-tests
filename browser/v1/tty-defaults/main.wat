@@ -16,4 +16,3 @@
         (if (call $get (i32.const 100)) (then (call $exit (i32.const 6))))
         (if (i32.ne (i32.load8_u (i32.const 119)) (i32.const 1)) (then (call $exit (i32.const 7))))
         (call $exit (i32.const 0))))
-    

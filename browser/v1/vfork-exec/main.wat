@@ -23,4 +23,3 @@
         (if (call $join (i32.const 200) (i32.const 0) (i32.const 220)) (then (call $exit (i32.const 4))))
         (if (i32.ne (i32.load16_u (i32.const 222)) (i32.const 3)) (then (call $exit (i32.const 5))))
         (call $exit (i32.const 0))))
-    

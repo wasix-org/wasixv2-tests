@@ -1,4 +1,4 @@
-(module 
+(module
   (import "wasix_32v1" "sock_open" (func $sock_open (param i32 i32 i32 i32) (result i32)))
   (import "wasix_32v1" "sock_bind" (func $sock_bind (param i32 i32) (result i32)))
   (import "wasix_32v1" "sock_listen" (func $sock_listen (param i32 i32) (result i32)))
@@ -55,7 +55,7 @@
         (data (i32.const 1630) "\98\08\00\00\10\00\00\00")
         ;; subscription at 3000: userdata 42, FD_READ; the fd is filled in
         (data (i32.const 3000) "\2a\00\00\00\00\00\00\00\01")
-(func (export "_start") 
+(func (export "_start")
     ;; server at [0], bound to an ephemeral port on 127.0.0.1
     (call $ok (call $sock_open (i32.const 1) (i32.const 1) (i32.const 6) (i32.const 0)) (i32.const 1))
     (call $ok (call $sock_bind (i32.load (i32.const 0)) (i32.const 1024)) (i32.const 2))
