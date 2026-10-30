@@ -1,0 +1,15 @@
+# Required WASIX v1 browser compatibility cases; never native xfail baselines.
+static/default
+preopens/default
+threads/default
+tty-defaults/default
+spawn/default
+vfork-exec/default
+socket/default
+http-no-provider/default
+fork/default
+console/default
+http-fetch/default
+command-defaults/default
+command-other-file/default
+trap-unreachable/default

@@ -47,3 +47,11 @@ test("a hung guest fails on its deadline", async () => {
     await assert.rejects(within(new Promise(() => {}), 5), /timeout/);
     assert.equal(await within(Promise.resolve(42), 1000), 42);
 });
+
+test("v1 capabilities and command defaults are typed metadata",()=>{
+    const manifest={version:1,lane:"sab-isolated-no-jspi",tests:[{...fixture(),console:true,http:true,commandDefaults:[{name:"show",argv0:"shown",args:["--main"],env:["B=default"]}]}]};
+    validateManifest(manifest);
+    for(const changes of [{http:"yes"},{console:1},{commandDefaults:[{name:"show",argv0:null,args:[],env:[],unknown:true}]},{commandDefaults:[{name:"show",argv0:1,args:[],env:[]}]}]) {
+        assert.throws(()=>validateManifest({...manifest,tests:[{...manifest.tests[0],...changes}]}));
+    }
+});

@@ -178,3 +178,27 @@ If any pinned source repository requires private access, configure
 `WASIXV2_TOOLCHAIN_TOKEN` with read access to those repositories. Missing tools,
 credentials, fixture builds and runtime capabilities fail the job; none are
 converted to skips or expected failures. No prebuilt guest Wasm is checked in.
+
+## WASIX v1 compatibility
+
+`--browser-v1-export DIR` and `--browser-v1-run DIR` select only `v1-allowlist.txt`
+from `browser/v1/`. These source WAT fixtures use the ordinary shell compiler,
+configuration parser, manifest and B8 facade. Binaryen `wasm-as`/`wasm-opt` must
+be on PATH. Their explicit `BuildEnv: WASIXCC_TARGET=wasm32-wasix` permits legacy
+imports without weakening the v2 build check. No prebuilt wasm is tracked.
+
+The fourteen required cases cover static output, preopens, shared-memory threads/futexes,
+detached tty defaults, spawn/file actions, vfork/exec, copied-memory fork, loopback
+sockets, unavailable HTTP capability, active v1 console mode changes, file-identity
+command defaults with argv/env, and HTTP through B8's independent I/O worker.
+An explicit unreachable fixture must exit with SIGILL (132).
+
+`BrowserConsole` and `BrowserHttp` are boolean fixture metadata;
+`BrowserCommandDefaults` passes typed JSON annotations to the existing file-identity
+API. `BrowserHttp` grants a Fetch provider and injects HTTP_BASE pointing at an
+ephemeral cross-origin mock: binary GET/POST, readable status500, CORS denial,
+connection failure and timeout/abort. The runner removes JSPI APIs from every
+served module as in the v2 lane; no fixtures are skipped or expected failures
+accepted. Linux behavior remains in the v2 kernel (`kernel/fork.c:copy_process`,
+`drivers/tty/n_tty.c:n_tty_set_termios`, `net/socket.c:__sys_socket`); HTTP layouts
+follow the historical WASIX v1 WAI binding.
