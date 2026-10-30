@@ -55,3 +55,11 @@ test("v1 capabilities and command defaults are typed metadata",()=>{
         assert.throws(()=>validateManifest({...manifest,tests:[{...manifest.tests[0],...changes}]}));
     }
 });
+
+test("acceptance actions and WEBC version must be explicit and bounded", () => {
+    const manifest = { version: 1, lane: "sab-isolated-no-jspi", tests: [{ ...fixture(), acceptance: { packageVersion: 2, actions: [{ after: "ready", input: [3], resize: [24, 80, 0, 0] }] } }] };
+    validateManifest(manifest);
+    for (const acceptance of [{ packageVersion: 1 }, { actions: [{ after: "" }] }, { actions: [{ after: "ready", input: [-1] }] }, { actions: [{ after: "ready", resize: [24] }] }, { unknown: true }]) {
+        assert.throws(() => validateManifest({ ...manifest, tests: [{ ...fixture(), acceptance }] }));
+    }
+});

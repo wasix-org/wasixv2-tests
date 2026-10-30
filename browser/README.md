@@ -233,3 +233,43 @@ run both modes and retain failing results rather than treating process isolation
 as proof that repeated-context lifecycle works. Local Playwright WebKit 27.2
 showed repeated-context crashes even in transport-only smoke; its WASIX lane is
 therefore additionally exercised with explicit process isolation.
+
+## R1/R3 package, filesystem and terminal acceptance
+
+`--browser-accept-export DIR` selects the 15 exact configurations in
+`accept-allowlist.txt`. It combines new source fixtures under `browser/accept`
+with the existing `tty-pty`, `tty-pty-jobctl` and `tty-mini-shell` fixtures;
+it does not build any other suite fixture. Run its manifest through `run.mjs`
+with the B8/B12 facade artifact, using the same no-JSPI capability checks.
+`--browser-accept-run DIR` exports then invokes that runner, like the other modes.
+
+`BrowserAcceptance` carries explicit example-only inputs: `packageVersion` (2/3),
+optional named `command`, `liveVfs`, and ordered `actions`. Each action waits for
+its nonempty `after` output marker and may send bounded input bytes, resize the
+console (`[rows, cols, xpixel, ypixel]`), hang up, close input, or perform the live
+VFS scenario. Complete marker lines use one guest write; echo stays entirely in
+the kernel. Every action must execute before EOF, otherwise the fixture fails.
+
+The package case source-builds its guest, then the browser constructs and parses
+real WEBC bytes (v3 or migrated v2), installs supplied dependencies and extra
+packages, prepares a default/named command and executes its VFS path. It checks
+annotations, explicit cwd/environment precedence, extra-command collision
+precedence, subdirectory containment and writable package overlays. Missing
+commands/dependencies and invalid bytes fail explicitly. Acquisition/auth/CORS,
+persistent package caches and SDK JavaScript wrappers remain separate work.
+
+Live VFS acceptance keeps a guest handle open while the embedder writes, renames,
+unlinks and replaces its pathname using explicit VFS credentials. Both sides
+check the old/new inode contents; foreign credentials return EACCES, a readonly
+mount EROFS, and a test provider returns EIO for lookup/read. The provider wrapper
+is test-only and uses the existing Provider protocol and memory driver.
+
+Console fixtures check canonical echo/erase, Ctrl-D followed by more input,
+raw control bytes without echo, blocked/busy SIGWINCH with every winsize field,
+background SIGTTIN then foreground Ctrl-C, caught hangup and default SIGHUP under
+read/busy guests. Input close is persistent hangup, distinct from terminal Ctrl-D.
+Linux `drivers/tty/tty_io.c:__tty_hangup` changes file operations before signalling
+the session, so an EOF racing ahead of SIGHUP must still wait for the signal.
+The reused PTY/shell fixtures add TOSTOP/SIGTTOU, stop/continue and foreground swaps.
+EOF, output and guest exit expectations use the existing strict result checker;
+there are no browser expected failures or skips.

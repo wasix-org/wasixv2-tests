@@ -108,6 +108,7 @@ pub struct Config {
     pub program_name: Option<String>,
     /// Native compatibility directives that browser export must not silently discard.
     pub browser_unsupported: Vec<String>,
+    pub browser_acceptance: serde_json::Value,
     pub browser_console: bool,
     pub browser_http: bool,
     pub browser_command_defaults: Vec<BrowserCommandDefaults>,
@@ -140,6 +141,7 @@ impl Config {
             expected_files: Vec::new(),
             program_name: None,
             browser_unsupported: Vec::new(),
+            browser_acceptance: serde_json::Value::Null,
             browser_console: false,
             browser_http: false,
             browser_command_defaults: Vec::new(),
@@ -352,6 +354,7 @@ impl Parser<'_> {
                 }
             }
             "BuildEnv" => self.build_env.push(key_value(arg, "BuildEnv")?),
+            "BrowserAcceptance" => c.browser_acceptance = serde_json::from_str(arg)?,
             "BrowserConsole" => c.browser_console = arg.parse()?,
             "BrowserHttp" => c.browser_http = arg.parse()?,
             "BrowserCommandDefaults" => c.browser_command_defaults = serde_json::from_str(arg)?,

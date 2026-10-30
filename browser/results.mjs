@@ -19,8 +19,24 @@ export function validateManifest(manifest) {
     assert(Array.isArray(manifest.tests) && manifest.tests.length > 0, "empty test selection");
     const names = new Set();
     for (const test of manifest.tests) {
-        knownKeys(test, ["name", "status", "assets", "module", "timeoutMs", "args", "env", "stdin", "cwd", "user", "programName", "buildEnv", "mounts", "expected", "error", "transportOnly", "console", "http", "commandDefaults"], "test");
+        knownKeys(test, ["name", "status", "assets", "module", "timeoutMs", "args", "env", "stdin", "cwd", "user", "programName", "buildEnv", "mounts", "expected", "error", "transportOnly", "console", "http", "commandDefaults", "acceptance"], "test");
         for (const key of ["console", "http"]) if (key in test) assert.equal(typeof test[key], "boolean", key + ": expected boolean");
+        if (test.acceptance != null) {
+            knownKeys(test.acceptance, ["packageVersion", "command", "actions", "liveVfs"], "acceptance");
+            if ("packageVersion" in test.acceptance) assert([2, 3].includes(test.acceptance.packageVersion), "invalid package version");
+            if ("command" in test.acceptance) assert(typeof test.acceptance.command === "string", "invalid package command");
+            if ("liveVfs" in test.acceptance) assert.equal(typeof test.acceptance.liveVfs, "boolean", "invalid liveVfs");
+            if ("actions" in test.acceptance) {
+                assert(Array.isArray(test.acceptance.actions), "actions: expected array");
+                for (const action of test.acceptance.actions) {
+                    knownKeys(action, ["after", "input", "resize", "hangup", "edit", "closeInput"], "acceptance action");
+                    assert(typeof action.after === "string" && action.after.length > 0, "action needs output marker");
+                    for (const key of ["hangup", "edit", "closeInput"]) if (key in action) assert.equal(typeof action[key], "boolean", "invalid action " + key);
+                    if ("input" in action) bytes(action.input, "action input");
+                    if ("resize" in action) assert(Array.isArray(action.resize) && action.resize.length === 4 && action.resize.every(n => Number.isInteger(n) && n >= 0 && n <= 65535), "invalid resize");
+                }
+            }
+        }
         if ("commandDefaults" in test) {
             assert(Array.isArray(test.commandDefaults), "commandDefaults: expected array");
             for (const command of test.commandDefaults) {
