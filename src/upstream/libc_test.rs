@@ -2,7 +2,7 @@
 //! that exits 0 and prints nothing on success, and api tests that only have to compile. Tests that
 //! fork are built for the asyncify configuration, the rest for exception handling.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::OnceLock;
 
@@ -188,7 +188,76 @@ fn prepare(suite: &Suite) -> Result<Prepared> {
     })
 }
 
+/// libc-test's static targets declare companion objects in their per-test .mk file.
+/// Compile their sources with the same configuration as the primary source; never
+/// substitute the dynamic target's .so dependency (functional/tls_align.mk).
+fn static_companions(source: &Path) -> Result<Vec<PathBuf>, Failure> {
+    let makefile = source.with_extension("mk");
+    let text = match std::fs::read_to_string(&makefile) {
+        Ok(text) => text,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(vec![]),
+        Err(err) => {
+            return Err(Failure::harness(format!(
+                "reading {}: {err}",
+                makefile.display()
+            )));
+        }
+    };
+    let mut sources = Vec::new();
+    for line in text.lines() {
+        let Some((key, value)) = line.split_once(":=") else {
+            continue;
+        };
+        if key.trim() != "$(N)-static.LDLIBS" {
+            continue;
+        }
+        for object in value.split_whitespace() {
+            let stem = object
+                .strip_prefix("$(B)/$(D)/")
+                .and_then(|v| v.strip_suffix(".o"))
+                .filter(|v| {
+                    !v.is_empty() && v.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
+                })
+                .ok_or_else(|| {
+                    Failure::harness(format!(
+                        "unsupported static dependency {object} in {}",
+                        makefile.display()
+                    ))
+                })?;
+            let companion = source.with_file_name(format!("{stem}.c"));
+            if !companion.is_file() {
+                return Err(Failure::harness(format!(
+                    "static companion {} is missing",
+                    companion.display()
+                )));
+            }
+            sources.push(companion);
+        }
+    }
+    Ok(sources)
+}
+
 impl Test {
+    fn compile(
+        &self,
+        suite: &Suite,
+        prepared: &Prepared,
+        config: BuildConfig,
+    ) -> Result<Command, Failure> {
+        let mut cmd = Command::new(&suite.cc);
+        wasixcc_env_for(&mut cmd, config)
+            .args(CFLAGS)
+            .arg("-I")
+            .arg(&prepared.common)
+            .arg("-I")
+            .arg(prepared.src.join("src/common"))
+            .arg(prepared.src.join("src").join(&self.file));
+        for source in static_companions(&prepared.src.join("src").join(&self.file))? {
+            cmd.arg(source);
+        }
+        Ok(cmd)
+    }
+
     pub fn run(&self, suite: &Suite) -> Result<Outcome, Failure> {
         let prepared = PREPARED
             .get_or_init(|| prepare(suite).map_err(|e| format!("{e:#}")))
@@ -197,19 +266,9 @@ impl Test {
         let dir = suite.build_root.join(&self.name);
         std::fs::create_dir_all(&dir).map_err(|e| Failure::harness(e.to_string()))?;
         let main = dir.join("main");
-        let compile = |config| {
-            let mut cmd = Command::new(&suite.cc);
-            wasixcc_env_for(&mut cmd, config)
-                .args(CFLAGS)
-                .arg("-I")
-                .arg(&prepared.common)
-                .arg("-I")
-                .arg(prepared.src.join("src/common"))
-                .arg(prepared.src.join("src").join(&self.file));
-            cmd
-        };
+        let compile = |config| self.compile(suite, prepared, config);
         if self.dir == "api" {
-            let mut cmd = compile(BuildConfig::ExceptionHandling);
+            let mut cmd = compile(BuildConfig::ExceptionHandling)?;
             cmd.args(API_CFLAGS)
                 .arg("-c")
                 .arg("-o")
@@ -218,7 +277,7 @@ impl Test {
             return Ok(Outcome::Passed);
         }
         build_program(&main, |config| {
-            let mut cmd = compile(config);
+            let mut cmd = compile(config)?;
             cmd.args(prepared.objects(config))
                 .arg("-o")
                 .arg(&main)
@@ -248,5 +307,46 @@ pub fn exit_cause(status: Option<i32>) -> String {
     match status {
         Some(s) => format!("exit status {s}"),
         None => "timeout".to_owned(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn static_tls_alignment_test_links_its_declared_companion() {
+        let src = crate::root().join("upstream/libc-test");
+        let prepared = Prepared {
+            src: src.clone(),
+            common: "common".into(),
+            objects: vec![],
+            objects_asyncify: vec![],
+        };
+        let suite = Suite {
+            wasmer: "wasmer".into(),
+            wrapper: vec![],
+            cc: "cc".into(),
+            cxx: "c++".into(),
+            build_root: PathBuf::new(),
+            timeout: std::time::Duration::from_secs(60),
+        };
+        let test = Test {
+            name: "libc-test/functional/tls_align".into(),
+            dir: "functional".into(),
+            file: "functional/tls_align.c".into(),
+        };
+        let companion = src.join("src/functional/tls_align_dso.c");
+        for config in [BuildConfig::ExceptionHandling, BuildConfig::Asyncify] {
+            let cmd = test.compile(&suite, &prepared, config).unwrap();
+            assert!(
+                cmd.get_args().any(|arg| arg == companion.as_os_str()),
+                "{cmd:?}"
+            );
+            assert!(
+                !cmd.get_args()
+                    .any(|arg| arg.to_string_lossy().ends_with(".so"))
+            );
+        }
     }
 }
