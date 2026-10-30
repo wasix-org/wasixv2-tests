@@ -370,7 +370,7 @@ mod tests {
             include_str!("../browser/allowlist.txt"),
         )
         .unwrap();
-        assert_eq!(selected.len(), 21);
+        assert_eq!(selected.len(), 22);
         for config in selected {
             validate(&config).unwrap();
         }
@@ -392,7 +392,7 @@ mod tests {
         let manifest: Value =
             serde_json::from_slice(&std::fs::read(out.join("manifest.json")).unwrap()).unwrap();
         let cases = manifest["tests"].as_array().unwrap();
-        assert_eq!(cases.len(), 21);
+        assert_eq!(cases.len(), 22);
         for case in cases {
             assert_eq!(case["status"], "export-failed");
             assert!(
