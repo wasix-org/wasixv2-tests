@@ -157,6 +157,3 @@ ltp/sched/sched_stress
 ## LTP setsockopt11 calls lib/tst_memutils.c:tst_pollute_memory to commit all reported guest free memory; the 2 GiB host scope OOM-kills the embedder. Exact module/argv also OOM-kill landed fix22 e62bcd36 twice; broader memory accounting remains paused. No cap increase or runtime workaround.
 ltp/cve/cve-2026-53362
 ltp/syscalls/setsockopt11
-
-## TFAIL: upper timer-latency sensitivity; epoll_pwait2 100ms mean100572.33us exceeded100537us ceiling. Landed train27 also fails under controlled descheduling; Linux fs/eventpoll.c:ep_poll and kernel/time/sleep_timeout.c:schedule_hrtimeout_range provide best-effort upper latency. No early-return failure; caps/deadlines unchanged
-ltp/syscalls/epoll_pwait03
