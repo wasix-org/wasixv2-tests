@@ -1410,6 +1410,42 @@ mod tests {
     }
 
     #[test]
+    fn time64_only_syscall_alias_has_no_legacy_timespec_variant() {
+        use std::io::Write;
+        use std::process::{Command, Stdio};
+        let source = std::fs::read_to_string(
+            super::src().join("testcases/kernel/syscalls/futex/futex_wait01.c"),
+        )
+        .unwrap();
+        let (_, array) = source
+            .split_once("static struct futex_test_variants variants[] = {")
+            .unwrap();
+        let (array, _) = array.split_once("};").unwrap();
+        for (legacy, time64, expected) in [(98, 422, 2), (202, -1, 1), (422, 422, 1)] {
+            let program = format!(
+                "#define __NR_futex {legacy}\n#define __NR_futex_time64 {time64}\n#define __LTP__NR_INVALID_SYSCALL -1\n#define FUTEX_FN_FUTEX 0\n#define FUTEX_FN_FUTEX64 1\n#define TST_KERN_OLD_TIMESPEC 0\n#define TST_KERN_TIMESPEC 1\nstruct futex_test_variants {{ int fntype, tstype; const char *desc; }};\nstatic struct futex_test_variants variants[] = {{{array}}};\n_Static_assert(sizeof(variants)/sizeof(variants[0]) == {expected}, \"wrong futex timeout ABI variants\");\n"
+            );
+            let mut cc = Command::new(std::env::var("HOSTCC").unwrap_or_else(|_| "cc".into()))
+                .args(["-std=c11", "-x", "c", "-fsyntax-only", "-"])
+                .stdin(Stdio::piped())
+                .stderr(Stdio::piped())
+                .spawn()
+                .unwrap();
+            cc.stdin
+                .take()
+                .unwrap()
+                .write_all(program.as_bytes())
+                .unwrap();
+            let output = cc.wait_with_output().unwrap();
+            assert!(
+                output.status.success(),
+                "legacy={legacy} time64={time64}: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+    }
+
+    #[test]
     fn legacy_shell_helpers_resolve_from_the_installed_binary_directory() {
         let test = super::Test {
             name: "ltp/capability/cap_bounds".into(),
