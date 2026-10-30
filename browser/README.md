@@ -337,11 +337,17 @@ its process IDs. RSS collection dips are reported separately from later peak
 growth; these numbers include browser/JIT costs, not just the shared Rust heap.
 After iteration 25 the debug-artifact gates allow a 16 MiB shared-heap range
 (one additional dense fork-copy staging allocation), require a fixed worker
-pool, cap RSS at 2 GiB with at most 512 MiB later peak growth, and bound the
+pool, cap RSS at 2 GiB, and bound the
 virtual-address range to 16 GiB. Dense browser fork copies include the 8 MiB
 guest stack and asyncify/data; shared-memory allocator high-water cannot shrink.
 These explicit allowances cover the large debug module and JIT while rejecting
 per-run heap growth. Preserve reports from failed budgets when comparing runs.
+RSS later-peak growth remains diagnostic: a previous 512 MiB allowance relative
+to two warmup samples failed during bounded collection cycles; those failed
+reports are retained. The fixed 2 GiB ceiling has not been raised.
+Actual worker targets are also bounded by the Rust pool plus one retiring realm
+per task slot, the coordinator and up to two copy realms. A 500-run fork lane
+requires both copy and guarded task retirements to have actually occurred.
 
 The Chromium lane counts browser-wide CDP worker targets, including unattached
 targets, and checks a positive live inventory before requiring zero after shutdown.

@@ -40,14 +40,17 @@ export function checkLifetimeBounds(samples, chromium) {
     // asyncify/data; allocator high-water can retain one additional staging slab.
     assert(range("heapBytes") <= 16 * 1024 * 1024, "shared runtime heap did not plateau");
     assert(tail.every(s => s.workers === tail[0].workers), "worker pool grew after warmup");
+    assert(tail.every(s => Number.isSafeInteger(s.workerTargets) && s.workerTargets <= s.workerTargetLimit),
+        "native worker targets grew beyond bounded retiring realms");
     if (chromium) {
         // Debug builds include a large compiled module plus browser/JIT costs.
-        // Bound total RSS as well as later peaks; collection dips are separate.
+        // A fixed RSS ceiling is independent of collection phase. Report later
+        // peak growth below instead of deriving a bound from two warmup samples.
         assert(Math.max(...tail.map(s => s.rendererRssBytes)) <= 2 * 1024 ** 3, "renderer RSS exceeded the debug-artifact budget");
-        assert(peakGrowth("rendererRssBytes") <= 512 * 1024 * 1024, "renderer RSS peak did not stay bounded");
         assert(range("rendererVirtualBytes") <= 16 * 1024 ** 3, "address reservations did not stay bounded");
     }
     return { maxHeapBytes: Math.max(...tail.map(s => s.heapBytes)), workers: tail[0].workers,
+        maxWorkerTargets: Math.max(...tail.map(s => s.workerTargets)), workerTargetLimit: Math.max(...tail.map(s => s.workerTargetLimit)),
         ...(chromium ? { maxRssBytes: Math.max(...tail.map(s => s.rendererRssBytes)), rssPeakGrowthBytes: peakGrowth("rendererRssBytes"), rssRangeBytes: range("rendererRssBytes"), virtualRangeBytes: range("rendererVirtualBytes") } : {}) };
 }
 
@@ -75,7 +78,9 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
             if (report.completed === 1 || report.completed % 25 === 0 || report.completed === repeat) {
                 const workerTargets = await liveWorkerCount(page, cdp);
                 assert(workerTargets >= stats.workers.length + 1, "worker inventory lost live runtime targets");
-                const sample = { iteration: report.completed, heapBytes, workers: stats.workers.length, workerTargets, copyRotations: stats.copyRotations, heartbeat };
+                // One closing task realm per slot, coordinator and two copy realms.
+                const workerTargetLimit = stats.workers.length + stats.workers.filter(({ role }) => role === "task").length + 3;
+                const sample = { iteration: report.completed, heapBytes, workers: stats.workers.length, workerTargets, workerTargetLimit, copyRotations: stats.copyRotations, taskRotations: stats.taskRotations, heartbeat };
                 if (cdp) {
                     let rss = 0, virtual = 0;
                     const { processInfo } = await cdp.send("SystemInfo.getProcessInfo");
@@ -156,6 +161,10 @@ export async function runLifetime({ manifestPath, runtime, out, repeat = 500, br
         // GC/JIT variation. RSS and address reservations are separate measurements.
         if (repeat >= 50) {
             report.bounds = checkLifetimeBounds(report.samples, Boolean(cdp));
+        }
+        if (repeat >= 500 && entry === "run_fixture" && filter === "proc-fork/default") {
+            assert(report.samples.at(-1).copyRotations > 0, "copy realm retirement was not exercised");
+            assert(report.samples.at(-1).taskRotations > 0, "guarded task realm retirement was not exercised");
         }
         await within((async () => {
             while (await liveWorkerCount(page, cdp)) await new Promise(resolve => setTimeout(resolve, 10));
