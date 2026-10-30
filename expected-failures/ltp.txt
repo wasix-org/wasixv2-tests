@@ -218,10 +218,6 @@ ltp/syscalls/process_vm_readv03
 ltp/syscalls/pselect01
 ltp/syscalls/pselect01_64
 
-## TFAIL: raw brk cannot expand into adjacent LTP fork-child mmap pages; restored fork_testrun reaches the syscall variant after libc brk TCONF (mm/mmap.c sys_brk collision rule)
-ltp/syscalls/brk01
-ltp/syscalls/brk02
-
 ## TFAIL: recv() read 16 bytes, expected 0, step 1
 ltp/syscalls/send02
 
