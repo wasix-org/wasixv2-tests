@@ -96,6 +96,8 @@ pub struct Config {
     pub prefilled_files: Vec<(PathBuf, String)>,
     pub expected_files: Vec<(PathBuf, String)>,
     pub program_name: Option<String>,
+    /// Native compatibility directives that browser export must not silently discard.
+    pub browser_unsupported: Vec<String>,
 }
 
 impl Config {
@@ -124,6 +126,7 @@ impl Config {
             prefilled_files: Vec::new(),
             expected_files: Vec::new(),
             program_name: None,
+            browser_unsupported: Vec::new(),
         }
     }
 
@@ -212,6 +215,7 @@ struct Parser<'a> {
     done: Vec<Config>,
     by_name: HashMap<String, usize>,
     build_env: Vec<(String, String)>,
+    browser_unsupported: Vec<String>,
 }
 
 fn parse_configs(default: &Config) -> Result<Vec<Config>> {
@@ -224,6 +228,7 @@ fn parse_configs(default: &Config) -> Result<Vec<Config>> {
         done: Vec::new(),
         by_name: HashMap::new(),
         build_env: Vec::new(),
+        browser_unsupported: Vec::new(),
     };
     for (i, line) in text.lines().enumerate() {
         if let Some(rest) = default.source.directive(line) {
@@ -235,11 +240,13 @@ fn parse_configs(default: &Config) -> Result<Vec<Config>> {
         current,
         mut done,
         build_env,
+        browser_unsupported,
         ..
     } = p;
     done.push(current);
     for config in &mut done {
         config.build_env = build_env.clone();
+        config.browser_unsupported = browser_unsupported.clone();
     }
     done.retain(|c| !c.is_abstract);
     ensure!(!done.is_empty(), "no runnable Config");
@@ -374,7 +381,9 @@ impl Parser<'_> {
             }
             "ProgramName" => c.program_name = Some(arg.to_owned()),
             // Only meaningful to wasmer's WASIX v1 suite.
-            "MinimalLibc" | "FileSystems" | "Toolchains" | "DefaultMappedDirectories" => {}
+            "MinimalLibc" | "FileSystems" | "Toolchains" | "DefaultMappedDirectories" => {
+                self.browser_unsupported.push(directive.trim().to_owned());
+            }
             other => bail!("unknown directive `{other}`"),
         }
         Ok(())
@@ -384,6 +393,25 @@ impl Parser<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compatibility_directives_do_not_create_an_extra_native_configuration() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(
+            dir.path().join("main.c"),
+            "//#FileSystems: memfs\n//#Config: named\n//#ExpectedStdout: ok\n",
+        )
+        .unwrap();
+        let config = Config::new(
+            Source::C("main.c".into()),
+            dir.path().into(),
+            "compat".into(),
+        );
+        let parsed = parse_configs(&config).unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].name, "named");
+        assert_eq!(parsed[0].browser_unsupported, ["FileSystems"]);
+    }
 
     #[test]
     fn permission_fixtures_can_request_root() {

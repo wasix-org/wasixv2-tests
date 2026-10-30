@@ -49,6 +49,16 @@ pub fn build(suite: &Suite, config: &Config, dir: &Path) -> Result<PathBuf, Fail
     let output = cmd
         .output()
         .map_err(|e| Failure::harness(format!("cannot run {cmd:?}: {e}")))?;
+    std::fs::write(
+        dir.join("build.log"),
+        format!(
+            "command: {cmd:?}\nstatus: {}\n--- stdout\n{}\n--- stderr\n{}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        ),
+    )
+    .map_err(|e| Failure::harness(format!("writing build.log: {e}")))?;
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -159,6 +169,28 @@ fn copy_tree(from: &Path, to: &Path) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::strip_location;
+
+    #[test]
+    fn failed_build_keeps_the_compiler_log() {
+        let source = tempfile::tempdir().unwrap();
+        let fixture = source.path().join("case");
+        std::fs::create_dir(&fixture).unwrap();
+        std::fs::write(fixture.join("main.c"), "int main(void) { return 0; }").unwrap();
+        let config = crate::fixture::discover(source.path()).unwrap().remove(0);
+        let suite = crate::Suite {
+            wasmer: Default::default(),
+            wrapper: Vec::new(),
+            cc: "false".into(),
+            cxx: "false".into(),
+            build_root: Default::default(),
+            timeout: std::time::Duration::from_secs(1),
+        };
+        let out = tempfile::tempdir().unwrap();
+        let build = out.path().join("build");
+        assert!(super::build(&suite, &config, &build).is_err());
+        let log = std::fs::read_to_string(build.join("build.log")).unwrap();
+        assert!(log.contains("status:") && log.contains("--- stderr"));
+    }
 
     #[test]
     fn locations_are_stripped() {

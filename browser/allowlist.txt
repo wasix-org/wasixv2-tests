@@ -1,0 +1,22 @@
+# Exact configurations; no prefix/glob selection and no native baseline blessing.
+base-args-env/default # argv, environment and auxv
+base-exit-status/exit # atexit and nonzero status
+base-exit-status/return # return from main
+base-exit-status/negative # low-byte exit encoding
+base-exit-status/underscore-exit # _exit and output flush
+base-exit-status/quick-exit # quick_exit handlers
+base-getrandom/default # browser entropy including large requests
+base-clocks/default # clocks; active-wall CPU accounting is explicit
+base-nanosleep/default # relative/absolute waits and errors
+base-timerfd/default # independent timer driver and readiness
+fs-rw-pread/default # memfs positioned/vectored I/O
+fs-readdir/default # directory cookies and cwd
+fs-rename/default # Linux rename validation
+fs-link-symlink/default # links and path traversal
+fs-openat2-in-root/default # VFS containment
+mmap-brk-layout/default # asyncify fork, pthread and separate unwind buffers
+mmap-file-private/default # copied private mappings
+mmap-file-shared-msync/default # copied mappings at synchronization points
+thr-atomic-wait-signal/default # instruction waits meet futexes and signals
+proc-fork/default # asyncify fork, wait, inherited descriptors and signals
+proc-execve/default # image replacement from a snapshotted mount
