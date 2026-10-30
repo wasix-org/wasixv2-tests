@@ -30,4 +30,3 @@ ltp/mm/shm_test01                                          # stress test near th
 ltp/cve/cve-2014-0196                                      # pty write race: timed out (60 s) in one of two full runs of merge train 12 (and in none before), passes alone
 ltp/cve/cve-2015-7550                                      # times out (60 s) under suite load since train 17; passes alone in 24 s. Investigate keyring read/revoke race cost in the validation phase
 posix/conformance/interfaces/pthread_kill/8-1              # signal stress: failed once under suite load in train 18, passes alone; capture and reproduce in the validation phase
-ltp/syscalls-ipc/semget05                                  # timing: 32000-array SEMMNI workload, 13s alone, 62.8s (>60s budget) once under full-suite load
