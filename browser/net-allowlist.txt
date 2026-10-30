@@ -15,3 +15,14 @@ relay/disconnect
 relay/overflow
 relay/ingress
 relay/peer
+relay/ephemeral
+switch/tcp4
+switch/udp4
+switch/tcp6
+switch/udp6
+icmp/connected4
+icmp/connected6
+icmp/recverr4
+icmp/recverr6
+icmp/unconnected4
+icmp/unconnected6

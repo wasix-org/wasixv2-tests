@@ -459,13 +459,17 @@ mod tests {
     fn network_metadata_and_required_cases_are_explicit() {
         let config = configs("//#BrowserNetwork: fidelity");
         assert_eq!(descriptor(&config[0], 1000)["network"], "fidelity");
+        for profile in ["switch4", "switch6", "ephemeral"] {
+            let configs = configs(&format!("//#BrowserNetwork: {profile}"));
+            assert_eq!(descriptor(&configs[0], 1000)["network"], profile);
+        }
         assert!(std::panic::catch_unwind(|| configs("//#BrowserNetwork: unsupported")).is_err());
         let cases = select(
             fixture::discover(&root().join("browser/net")).unwrap(),
             include_str!("../browser/net-allowlist.txt"),
         )
         .unwrap();
-        assert_eq!(cases.len(), 17);
+        assert_eq!(cases.len(), 28);
         for config in cases {
             assert!(config.browser_network.is_some());
             validate(&config).unwrap();

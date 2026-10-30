@@ -96,7 +96,7 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
             const start = Date.now();
             try {
                 await within((async () => {
-                    if (test.network && test.network !== "absent") {
+                    if (test.network && test.network !== "absent" && !test.network.startsWith("switch")) {
                         network = await serveNetwork(test.network);
                         test.relayUrl = network.url;
                         test.env.push(...Object.entries(network.env));

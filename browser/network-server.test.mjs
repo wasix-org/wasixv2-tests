@@ -60,3 +60,26 @@ test("urgent relay traverses native MSG_OOB sockets and preserves the mark",asyn
         assert.equal(text,"ab!cd");assert.deepEqual(marks,[2]);assert.equal(relay.stats.urgent,1);
     }finally{ws.terminate();await relay.close();}
 });
+
+test("port-zero TCP and UDP bindings return their actual classic local address",{timeout:5000},async()=>{
+    const relay=await serveNetwork("ephemeral"),ws=new utils.ws(relay.url);await once(ws,"open");
+    try{
+        for(const [id,op,flags] of [[9,15,[0,0,0]],[10,17,[0,0]]]){
+            let next=wait(ws);ws.send(Buffer.concat([u32(0),u32(op),u64(id),addr([127,0,0,1],0),Buffer.from(flags),option]));assert.equal((await next).readUInt32LE(12),0);
+            next=wait(ws);ws.send(Buffer.concat([u32(1),u64(id),u32(25),option]));const response=await next;
+            assert.equal(response.readUInt32LE(12),8);assert.equal(response.readUInt32LE(16),0);
+            assert.equal(response.readUInt16LE(24),Number(relay.env[id===9?"PUBLISH_TCP":"PUBLISH_UDP"]));assert.notEqual(response.readUInt16LE(24),0);
+        }
+        assert.equal(relay.stats.boundAddresses,2);
+    }finally{ws.terminate();await relay.close();}
+});
+
+test("native connected UDP reports actual ICMP refusal with destination and quote",{timeout:5000},async()=>{
+    const relay=await serveNetwork(),ws=new utils.ws(relay.url);await once(ws,"open");
+    try{
+        let next=wait(ws);ws.send(Buffer.concat([u32(0),u32(17),u64(9),addr([0,0,0,0],0),Buffer.from([0,0]),option]));await next;
+        next=wait(ws);ws.send(Buffer.concat([u32(3),u64(9),u64(5),Buffer.from("quote"),addr([192,0,2,1],Number(relay.env.UDP_REFUSED)),option]));const error=await next;
+        assert.equal(error.readUInt32LE(0),7);assert.equal(error.readUInt32LE(8),4);assert.equal(error.readBigUInt64LE(12),9n);
+        assert.equal(error.readUInt16LE(28),Number(relay.env.UDP_REFUSED));assert.equal(error.subarray(-5).toString(),"quote");assert.equal(relay.stats.icmpErrors,1);
+    }finally{ws.terminate();await relay.close();}
+});

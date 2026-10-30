@@ -37,7 +37,7 @@ export function validateManifest(manifest) {
                 }
             }
         }
-        if (test.network != null) assert(["classic","fidelity","absent","refused","disconnect","overflow","ingress","peer"].includes(test.network), "unknown network profile");
+        if (test.network != null) assert(["classic","fidelity","absent","refused","disconnect","overflow","ingress","peer","switch4","switch6","ephemeral"].includes(test.network), "unknown network profile");
         if ("relayUrl" in test) assert(typeof test.relayUrl === "string" && /^ws:\/\/127\.0\.0\.1:[0-9]+$/.test(test.relayUrl), "invalid local relay URL");
         if ("commandDefaults" in test) {
             assert(Array.isArray(test.commandDefaults), "commandDefaults: expected array");

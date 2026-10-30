@@ -369,7 +369,10 @@ impl Parser<'_> {
                         "disconnect",
                         "overflow",
                         "ingress",
-                        "peer"
+                        "peer",
+                        "switch4",
+                        "switch6",
+                        "ephemeral"
                     ]
                     .contains(&arg),
                     "unknown browser network profile"

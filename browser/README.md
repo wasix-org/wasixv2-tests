@@ -278,7 +278,7 @@ there are no browser expected failures or skips.
 ## Deterministic browser networking
 
 `--browser-net-export DIR` / `--browser-net-run DIR` reuse the fixture compiler,
-metadata checker and ordinary B8 facade for `net-allowlist.txt` (17 cases under
+metadata checker and ordinary B8 facade for `net-allowlist.txt` (28 cases under
 `browser/net`). Set the usual source compiler/sysroot environment, then run:
 
 ```sh
@@ -290,8 +290,9 @@ node browser/run.mjs --browser firefox --manifest /exports/network/manifest.json
 ```
 
 `BrowserNetwork` is an explicit profile (`classic`, `fidelity`, `absent`,
-`refused`, `disconnect`, `overflow`, `ingress`, `peer`). The runner starts fresh
-local services per case, injects ephemeral service ports and a local relay URL,
+`refused`, `disconnect`, `overflow`, `ingress`, `peer`, `ephemeral`, `switch4`,
+`switch6`). The runner starts fresh local services for relay cases, injects
+ephemeral service ports and a local relay URL,
 and retains service counts/maxima in each result. Unknown profiles fail export
 and validation. The required lane still removes JSPI in page and all workers.
 No external DNS or internet is used. Linux and Python 3 provide the deterministic
@@ -304,12 +305,22 @@ half and confirmed remote delivery, reset, actual host UDP-send error with a
 usable endpoint afterward, urgent mark/peek/POLLPRI, bounded nonblocking writes
 and ingress overflow, no provider, peer refusal, transport refusal/disconnect,
 TCP+UDP publication with reply source-port verification and two distinct
-Machines/Nets exchanging peer bytes via an explicit relay publication.
+Machines/Nets exchanging peer bytes via an explicit relay publication. Four
+switch cases instead create two separate Machines on one in-runtime switch,
+with no relay/host network service: IPv4/IPv6 TCP+UDP, exact guest source tuples,
+same guest ports, loopback privacy, half-close and next-I/O UDP refusal.
+The ephemeral case requests TCP+UDP port zero and verifies real ingress/reply
+source ports after classic GetAddrLocal completion. Six ICMP cases use actual
+Linux connected UDP host sockets to closed loopback ports: connected refusal on
+next send/recv, unconnected suppression and RECVERR quotes on both IP families.
 Refusal before flow creation returns ENETDOWN; a flow already accepted by a
 failed transport returns ECONNABORTED. Neither is silently treated as peer RST.
 
-Peer acceptance proves the supplied-Net/relay-publication path; it does not
-implement the separate vnet-switch's address routing or the SDK service-worker
-HTTP/WISP adapters. The matching runtime must expose the opt-in classic-fidelity
-profile. Stock relay changes and unsupported port-zero/connected-UDP error-queue
-features are documented in Wasmer's vnet-web/RELAY-FIDELITY.md.
+The matching B16 runtime must expose the switch, resolved publication API and
+opt-in destination-qualified classic-fidelity ICMP record. The deterministic
+relay reports actual native ECONNREFUSED with the quoted destination/payload;
+local send failures remain a separate event. These tests do not implement SDK
+service-worker HTTP/Ports/WISP wrappers or change stock relay deployments.
+Exact provider records and production follow-ups are documented in Wasmer's
+vnet-web/RELAY-FIDELITY.md. Both Chromium and Firefox run these 28 configurations
+with JSPI absent; no native expected-failure baseline is imported.
