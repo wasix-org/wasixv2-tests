@@ -1553,6 +1553,23 @@ mod tests {
     }
 
     #[test]
+    fn multicast_membership_budget_covers_the_declared_workload() {
+        use std::{path::Path, time::Duration};
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("upstream/ltp/testcases/network/multicast/mc_member");
+        let script = std::fs::read_to_string(source.join("mc_member.sh")).unwrap();
+        let groups = std::fs::read_to_string(source.join("datafiles/ManyGroups"))
+            .unwrap()
+            .lines()
+            .count();
+        let workload = Duration::from_secs(2 * (30 + groups as u64 * 10 + 60));
+        assert!(
+            super::declared_budget(&[super::script_metadata(&script)], Duration::from_secs(60))
+                > workload
+        );
+    }
+
+    #[test]
     fn shell_timeout_is_an_overall_duration() {
         use std::time::Duration;
         let budget =
