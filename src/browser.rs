@@ -388,7 +388,7 @@ mod tests {
             timeout: std::time::Duration::from_secs(1),
         };
         let out = temp.path().join("export");
-        assert!(!export(&suite, &out, false, false).unwrap());
+        assert!(!export(&suite, &out, false, false, false).unwrap());
         let manifest: Value =
             serde_json::from_slice(&std::fs::read(out.join("manifest.json")).unwrap()).unwrap();
         let cases = manifest["tests"].as_array().unwrap();
@@ -402,7 +402,7 @@ mod tests {
             );
         }
         assert!(
-            export(&suite, &out, false, false).is_err(),
+            export(&suite, &out, false, false, false).is_err(),
             "must not reuse a stale export"
         );
     }
