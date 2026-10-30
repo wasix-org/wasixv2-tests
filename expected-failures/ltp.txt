@@ -157,3 +157,6 @@ ltp/sched/sched_stress
 ## LTP setsockopt11 calls lib/tst_memutils.c:tst_pollute_memory to commit all reported guest free memory; the 2 GiB host scope OOM-kills the embedder. Exact module/argv also OOM-kill landed fix22 e62bcd36 twice; broader memory accounting remains paused. No cap increase or runtime workaround.
 ltp/cve/cve-2026-53362
 ltp/syscalls/setsockopt11
+
+## Canonical 60s deadline exceeded by SEMMNI exhaustion workload: semget05.c:setup allocates 32000 arrays and cleanup removes them; tst_set_runtime(32000/200) declares 160s/190s overall. Sole IPC invocation completes TPASS/exit0 at 62.83s; normal alias 13.08s and trace retry 13.15s. Timing/cost outlier remains unresolved; budgets unchanged.
+ltp/syscalls-ipc/semget05
