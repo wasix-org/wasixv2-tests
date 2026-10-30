@@ -5,7 +5,8 @@ use std::collections::{BTreeMap, VecDeque};
 use std::io::{Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
-use std::time::Instant;
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use crate::{Failure, Suite, fixture::Config, fixture::Host};
 
@@ -113,6 +114,17 @@ pub(crate) fn execute(
     cmd: &mut Command,
     stdin: Option<&[u8]>,
 ) -> Result<Output, Failure> {
+    execute_with_timeout_updates(suite, cmd, stdin, None)
+}
+
+pub(crate) type TimeoutFromLine = fn(&str) -> Option<Duration>;
+
+pub(crate) fn execute_with_timeout_updates(
+    suite: &Suite,
+    cmd: &mut Command,
+    stdin: Option<&[u8]>,
+    timeout_from_line: Option<TimeoutFromLine>,
+) -> Result<Output, Failure> {
     let mut child = cmd
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -125,16 +137,21 @@ pub(crate) fn execute(
     let writer = std::thread::spawn(move || {
         let _ = input.write_all(&stdin);
     });
-    let mut out = child.stdout.take().unwrap();
-    let mut err = child.stderr.take().unwrap();
-    let stdout = std::thread::spawn(move || read_bounded(&mut out));
-    let stderr = std::thread::spawn(move || read_bounded(&mut err));
-
-    let deadline = Instant::now() + suite.timeout;
+    let deadline = Arc::new(Mutex::new(Instant::now() + suite.timeout));
+    let stdout = capture_output(
+        child.stdout.take().unwrap(),
+        timeout_from_line,
+        deadline.clone(),
+    );
+    let stderr = capture_output(
+        child.stderr.take().unwrap(),
+        timeout_from_line,
+        deadline.clone(),
+    );
     let status = loop {
         match child.try_wait() {
             Ok(Some(status)) => break status.code().or(Some(-1)),
-            Ok(None) if Instant::now() >= deadline => {
+            Ok(None) if Instant::now() >= *deadline.lock().unwrap() => {
                 let _ = child.kill();
                 let _ = child.wait();
                 break None;
@@ -151,9 +168,59 @@ pub(crate) fn execute(
     })
 }
 
+fn capture_output(
+    mut stream: impl Read + Send + 'static,
+    timeout_from_line: Option<TimeoutFromLine>,
+    deadline: Arc<Mutex<Instant>>,
+) -> std::thread::JoinHandle<Vec<u8>> {
+    std::thread::spawn(move || {
+        let mut lines = BudgetLines::default();
+        read_bounded(&mut stream, |chunk| {
+            if let Some(parse) = timeout_from_line {
+                lines.observe(chunk, |line| {
+                    if let Some(budget) = parse(line)
+                        && let Some(expires) = Instant::now().checked_add(budget)
+                    {
+                        let mut deadline = deadline.lock().unwrap();
+                        *deadline = (*deadline).max(expires);
+                    }
+                });
+            }
+        })
+    })
+}
+
+/// Output reads need not end at newlines. Bound incomplete lines separately from
+/// retained output so a binary or unbounded line cannot grow this buffer.
+#[derive(Default)]
+struct BudgetLines {
+    pending: Vec<u8>,
+    overlong: bool,
+}
+
+impl BudgetLines {
+    fn observe(&mut self, chunk: &[u8], mut line: impl FnMut(&str)) {
+        for &byte in chunk {
+            if byte == b'\n' {
+                if !self.overlong
+                    && let Ok(text) = std::str::from_utf8(&self.pending)
+                {
+                    line(text);
+                }
+                self.pending.clear();
+                self.overlong = false;
+            } else if self.pending.len() < 1024 {
+                self.pending.push(byte);
+            } else {
+                self.overlong = true;
+            }
+        }
+    }
+}
+
 /// Reads `stream` to its end, keeping its first [`KEEP_HEAD`] and last [`KEEP_TAIL`] bytes, with
 /// a line in between that says how much was left out.
-fn read_bounded(stream: &mut impl Read) -> Vec<u8> {
+fn read_bounded(stream: &mut impl Read, mut observe: impl FnMut(&[u8])) -> Vec<u8> {
     let mut head = Vec::new();
     let mut tail = Vec::new();
     let mut dropped = 0usize;
@@ -163,6 +230,7 @@ fn read_bounded(stream: &mut impl Read) -> Vec<u8> {
             Ok(0) | Err(_) => break,
             Ok(n) => n,
         };
+        observe(&buf[..n]);
         let mut chunk = &buf[..n];
         if head.len() < KEEP_HEAD {
             let take = chunk.len().min(KEEP_HEAD - head.len());
@@ -306,15 +374,52 @@ mod tests {
     use super::*;
 
     #[test]
+    fn captured_watchdog_lines_extend_only_opted_in_runs() {
+        fn parse(line: &str) -> Option<Duration> {
+            (line == "watchdog").then_some(Duration::from_secs(30))
+        }
+        for enabled in [false, true] {
+            let before = Instant::now();
+            let deadline = Arc::new(Mutex::new(before));
+            let output = capture_output(
+                std::io::Cursor::new(b"watchdog\n"),
+                enabled.then_some(parse as TimeoutFromLine),
+                deadline.clone(),
+            )
+            .join()
+            .unwrap();
+            assert_eq!(output, b"watchdog\n");
+            let expires = *deadline.lock().unwrap();
+            if enabled {
+                assert!(expires >= before + Duration::from_secs(30));
+            } else {
+                assert_eq!(expires, before);
+            }
+        }
+    }
+
+    #[test]
+    fn budget_updates_survive_chunk_boundaries_and_overlong_lines() {
+        let mut lines = BudgetLines::default();
+        let mut seen = Vec::new();
+        lines.observe(b"first\nsec", |line| seen.push(line.to_owned()));
+        lines.observe(b"ond\n", |line| seen.push(line.to_owned()));
+        lines.observe(&[b'x'; 2048], |line| seen.push(line.to_owned()));
+        lines.observe(b"\nlast\n", |line| seen.push(line.to_owned()));
+        assert_eq!(seen, ["first", "second", "last"]);
+        assert!(lines.pending.is_empty());
+    }
+
+    #[test]
     fn read_bounded_keeps_both_ends_of_a_long_stream() {
         let lines: String = (0..2_000_000).map(|i| format!("line {i}\n")).collect();
-        let kept = read_bounded(&mut lines.as_bytes());
+        let kept = read_bounded(&mut lines.as_bytes(), |_| {});
         let kept = String::from_utf8(kept).unwrap();
         assert!(kept.len() < KEEP_HEAD + KEEP_TAIL + 100);
         assert!(kept.starts_with("line 0\n"));
         assert!(kept.ends_with("line 1999999\n"));
         assert!(kept.contains(" bytes left out ...]\nline "));
-        let short = read_bounded(&mut "a\nb\n".as_bytes());
+        let short = read_bounded(&mut "a\nb\n".as_bytes(), |_| {});
         assert_eq!(short, b"a\nb\n");
     }
 }

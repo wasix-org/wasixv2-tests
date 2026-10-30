@@ -404,6 +404,8 @@ pub struct Invocation {
     pub cwd: Option<String>,
     /// `UID[:GID]` to run as, instead of `wasmer run`'s default user.
     pub user: Option<String>,
+    /// An upstream runner can declare a new watchdog interval during setup.
+    pub timeout_from_line: Option<run::TimeoutFromLine>,
 }
 
 /// The result of running an `Invocation`.
@@ -483,7 +485,7 @@ fn wasm_command(suite: &Suite, inv: &Invocation, dir: &Path, userland: Option<&P
 
 pub fn run_wasm(suite: &Suite, inv: &Invocation, dir: &Path) -> Result<Ran, Failure> {
     let mut cmd = wasm_command(suite, inv, dir, userland()?);
-    let output = run::execute(suite, &mut cmd, None)?;
+    let output = run::execute_with_timeout_updates(suite, &mut cmd, None, inv.timeout_from_line)?;
     Ok(Ran { output, cmd })
 }
 
