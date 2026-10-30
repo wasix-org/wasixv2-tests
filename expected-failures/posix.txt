@@ -11,7 +11,6 @@ posix/conformance/interfaces/mmap/5-1
 posix/conformance/interfaces/mmap/6-1
 posix/conformance/interfaces/mmap/6-2
 posix/conformance/interfaces/mmap/6-3
-posix/conformance/interfaces/mq_close/2-1
 
 ## FAIL: Test FAILED: Did not trigger SIGSEGV
 posix/conformance/interfaces/munmap/1-1
@@ -25,18 +24,9 @@ posix/conformance/interfaces/mmap/11-3
 posix/conformance/interfaces/sem_unlink/3-1
 posix/conformance/interfaces/shm_unlink/9-1
 
-## FAIL: upstream sem_unlink4-1 uses an uninitialized semaphore name before any syscall; not evidence of a kernel permission failure
-posix/conformance/interfaces/sem_unlink/4-1
-
-## UNRESOLVED: Failed: execl() errno: No such file or directory
-posix/conformance/interfaces/sigaltstack/9-1
-
 ## UNRESOLVED: Test upstream/ltp-525608d49a6f/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
 
 ## build: error: call to undeclared function 'pthread_rwlockattr_setkind_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declara
 posix/conformance/interfaces/pthread_rwlock_rdlock/2-1
 posix/conformance/interfaces/pthread_rwlock_rdlock/2-2
-
-## timeout
-posix/conformance/interfaces/timer_settime/5-3

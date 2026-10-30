@@ -7,9 +7,6 @@
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
 
-## TBROK: Test killed! (timeout?)
-ltp/syscalls/futex_wait01
-
 ## TBROK: Unexpected error: CommitLimit < Committed_AS
 ltp/mm/overcommit_memory04
 ltp/mm/overcommit_memory05
@@ -28,18 +25,12 @@ ltp/syscalls/mmap03
 ltp/syscalls/sendfile04
 ltp/syscalls/sendfile04_64
 
-## TBROK: mremap() failed
-ltp/syscalls/mremap06
-
 ## TBROK: setsockopt(3, 263, 10, 0x7fe938, 4) failed: EINVAL (22)
 ltp/cve/cve-2020-14386
 ltp/syscalls/sendto03
 
 ## TBROK: unexpected VMA found.
 ltp/mm/vma01
-
-## TBROK: unshare(131072) failed: EPERM (1)
-ltp/syscalls/statmount03
 
 ## TFAIL: ARP neighbor cache state is missing (ipneigh01.sh stress auto-creation); the fork fixes ping option order, but /proc/net/arp is absent and the address is not listed
 ltp/net.tcp_cmds/ipneigh01_arp
@@ -94,9 +85,6 @@ ltp/syscalls/mincore03
 ## TFAIL: mlock2(0) locked 8 pages, expected 1
 ltp/syscalls/mlock201
 
-## TFAIL: mmap Error, errno=22 : Invalid argument
-ltp/syscalls/remap_file_pages01
-
 ## TFAIL: mprotect failed to exec: EACCES (13)
 ltp/syscalls/mprotect05
 
@@ -118,12 +106,6 @@ ltp/syscalls/shmdt01
 ## TFAIL: test PROT_NONE for mprotect failed
 ltp/syscalls/mprotect04
 
-## TFAIL: uaddr unmapped succeeded
-ltp/syscalls/futex_wake05
-
-## TFAIL: uaddr2 unmapped succeeded
-ltp/syscalls/futex_cmp_requeue03
-
 ## TFAIL: unexpected value in map, i=0,val=0x0
 ltp/mm/mmapstress04
 
@@ -132,27 +114,6 @@ ltp/syscalls/mseal01
 
 ## no ldd in the v2 userland (`ldd lddfile.out` finds no command, so no lddfile*.obj.so is listed); v2 programs are static
 ltp/commands/ldd01_sh
-
-## runs unprivileged (declares no root) but makes a network namespace with tst_ns_create: EPERM, as on Linux
-ltp/containers/netns_sysfs
-
-## runs unprivileged (declares no root): PR_CAPBSET_DROP and cap_set_proc need CAP_SETPCAP, EPERM as on Linux
-ltp/capability/cap_bounds
-
-## runs unprivileged (declares no root): dropping root privileges fails EPERM, as on Linux
-ltp/capability/filecaps
-
-## timeout
-ltp/fs/gf16
-ltp/fs/gf17
-ltp/fs/gf29
-ltp/fs/iogen01
-ltp/fs/rwtest01
-ltp/fs/rwtest02
-ltp/fs/rwtest03
-ltp/fs/rwtest04
-ltp/net.multicast/mc_member
-ltp/sched/sched_stress
 
 ## LTP setsockopt11 calls lib/tst_memutils.c:tst_pollute_memory to commit all reported guest free memory; the 2 GiB host scope OOM-kills the embedder. Exact module/argv also OOM-kill landed fix22 e62bcd36 twice; broader memory accounting remains paused. No cap increase or runtime workaround.
 ltp/cve/cve-2026-53362
