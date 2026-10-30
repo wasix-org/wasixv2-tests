@@ -4,9 +4,6 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## needs memory accounting (overcommit/min_free_kbytes enforcement), paused by the user: the test allocates until the 2 GiB scope OOM-kills it (also on train 21)
-ltp/mm/min_free_kbytes
-
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
 
@@ -146,13 +143,6 @@ ltp/capability/cap_bounds
 ltp/capability/filecaps
 
 ## timeout
-ltp/dma_thread_diotest/dma_thread_diotest1
-ltp/dma_thread_diotest/dma_thread_diotest2
-ltp/dma_thread_diotest/dma_thread_diotest3
-ltp/dma_thread_diotest/dma_thread_diotest4
-ltp/dma_thread_diotest/dma_thread_diotest5
-ltp/dma_thread_diotest/dma_thread_diotest6
-ltp/dma_thread_diotest/dma_thread_diotest7
 ltp/fs/gf16
 ltp/fs/gf17
 ltp/fs/gf29
@@ -164,5 +154,6 @@ ltp/fs/rwtest04
 ltp/net.multicast/mc_member
 ltp/sched/sched_stress
 
-## timeout: semget05.c setup allocates all32000 SEMMNI sets and dynamically sets160s runtime (LTP overall190s), which static metadata cannot declare; this registration exceeded60s under full-run load while its duplicate passed13.24s. Setup cost remains load-sensitive; no global deadline change
-ltp/syscalls-ipc/semget05
+## LTP setsockopt11 calls lib/tst_memutils.c:tst_pollute_memory to commit all reported guest free memory; the 2 GiB host scope OOM-kills the embedder. Exact module/argv also OOM-kill landed fix22 e62bcd36 twice; broader memory accounting remains paused. No cap increase or runtime workaround.
+ltp/cve/cve-2026-53362
+ltp/syscalls/setsockopt11
