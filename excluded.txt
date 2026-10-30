@@ -131,8 +131,6 @@ ltp/syscalls/futimesat01 # legacy syscall is absent from the asm-generic/riscv32
 ltp/syscalls/get_mempolicy01 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
 ltp/syscalls/get_mempolicy02 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
 ltp/syscalls/getcontext01 # musl does not implement the tested non-POSIX interface
-ltp/syscalls/getegid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
-ltp/syscalls/getegid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
 ltp/syscalls/geteuid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
 ltp/syscalls/geteuid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
 ltp/syscalls/getgid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
