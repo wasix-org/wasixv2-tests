@@ -6,6 +6,7 @@
 //! Many tests fail until wasixv2 is complete. `expected-failures/<suite>.txt` lists them; a listed
 //! test that fails passes the run, and one that passes fails it so the lists keep shrinking.
 
+mod browser;
 mod build;
 mod fixture;
 mod run;
@@ -97,13 +98,25 @@ fn env_path(var: &str) -> Option<PathBuf> {
 
 impl Suite {
     fn from_env() -> Result<Self> {
-        let wasmer = match env_path("WASIXV2_TESTS_WASMER") {
-            Some(wasmer) => wasmer,
-            None => find_on_path("wasmer").context(
-                "no `wasmer` on PATH; set WASIXV2_TESTS_WASMER to the wasmer binary under test",
-            )?,
+        Self::with_mode(false)
+    }
+
+    fn with_mode(build_only: bool) -> Result<Self> {
+        let wasmer = if build_only {
+            PathBuf::new()
+        } else {
+            match env_path("WASIXV2_TESTS_WASMER") {
+                Some(wasmer) => wasmer,
+                None => find_on_path("wasmer").context(
+                    "no `wasmer` on PATH; set WASIXV2_TESTS_WASMER to the wasmer binary under test",
+                )?,
+            }
         };
-        ensure!(wasmer.is_file(), "{} is not a file", wasmer.display());
+        ensure!(
+            build_only || wasmer.is_file(),
+            "{} is not a file",
+            wasmer.display()
+        );
         let timeout = match std::env::var("WASIXV2_TESTS_TIMEOUT_SECS") {
             Ok(secs) => secs.parse().context("WASIXV2_TESTS_TIMEOUT_SECS")?,
             Err(_) => DEFAULT_TIMEOUT_SECS,
@@ -273,6 +286,9 @@ fn main() -> ExitCode {
 }
 
 fn try_main() -> Result<ExitCode> {
+    if let Some(code) = browser::try_main()? {
+        return Ok(code);
+    }
     let args = Arguments::from_args();
     let build_root = build_root();
     let mut tests: Vec<(String, Test)> = fixture::discover(&root().join("suite"))?

@@ -64,6 +64,13 @@ Arguments are those of the standard Rust test harness. A failure report names it
 a test that fails at run time, the syscalls the kernel answered with `ENOSYS` (from a rerun with
 `RUST_LOG=wasixv2_trace=trace`) and the last syscalls made.
 
+## Browser runner
+
+The reviewed browser subset, build-only export, headless Playwright adapter, artifact
+contract and B2/B8 merge points are documented in [browser/README.md](browser/README.md).
+The initial lane requires SharedArrayBuffer and cross-origin isolation with JSPI disabled.
+It never consults or blesses the native expected-failure baselines.
+
 ## Tests that fork
 
 libc2 has two build configurations, each with its own sysroot: exception handling, wasixcc's
