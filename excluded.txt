@@ -60,7 +60,6 @@ posix/conformance/interfaces/pthread_attr_setstack/1-1 # queries an unset stack 
 posix/conformance/interfaces/pthread_attr_setstack/2-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
 posix/conformance/interfaces/pthread_attr_setstack/4-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
 posix/conformance/interfaces/pthread_create/1-6 # assumes strict guest priority scheduling; guest priorities are advisory to the host scheduler
-<<<<<<< HEAD
 
 # Validation package P1: unsupported platform/libc assumptions, with specific reasons.
 libc-test/functional/dlopen # dynamic loading tests; static v2 libc has no loader (dynamic linking is owned by another team)
@@ -268,10 +267,8 @@ ltp/sched/sched_football # requires strict SCHED_FIFO preemption; guest scheduli
 ltp/syscalls/munmap04 # its 65530-map limit cannot be reached in wasm32 with 64 KiB pages and six-page spacing; mmap exhausts address space first
 
 ltp/syscalls/epoll_wait06 # assumes one pipe buffer equals getpagesize(); half of the reported 64 KiB page frees multiple 4 KiB pipe buffers, so EPOLLOUT is correct
-=======
 ltp/mm/mmapstress03 # musl src/linux/sbrk.c:sbrk deliberately rejects nonzero increments, matching native Linux musl
 ltp/mm/mmapstress05 # musl src/linux/sbrk.c:sbrk deliberately rejects nonzero increments, matching native Linux musl
 posix/conformance/interfaces/pthread_rwlock_wrlock/3-1 # requires optional EDEADLK detection for a recursive write lock; native musl permits the calling thread to deadlock
 posix/conformance/interfaces/pthread_mutex_init/3-2 # cancels inside non-async-cancel-safe pthread_mutex_lock; native musl disables cancellation in __timedwait and waits indefinitely
 posix/conformance/interfaces/pthread_setcanceltype/1-1 # expects asynchronous cancellation inside non-async-cancel-safe pthread_mutex_lock; native musl masks cancellation in __timedwait
->>>>>>> input/vleft
