@@ -212,7 +212,12 @@ pub fn discover(
             let test = Test {
                 name: name.clone(),
                 root: needs_root(&declared),
-                budget: declared_budget(&declared, std::time::Duration::from_secs(30)),
+                budget: runtest_budget(
+                    &declared,
+                    &line,
+                    &scripts,
+                    std::time::Duration::from_secs(30),
+                ),
                 command,
                 args,
                 line,
@@ -266,6 +271,55 @@ fn needs_root(declared: &[serde_json::Value]) -> bool {
     declared
         .iter()
         .any(|test| has(test, "needs_root") || has(test, "caps"))
+}
+
+fn runtest_budget(
+    declared: &[serde_json::Value],
+    line: &str,
+    scripts: &[String],
+    default: std::time::Duration,
+) -> std::time::Duration {
+    let runtime = std::iter::once(line)
+        .chain(scripts.iter().flat_map(|text| text.lines()))
+        .filter_map(legacy_runtime)
+        .max();
+    let mut declared = declared.to_vec();
+    if let Some(runtime) = runtime {
+        declared.push(serde_json::json!({ "runtime": runtime }));
+    }
+    declared_budget(&declared, default)
+}
+
+/// Explicit durations of legacy workloads without tst_test metadata: growfiles.c
+/// documents -L in seconds, rwtest's -i distinguishes a seconds suffix from an
+/// iteration count, and sched_driver.c takes -t in hours.
+fn legacy_runtime(line: &str) -> Option<u64> {
+    fn argument<'a>(words: &[&'a str], flag: &str) -> Option<&'a str> {
+        let at = words.iter().position(|word| word.starts_with(flag))?;
+        let value = words[at].strip_prefix(flag)?;
+        if value.is_empty() {
+            words.get(at + 1).copied()
+        } else {
+            Some(value)
+        }
+    }
+    line.split(';')
+        .filter_map(|command| {
+            let words: Vec<_> = command.split_whitespace().collect();
+            let program = Path::new(*words.first()?).file_name()?.to_str()?;
+            match program {
+                "growfiles" => argument(&words, "-L")?.parse().ok(),
+                "rwtest" => argument(&words, "-i")?.strip_suffix('s')?.parse().ok(),
+                "sched_driver" => {
+                    let hours: f64 = argument(&words, "-t")?.parse().ok()?;
+                    std::time::Duration::try_from_secs_f64(hours * 3600.0)
+                        .ok()
+                        .map(|d| d.as_secs())
+                }
+                _ => None,
+            }
+        })
+        .max()
 }
 
 fn declared_budget(
@@ -1349,6 +1403,40 @@ mod tests {
         let mut inv = super::Invocation::default();
         test.in_shell(std::path::Path::new("/host/bin"), &mut inv);
         assert_eq!(inv.cwd.as_deref(), Some("/opt/ltp/testcases/bin"));
+    }
+
+    #[test]
+    fn legacy_workloads_use_their_requested_duration() {
+        use std::time::Duration;
+        let entries = super::runtest_entries(&super::src().join("runtest/fs")).unwrap();
+        for tag in [
+            "gf16", "gf17", "gf29", "rwtest01", "rwtest02", "rwtest03", "rwtest04", "iogen01",
+        ] {
+            let entry = entries.iter().find(|e| e.tag == tag).unwrap();
+            let seconds = if matches!(tag, "iogen01" | "gf16" | "gf17") {
+                180
+            } else {
+                120
+            };
+            assert!(
+                super::runtest_budget(&[], &entry.line, &[], Duration::from_secs(60))
+                    >= Duration::from_secs(seconds),
+                "{tag}: {}",
+                entry.line
+            );
+        }
+        assert!(
+            super::runtest_budget(
+                &[],
+                "sched_stress.sh",
+                &["sched_driver -s 0.9 -t 0.02 -p 2".into()],
+                Duration::from_secs(60)
+            ) >= Duration::from_secs(132)
+        );
+        assert_eq!(
+            super::runtest_budget(&[], "rwtest -i 50", &[], Duration::from_secs(60)),
+            Duration::from_secs(60)
+        );
     }
 
     #[test]
