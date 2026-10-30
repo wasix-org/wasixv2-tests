@@ -19,7 +19,17 @@ export function validateManifest(manifest) {
     assert(Array.isArray(manifest.tests) && manifest.tests.length > 0, "empty test selection");
     const names = new Set();
     for (const test of manifest.tests) {
-        knownKeys(test, ["name", "status", "assets", "module", "timeoutMs", "args", "env", "stdin", "cwd", "user", "programName", "buildEnv", "mounts", "expected", "error", "transportOnly"], "test");
+        knownKeys(test, ["name", "status", "assets", "module", "timeoutMs", "args", "env", "stdin", "cwd", "user", "programName", "buildEnv", "mounts", "expected", "error", "transportOnly", "console", "http", "commandDefaults"], "test");
+        for (const key of ["console", "http"]) if (key in test) assert.equal(typeof test[key], "boolean", key + ": expected boolean");
+        if ("commandDefaults" in test) {
+            assert(Array.isArray(test.commandDefaults), "commandDefaults: expected array");
+            for (const command of test.commandDefaults) {
+                knownKeys(command, ["name", "argv0", "args", "env"], "command defaults");
+                assert(typeof command.name === "string" && command.name.length, "missing command name");
+                assert(command.argv0 === null || typeof command.argv0 === "string", "invalid command argv0");
+                for (const key of ["args", "env"]) assert(Array.isArray(command[key]) && command[key].every(value=>typeof value === "string"), "invalid command " + key);
+            }
+        }
         knownKeys(test.expected, ["exitCode", "mustFail", "stdout", "stderr", "files"], "expectations");
         assert(typeof test.name === "string" && test.name.length > 0 && !names.has(test.name), "missing/duplicate test name");
         names.add(test.name);

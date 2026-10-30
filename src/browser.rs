@@ -16,18 +16,23 @@ pub(crate) fn try_main() -> Result<Option<ExitCode>> {
     let Some(mode) = args.first().and_then(|s| s.to_str()) else {
         return Ok(None);
     };
-    if !matches!(mode, "--browser-export" | "--browser-run") {
+    if !matches!(
+        mode,
+        "--browser-export" | "--browser-run" | "--browser-v1-export" | "--browser-v1-run"
+    ) {
         return Ok(None);
     }
+    let v1 = mode.starts_with("--browser-v1-");
+    let run = mode.ends_with("-run");
     ensure!(args.len() >= 2, "{mode} needs an export directory");
     ensure!(
-        mode == "--browser-run" || args.len() == 2,
+        run || args.len() == 2,
         "usage: --browser-export DIR (selection is browser/allowlist.txt)"
     );
     let out = std::path::absolute(PathBuf::from(&args[1]))?;
     let suite = Suite::with_mode(true)?;
-    let ok = export(&suite, &out)?;
-    if mode == "--browser-export" {
+    let ok = export(&suite, &out, v1)?;
+    if !run {
         return Ok(Some(if ok {
             ExitCode::SUCCESS
         } else {
@@ -165,7 +170,7 @@ fn descriptor(config: &Config, timeout_ms: u128) -> Value {
         "name": config.test_name(), "status": "ready", "module": "main.wasm",
         "args": config.args, "env": config.env, "stdin": config.stdin.clone().unwrap_or_default(),
         "cwd": config.current_directory, "user": config.user, "programName": config.program_name,
-        "buildEnv": config.build_env, "timeoutMs": timeout_ms,
+        "buildEnv": config.build_env, "console":config.browser_console, "http":config.browser_http, "commandDefaults":config.browser_command_defaults, "timeoutMs": timeout_ms,
         "expected": { "exitCode": config.expected_exit_code, "mustFail": config.must_fail,
             "stdout": config.expected_stdout, "stderr": config.expected_stderr, "files": [] },
         "mounts": []
@@ -214,11 +219,15 @@ fn export_case(suite: &Suite, config: &Config, out: &Path) -> Result<Value> {
     Ok(case)
 }
 
-fn export(suite: &Suite, out: &Path) -> Result<bool> {
+fn export(suite: &Suite, out: &Path, v1: bool) -> Result<bool> {
     ensure!(!suite.timeout.is_zero(), "browser timeout must be positive");
     let configs = select(
-        fixture::discover(&root().join("suite"))?,
-        include_str!("../browser/allowlist.txt"),
+        fixture::discover(&root().join(if v1 { "browser/v1" } else { "suite" }))?,
+        if v1 {
+            include_str!("../browser/v1-allowlist.txt")
+        } else {
+            include_str!("../browser/allowlist.txt")
+        },
     )?;
     // Create a new destination: a previous successful export must never survive a failed build.
     std::fs::create_dir_all(out.parent().context("export directory needs a parent")?)?;
@@ -345,7 +354,7 @@ mod tests {
             timeout: std::time::Duration::from_secs(1),
         };
         let out = temp.path().join("export");
-        assert!(!export(&suite, &out).unwrap());
+        assert!(!export(&suite, &out, false).unwrap());
         let manifest: Value =
             serde_json::from_slice(&std::fs::read(out.join("manifest.json")).unwrap()).unwrap();
         let cases = manifest["tests"].as_array().unwrap();
@@ -359,9 +368,37 @@ mod tests {
             );
         }
         assert!(
-            export(&suite, &out).is_err(),
+            export(&suite, &out, false).is_err(),
             "must not reuse a stale export"
         );
+    }
+
+    #[test]
+    fn v1_console_http_metadata_and_allowlist_are_explicit() {
+        let parsed = configs(
+            r#"//#BrowserConsole: true
+//#BrowserHttp: true
+//#BrowserCommandDefaults: [{"name":"show","argv0":"shown","args":["--main"],"env":["B=default"]}]
+"#,
+        );
+        let case = descriptor(&parsed[0], 1000);
+        assert_eq!(case["console"], true);
+        assert_eq!(case["http"], true);
+        assert_eq!(case["commandDefaults"][0]["name"], "show");
+        assert!(
+            crate::fixture::discover(Path::new("does-not-exist"))
+                .unwrap()
+                .is_empty()
+        );
+        let selected = select(
+            fixture::discover(&root().join("browser/v1")).unwrap(),
+            include_str!("../browser/v1-allowlist.txt"),
+        )
+        .unwrap();
+        assert_eq!(selected.len(), 14);
+        for config in selected {
+            validate(&config).unwrap();
+        }
     }
 
     #[test]

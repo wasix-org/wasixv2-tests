@@ -68,6 +68,16 @@ pub enum Host {
     Temp,
 }
 
+/// Explicit browser embedding inputs for the existing v1 command annotation API.
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BrowserCommandDefaults {
+    pub name: String,
+    pub argv0: Option<String>,
+    pub args: Vec<String>,
+    pub env: Vec<String>,
+}
+
 /// One runnable configuration of a fixture.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Config {
@@ -98,6 +108,9 @@ pub struct Config {
     pub program_name: Option<String>,
     /// Native compatibility directives that browser export must not silently discard.
     pub browser_unsupported: Vec<String>,
+    pub browser_console: bool,
+    pub browser_http: bool,
+    pub browser_command_defaults: Vec<BrowserCommandDefaults>,
 }
 
 impl Config {
@@ -127,6 +140,9 @@ impl Config {
             expected_files: Vec::new(),
             program_name: None,
             browser_unsupported: Vec::new(),
+            browser_console: false,
+            browser_http: false,
+            browser_command_defaults: Vec::new(),
         }
     }
 
@@ -336,6 +352,9 @@ impl Parser<'_> {
                 }
             }
             "BuildEnv" => self.build_env.push(key_value(arg, "BuildEnv")?),
+            "BrowserConsole" => c.browser_console = arg.parse()?,
+            "BrowserHttp" => c.browser_http = arg.parse()?,
+            "BrowserCommandDefaults" => c.browser_command_defaults = serde_json::from_str(arg)?,
             "Env" => c.env.push(key_value(arg, "Env")?),
             "MustFail" => c.must_fail = arg.parse()?,
             "ExpectedExitCode" => c.expected_exit_code = arg.parse()?,

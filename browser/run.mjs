@@ -5,6 +5,7 @@ import { resolve, dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { serve } from "./server.mjs";
+import { serveHttp } from "./http-server.mjs";
 import { validateManifest, checkResult, within, bytes } from "./results.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -39,6 +40,7 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
     let input;
     let browser;
     let server;
+    let http;
     const report = { version: 1, lane: "sab-isolated-no-jspi", infrastructureOnly: smoke, tests: [] };
     const evidence = { lane: report.lane, node: process.version, jspiEnforcement: "APIs removed before every served JS module; page and worker probes required", page: null, worker: null };
     try {
@@ -51,7 +53,11 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
         }
         validateManifest(manifest);
         if (!smoke && manifest.tests.some((test) => test.transportOnly)) throw new Error("transportOnly is reserved for --smoke");
-        const tests = [...manifest.tests];
+        const tests = structuredClone(manifest.tests);
+        if (tests.some(test=>test.http)) {
+            http = await serveHttp();
+            for (const test of tests) if (test.http) test.env.push(["HTTP_BASE",http.url]);
+        }
         if (b2Smoke) tests.push({ name: "infrastructure/b2-shared-runtime", status: "ready", timeoutMs: 45000, b2: true });
         report.tests = tests.map(({ name }) => ({ name, status: "failed", error: "browser did not start" }));
         const mounts = { "/harness/": here, "/fixtures/": smoke ? out : input };
@@ -132,7 +138,7 @@ export async function run({ manifestPath, runtime, out, smoke = false, b2Smoke =
         report.error = error.stack ?? String(error);
         for (const test of report.tests) if (test.status !== "passed") test.error = report.error;
     } finally {
-        for (const cleanup of [() => browser?.close(), () => server?.close()]) {
+        for (const cleanup of [() => browser?.close(), () => server?.close(), () => http?.close()]) {
             try { await cleanup(); }
             catch (error) { report.error ??= "cleanup failed: " + error; }
         }

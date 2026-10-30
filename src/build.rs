@@ -78,11 +78,20 @@ pub fn build(suite: &Suite, config: &Config, dir: &Path) -> Result<PathBuf, Fail
             format!("the build succeeded but {} is missing: {e}", main.display()),
         )
     })?;
-    if !imports_wasixv2(&wasm) {
+    let v1 = config
+        .build_env
+        .iter()
+        .rev()
+        .find(|(k, _)| k == "WASIXCC_TARGET")
+        .is_some_and(|(_, v)| v == "wasm32-wasix");
+    if !imports_target(&wasm, v1) {
         return Err(Failure::new(
-            "build: not a wasixv2 module",
-            "`main` imports nothing from `wasixv2`; does this wasixcc support \
-             WASIXCC_TARGET=wasm32-wasixv2?",
+            "build: module does not import the declared WASIX target",
+            if v1 {
+                "`main` has no recognized WASIX v1 imports"
+            } else {
+                "`main` imports nothing from `wasixv2`; does this wasixcc support WASIXCC_TARGET=wasm32-wasixv2?"
+            },
         ));
     }
     Ok(main)
@@ -128,13 +137,20 @@ pub(crate) fn strip_location(line: &str) -> &str {
     }
 }
 
-fn imports_wasixv2(wasm: &[u8]) -> bool {
+fn imports_target(wasm: &[u8], v1: bool) -> bool {
     for payload in wasmparser::Parser::new(0).parse_all(wasm) {
         let Ok(wasmparser::Payload::ImportSection(reader)) = payload else {
             continue;
         };
         for import in reader.into_imports().flatten() {
-            if import.module == "wasixv2" {
+            if if v1 {
+                matches!(
+                    import.module,
+                    "wasi_snapshot_preview1" | "wasix_32v1" | "wasix_http_client_v1"
+                )
+            } else {
+                import.module == "wasixv2"
+            } {
                 return true;
             }
         }
@@ -190,6 +206,31 @@ mod tests {
         assert!(super::build(&suite, &config, &build).is_err());
         let log = std::fs::read_to_string(build.join("build.log")).unwrap();
         assert!(log.contains("status:") && log.contains("--- stderr"));
+    }
+
+    #[test]
+    fn v1_namespace_requires_an_explicit_legacy_target() {
+        for name in [
+            "wasi_snapshot_preview1",
+            "wasix_32v1",
+            "wasix_http_client_v1",
+            "wasixv2",
+            "unknown",
+        ] {
+            // Source-built minimal import section; no guest artifact is checked in.
+            let mut wasm = b"\0asm\x01\0\0\0".to_vec();
+            wasm.extend_from_slice(&[1, 4, 1, 0x60, 0, 0]); // one () -> () type
+            let mut section = vec![1, name.len() as u8];
+            section.extend_from_slice(name.as_bytes());
+            section.extend_from_slice(&[1, b'f', 0, 0]);
+            wasm.extend_from_slice(&[2, section.len() as u8]);
+            wasm.extend_from_slice(&section);
+            assert_eq!(super::imports_target(&wasm, false), name == "wasixv2");
+            assert_eq!(
+                super::imports_target(&wasm, true),
+                !matches!(name, "wasixv2" | "unknown")
+            );
+        }
     }
 
     #[test]

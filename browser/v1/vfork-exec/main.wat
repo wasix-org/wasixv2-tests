@@ -1,0 +1,26 @@
+
+    (module
+      (import "wasix_32v1" "proc_fork_env" (func $vfork (param i32) (result i32)))
+      (import "wasix_32v1" "proc_exec3" (func $exec (param i32 i32 i32 i32 i32 i32 i32 i32 i32) (result i32)))
+      (import "wasix_32v1" "proc_join" (func $join (param i32 i32 i32) (result i32)))
+      (import "wasix_32v1" "proc_exit2" (func $exit (param i32)))
+      (memory (export "memory") 1)
+      (data (i32.const 1000) "/prog/child.wasm")
+      (data (i32.const 1032) "child\n")
+      (data (i32.const 1072) "/prog/missing")
+      (func (export "_start")
+        (if (call $vfork (i32.const 100)) (then (call $exit (i32.const 1))))
+        ;; the child: a missing program fails here, the real one returns in the parent
+        (if (i32.ne (call $exec (i32.const 1072) (i32.const 13) (i32.const 1032) (i32.const 6)
+                                (i32.const 0) (i32.const 0) (i32.const 0) (i32.const 0) (i32.const 0))
+                    (i32.const 44))
+          (then (call $exit (i32.const 2))))
+        (if (call $exec (i32.const 1000) (i32.const 16) (i32.const 1032) (i32.const 6)
+                        (i32.const 0) (i32.const 0) (i32.const 0) (i32.const 0) (i32.const 0))
+          (then (call $exit (i32.const 3))))
+        (i32.store8 (i32.const 200) (i32.const 1))
+        (i32.store (i32.const 204) (i32.load (i32.const 100)))
+        (if (call $join (i32.const 200) (i32.const 0) (i32.const 220)) (then (call $exit (i32.const 4))))
+        (if (i32.ne (i32.load16_u (i32.const 222)) (i32.const 3)) (then (call $exit (i32.const 5))))
+        (call $exit (i32.const 0))))
+    
