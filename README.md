@@ -185,6 +185,7 @@ Directives use the syntax of wasmer's WASIX v1 suite: `//#Directive: args` in C,
 | `BuildEnv:{k}={v}` | Environment for the build. |
 | `MappedDirectory:{host}:{guest}`, `CurrentDirectory:{path}` | Passed to `wasmer run` as `--volume` and `--cwd`. A relative host path is resolved in the test's build directory; `$temp` is a fresh directory. |
 | `PrefilledFile:{path}:{text}`, `ExpectedFile:{path}:{text}` | A file in the build directory written before the run, or checked after it. |
+| `User:{uid}:{gid}` | Passed to `wasmer run --user`; permission tests can start as guest root, as the upstream suites do. |
 | `ProgramName:{name}` | argv[0]. `wasmer run` cannot set it, so these tests fail. |
 | `Ignored:{reason}`, `UnixOnly:{bool}`, `IgnoreMacOS:{bool}`, `SkipEngine:cranelift:{reason}` | Skip the test. |
 | `MinimalLibc`, `FileSystems`, `Toolchains`, `DefaultMappedDirectories` | Accepted for compatibility with the v1 suite's syntax, and ignored. |

@@ -74,6 +74,9 @@ pub fn run_and_check(
     let mut temp_dirs = Vec::new();
     let mut cmd = suite.wasmer_command();
     cmd.arg("run");
+    if let Some(user) = &config.user {
+        cmd.arg("--user").arg(user);
+    }
     for (host, guest) in &config.mapped_directories {
         let host = match host {
             Host::Path(path) => dir.join(path),
