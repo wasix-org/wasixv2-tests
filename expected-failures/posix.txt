@@ -7,12 +7,6 @@
 ## FAIL: Combination of PROT_READ PROT_WRITE PROT_EXEC with MAP_PRIVATE has failed: Permission denied
 posix/conformance/interfaces/mmap/5-1
 
-## FAIL: Failed: first is prio: 5, should be: 20
-posix/conformance/interfaces/pthread_attr_setschedpolicy/2-1
-
-## FAIL: Failed: func: pthread_attr_setschedpolicy() rc: No error information (0)
-posix/conformance/interfaces/pthread_attr_setschedpolicy/4-1
-
 ## FAIL: TEST FAILED: semaphore does exist
 posix/conformance/interfaces/sem_unlink/4-1
 
@@ -21,7 +15,6 @@ posix/conformance/interfaces/mmap/6-1
 posix/conformance/interfaces/mmap/6-2
 posix/conformance/interfaces/mmap/6-3
 posix/conformance/interfaces/mq_close/2-1
-posix/conformance/interfaces/sigismember/5-1
 
 ## FAIL: Test FAILED: Cancel request timed out
 posix/conformance/interfaces/pthread_setcanceltype/1-1
@@ -34,52 +27,17 @@ posix/conformance/interfaces/munmap/1-2
 posix/conformance/interfaces/mmap/11-2
 posix/conformance/interfaces/mmap/11-3
 
-## FAIL: Test FAILED: The cause of the signal hasn't been stored in the si_code
-posix/conformance/interfaces/sigwaitinfo/6-1
-
 ## FAIL: Test upstream/ltp-801f6ad4b8ec/testcases/open_posix_testsuite/conformance/interfaces/sem_unlink/3-1.c FAILED: Test failed in child
 posix/conformance/interfaces/sem_unlink/3-1
 
 ## FAIL: Testing with user 'nobody' (uid: 65534)
 posix/conformance/interfaces/shm_unlink/9-1
 
-## FAIL: The target process does not preempt the calling process
-posix/conformance/interfaces/sched_setparam/9-1
-
-## FAIL: off: ffffffff0000, len: ffff0000
-posix/conformance/interfaces/mmap/31-1
-
-## FAIL: unexpected error: pthread_attr_setschedparam 3-1: pthread_attr_setschedparam did not fail
-posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-1
-
-## FAIL: unexpected error: pthread_attr_setschedparam 3-2: pthread_attr_setschedparam did not fail
-posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-2
-
-## UNRESOLVED: Error setting protocol to 2
-posix/conformance/interfaces/pthread_mutexattr_getprotocol/1-2
-posix/conformance/interfaces/pthread_mutexattr_setprotocol/1-1
-
 ## UNRESOLVED: Failed: execl() errno: No such file or directory
 posix/conformance/interfaces/sigaltstack/9-1
 
 ## UNRESOLVED: Test upstream/ltp-801f6ad4b8ec/testcases/open_posix_testsuite/conformance/interfaces/fork/7-1.c unresolved: got 2 (No such file or directory) on line 121 (Could
 posix/conformance/interfaces/fork/7-1
-
-## UNRESOLVED: The difference between the processes is not representative.
-posix/conformance/interfaces/sched_setparam/2-1
-posix/conformance/interfaces/sched_setparam/2-2
-
-## UNRESOLVED: unexpected error: pthread_attr_getstack 1-1: pthread_attr_getstack: No error information
-posix/conformance/interfaces/pthread_attr_getstack/1-1
-
-## UNRESOLVED: unexpected error: pthread_attr_setstack 6-1: pthread_attr_getstack: No error information
-posix/conformance/interfaces/pthread_attr_setstack/6-1
-
-## UNRESOLVED: unexpected error: pthread_attr_setstack 7-1: pthread_attr_getstack: No error information
-posix/conformance/interfaces/pthread_attr_setstack/7-1
-
-## UNRESOLVED: unexpected error: pthread_attr_setstacksize 4-1: out of memory while allocating the stack memory: Out of memory
-posix/conformance/interfaces/pthread_attr_setstacksize/4-1
 
 ## build: error: call to undeclared function 'pthread_rwlockattr_setkind_np'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declara
 posix/conformance/interfaces/pthread_rwlock_rdlock/2-1

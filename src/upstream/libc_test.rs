@@ -23,6 +23,9 @@ const CFLAGS: &[&str] = &[
     "-Wno-missing-braces",
     "-Wno-unused",
     "-Wno-overflow",
+    // These tests intentionally exercise constant/boolean and chained expressions.
+    "-Wno-switch-bool",
+    "-Wno-parentheses",
     "-Wno-unknown-pragmas",
     "-fno-builtin",
     "-Werror=implicit-function-declaration",
@@ -38,6 +41,9 @@ const API_CFLAGS: &[&str] = &[
     "-Werror",
     "-Wno-unused",
     "-Wno-strict-prototypes",
+    "-Wno-switch-bool",
+    "-Wno-c23-extensions",
+    "-Wno-parentheses",
     "-D_XOPEN_SOURCE=700",
 ];
 const LDLIBS: &[&str] = &[

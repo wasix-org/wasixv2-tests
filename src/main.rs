@@ -42,6 +42,7 @@ fn suite_of(name: &str) -> &'static str {
 const DEFAULT_TIMEOUT_SECS: u64 = 60;
 
 /// Everything a test needs from the environment.
+#[derive(Clone)]
 pub struct Suite {
     pub wasmer: PathBuf,
     /// A command line every `wasmer` run goes through, such as one that caps its memory.

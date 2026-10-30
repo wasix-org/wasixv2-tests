@@ -60,3 +60,212 @@ posix/conformance/interfaces/pthread_attr_setstack/1-1 # queries an unset stack 
 posix/conformance/interfaces/pthread_attr_setstack/2-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
 posix/conformance/interfaces/pthread_attr_setstack/4-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
 posix/conformance/interfaces/pthread_create/1-6 # assumes strict guest priority scheduling; guest priorities are advisory to the host scheduler
+
+# Validation package P1: unsupported platform/libc assumptions, with specific reasons.
+libc-test/functional/dlopen # dynamic loading tests; static v2 libc has no loader (dynamic linking is owned by another team)
+libc-test/functional/tls_align_dlopen # dynamic loading tests; static v2 libc has no loader (dynamic linking is owned by another team)
+libc-test/functional/tls_init_dlopen # dynamic loading tests; static v2 libc has no loader (dynamic linking is owned by another team)
+libc-test/regression/raise-race # musl raw clone(CLONE_THREAD) is unsupported by policy; use pthread_create, as for LTP clone08
+libc-test/regression/tls_get_new-dtv # dynamic loading tests; static v2 libc has no loader (dynamic linking is owned by another team)
+ltp/commands/gdb01_sh # requires native ELF binaries or ELF-oriented binutils/debugger; v2 executables are WebAssembly
+ltp/cve/cve-2011-2496 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/cve/cve-2015-3290 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/cve/cve-2016-10044 # requires native tty line disciplines, sound/TUN hardware, or a native aio-ring mapping
+ltp/cve/cve-2017-1000364 # native stack guard-gap placement; the WebAssembly call stack is outside guest linear memory
+ltp/cve/cve-2017-1000380 # requires native tty line disciplines, sound/TUN hardware, or a native aio-ring mapping
+ltp/cve/cve-2017-17053 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/cve/cve-2017-2636 # requires native tty line disciplines, sound/TUN hardware, or a native aio-ring mapping
+ltp/cve/cve-2018-1000204 # requires block devices and a mountable device filesystem
+ltp/cve/cve-2018-7566 # requires native tty line disciplines, sound/TUN hardware, or a native aio-ring mapping
+ltp/cve/cve-2020-11494 # requires native tty line disciplines, sound/TUN hardware, or a native aio-ring mapping
+ltp/cve/cve-2020-25704 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/cve/cve-2020-36557 # requires native tty line disciplines, sound/TUN hardware, or a native aio-ring mapping
+ltp/fs/quota_remount_test01 # requires block devices and a mountable device filesystem
+ltp/mm/mmapstress08 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/mm/oom02 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/mm/vma02 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/mm/vma03 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/mm/vma04 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/net.features/bbr01 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/bbr01_ipv6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/bbr02 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/bbr02_ipv6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/busy_poll01 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/busy_poll01_ipv6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/busy_poll02 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/busy_poll02_ipv6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/busy_poll03 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/busy_poll03_ipv6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/dctcp_ipv4_01 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/dctcp_ipv6_01 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/mpls01 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/mpls02 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/mpls02_ipv6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/mpls03 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/mpls03_ipv6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/mpls04 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/tcp_fastopen # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/tcp_fastopen6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/wireguard01 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.features/wireguard01_ipv6 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/net.tcp_cmds/tc01 # requires tc/ethtool/modprobe or native virtual-link drivers absent from the v2 userland/kernel
+ltp/pty/pty04 # requires SLIP or SLCAN tty line disciplines and their network devices
+ltp/pty/pty05 # requires the native N_HDLC tty line discipline
+ltp/pty/pty06 # requires virtual consoles and VT_DISALLOCATE racing native tty release
+ltp/pty/pty07 # requires virtual consoles and VT_DISALLOCATE/VT_RESIZEX
+ltp/syscalls/cacheflush01 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/syscalls/chown01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/chown02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/chown03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/chown04_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/chown05_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/fchown01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/fchown02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/fchown03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/fchown04_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/fchown05_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/fcntl35 # pipe buffers use 4 KiB pages by design while AT_PAGESZ is the 64 KiB WebAssembly page
+ltp/syscalls/fcntl35_64 # pipe buffers use 4 KiB pages by design while AT_PAGESZ is the 64 KiB WebAssembly page
+ltp/syscalls/fork05 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/syscalls/futimesat01 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/get_mempolicy01 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/get_mempolicy02 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/getcontext01 # musl does not implement the tested non-POSIX interface
+ltp/syscalls/getegid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getegid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/geteuid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/geteuid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getgid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getgid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getgroups01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getgroups03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/gethostid01 # musl lacks sethostid, which the test requires to restore the host identifier
+ltp/syscalls/getresgid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getresgid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getresgid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getresuid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getresuid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getresuid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getrlimit03 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/gettimeofday01 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/gettimeofday02 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/getuid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getuid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/getxattr05 # requires libacl for constructing the ACL test fixture; this test build has no libacl
+ltp/syscalls/ioctl03 # requires native tty line disciplines, sound/TUN hardware, or a native aio-ring mapping
+ltp/syscalls/ioctl_sg01 # requires block devices and a mountable device filesystem
+ltp/syscalls/ioperm01 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/syscalls/ioperm02 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/syscalls/iopl01 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/syscalls/iopl02 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/syscalls/lchown01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/lchown02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/linkat02 # requires block devices and a mountable device filesystem
+ltp/syscalls/listxattr04 # requires libacl for constructing the ACL test fixture; this test build has no libacl
+ltp/syscalls/mallinfo02 # musl does not implement the tested non-POSIX interface
+ltp/syscalls/mallinfo2_01 # musl does not implement the tested non-POSIX interface
+ltp/syscalls/mallopt01 # musl does not implement the tested non-POSIX interface
+ltp/syscalls/mbind01 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/mbind02 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/mbind03 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/mbind04 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/migrate_pages01 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/migrate_pages02 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/migrate_pages03 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/mknodat02 # requires block devices and a mountable device filesystem
+ltp/syscalls/mmap15 # wasm32 has no kernel half of the virtual address space; the test assumes a native user/kernel split
+ltp/syscalls/mmap18 # native stack guard-gap placement; the WebAssembly call stack is outside guest linear memory
+ltp/syscalls/move_pages01 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages02 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages03 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages04 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages05 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages06 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages07 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages09 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages10 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages11 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/move_pages12 # requires libnuma and NUMA topology, which this WebAssembly system does not provide
+ltp/syscalls/pathconf02 # musl pathconf ignores the path and reports compile-time limits
+ltp/syscalls/pipe2_04 # pipe buffers use 4 KiB pages by design while AT_PAGESZ is the 64 KiB WebAssembly page
+ltp/syscalls/profil01 # musl does not implement the tested non-POSIX interface
+ltp/syscalls/rename11 # requires block devices and a mountable device filesystem
+ltp/syscalls/renameat01 # requires block devices and a mountable device filesystem
+ltp/syscalls/setfsgid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setfsgid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setfsgid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setfsuid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setfsuid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setfsuid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setfsuid04_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setgid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setgid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setgid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setgroups01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setgroups02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setgroups03 # musl NGROUPS_MAX is 32 while the kernel accepts 65536 supplementary groups
+ltp/syscalls/setgroups03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setregid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setregid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setregid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setregid04_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresgid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresgid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresgid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresgid04_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresuid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresuid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresuid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresuid04_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setresuid05_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setreuid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setreuid02_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setreuid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setreuid04_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setreuid05_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setreuid06_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setreuid07_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setuid01_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setuid03_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/setuid04_16 # 16-bit uid/gid syscalls exist on legacy i386/arm/s390/m68k, not asm-generic/riscv32
+ltp/syscalls/sgetmask01 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/signal06 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/syscalls/socketcall01 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/socketcall02 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/socketcall03 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/ssetmask01 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/switch01 # requires native architecture instructions, registers or an architecture-specific syscall
+ltp/syscalls/sysctl01 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/sysctl03 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/sysctl04 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/sysfs01 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/sysfs02 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/sysfs03 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/sysfs04 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/sysfs05 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/umount2_01 # requires block devices and a mountable device filesystem
+ltp/syscalls/ustat01 # legacy syscall is absent from the asm-generic/riscv32 ABI
+ltp/syscalls/ustat02 # legacy syscall is absent from the asm-generic/riscv32 ABI
+posix/conformance/interfaces/pthread_attr_getstack/1-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
+posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-1 # musl stores scheduling policy/priority attributes without the optional eager validation this test requires
+posix/conformance/interfaces/pthread_attr_setschedparam/speculative/3-2 # musl stores scheduling policy/priority attributes without the optional eager validation this test requires
+posix/conformance/interfaces/pthread_attr_setschedpolicy/2-1 # musl stores scheduling policy/priority attributes without the optional eager validation this test requires
+posix/conformance/interfaces/pthread_attr_setschedpolicy/4-1 # musl stores scheduling policy/priority attributes without the optional eager validation this test requires
+posix/conformance/interfaces/pthread_attr_setstack/6-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
+posix/conformance/interfaces/pthread_attr_setstack/7-1 # queries an unset stack address; musl pthread_attr_getstack returns EINVAL until one is assigned
+posix/conformance/interfaces/pthread_attr_setstacksize/4-1 # test subtracts the 64 KiB page size from PTHREAD_STACK_MIN, underflowing size_t instead of testing a small stack
+posix/conformance/interfaces/pthread_mutexattr_getprotocol/1-2 # musl does not support PTHREAD_PRIO_PROTECT, as for priority-ceiling attributes
+posix/conformance/interfaces/pthread_mutexattr_setprotocol/1-1 # musl does not support PTHREAD_PRIO_PROTECT, as for priority-ceiling attributes
+posix/conformance/interfaces/sched_setparam/2-1 # guest priorities are advisory to the host scheduler; the test requires deterministic priority preemption
+posix/conformance/interfaces/sched_setparam/2-2 # guest priorities are advisory to the host scheduler; the test requires deterministic priority preemption
+posix/conformance/interfaces/sched_setparam/9-1 # guest priorities are advisory to the host scheduler; the test requires deterministic priority preemption
+
+ltp/commands/ar_sh # requires native ELF executables or ELF-oriented binutils/debugger; v2 executables are WebAssembly
+ltp/commands/ld01_sh # requires native ELF executables or ELF-oriented binutils/debugger; v2 executables are WebAssembly
+ltp/commands/nm01_sh # requires native ELF executables or ELF-oriented binutils/debugger; v2 executables are WebAssembly
+ltp/commands/file01_sh # requires native ELF executables or ELF-oriented binutils/debugger; v2 executables are WebAssembly
+
+ltp/sched/sched_football # requires strict SCHED_FIFO preemption; guest scheduling priorities are advisory (testcases/realtime/func/sched_football/sched_football.c)
+ltp/syscalls/munmap04 # its 65530-map limit cannot be reached in wasm32 with 64 KiB pages and six-page spacing; mmap exhausts address space first
+
+ltp/syscalls/epoll_wait06 # assumes one pipe buffer equals getpagesize(); half of the reported 64 KiB page frees multiple 4 KiB pipe buffers, so EPOLLOUT is correct

@@ -4,39 +4,8 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
-## ENOSYS: Clone
-libc-test/regression/raise-race
-
-## build: error: chained comparison 'X <= Y >= Z' does not behave the same as a mathematical expression [-Wparentheses]
-libc-test/musl/pleval
-
-## build: error: defining a type within '__builtin_offsetof' is a C23 extension [-Werror,-Wc23-extensions]
-libc-test/api/stddef
-
-## build: error: switch condition has boolean value [-Werror,-Wswitch-bool]
-libc-test/api/ftw
-libc-test/api/iso646
-libc-test/api/stdlib
-libc-test/api/sys_stat
-libc-test/api/sys_wait
-
-## build: error: use of undeclared identifier '_SC_XOPEN_UUCP'
-libc-test/api/unistd
-
 ## build: wasm-ld: error: /tmp/.tmpcN6P6O/tls_align.c.0.o: undefined symbol: t
 libc-test/functional/tls_align
-
-## dlopen failed
-libc-test/functional/tls_align_dlopen
-
-## dlopen failed: Dynamic loading not supported
-libc-test/functional/tls_init_dlopen
-
-## dlopen libc-test/functional/dlopen/dlopen_dso.so failed: Dynamic loading not supported
-libc-test/functional/dlopen
-
-## mod = dlopen("tls_get_new-dtv_dso.so", RTLD_NOW) failed
-libc-test/regression/tls_get_new-dtv
 
 ## wordexp("$1", 0) gave 1 [$1|], want 0 []
 libc-test/functional/wordexp

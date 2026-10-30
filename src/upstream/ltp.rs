@@ -134,8 +134,9 @@ pub struct Test {
     /// The runtest line after the tag, which shell tests run.
     line: String,
     /// The test needs root (`needs_root`, `TST_NEEDS_ROOT=1`, or `tst_require_root` in the old
-    /// APIs): it runs as uid 0, which holds every capability.
+    /// APIs, or a `.caps` declaration): it runs as uid 0, which holds every capability.
     root: bool,
+    budget: std::time::Duration,
 }
 
 struct Prepared {
@@ -210,7 +211,8 @@ pub fn discover(
             }
             let test = Test {
                 name: name.clone(),
-                root: declared.iter().any(|test| has(test, "needs_root")),
+                root: needs_root(&declared),
+                budget: declared_budget(&declared, std::time::Duration::from_secs(30)),
                 command,
                 args,
                 line,
@@ -258,6 +260,39 @@ fn runtest_entries(path: &Path) -> Result<Vec<Entry>> {
 /// `_FILE_OFFSET_BITS=64` variants.
 fn metadata_key(command: &str) -> &str {
     command.strip_suffix("_64").unwrap_or(command)
+}
+
+fn needs_root(declared: &[serde_json::Value]) -> bool {
+    declared
+        .iter()
+        .any(|test| has(test, "needs_root") || has(test, "caps"))
+}
+
+fn declared_budget(
+    declared: &[serde_json::Value],
+    default: std::time::Duration,
+) -> std::time::Duration {
+    // LTP lib/tst_test.c set_overall_timeout: 30 seconds plus the timeout
+    // adjustment and runtime, once per test variant. Leave 30 seconds for the
+    // launcher/compilation and use the suite's configured budget as a floor.
+    let seconds = |test: &serde_json::Value, key: &str| {
+        test.get(key)
+            .and_then(|v| v.as_u64().or_else(|| v.as_str()?.parse().ok()))
+            .unwrap_or(0)
+    };
+    let declared = declared
+        .iter()
+        .map(|test| {
+            let runtime = seconds(test, "runtime").max(seconds(test, "min_runtime"));
+            (30u64
+                .saturating_add(seconds(test, "timeout"))
+                .saturating_add(runtime))
+            .max(seconds(test, "overall_timeout"))
+            .saturating_mul(seconds(test, "test_variants").max(1))
+        })
+        .max()
+        .unwrap_or(30);
+    default.max(std::time::Duration::from_secs(declared.saturating_add(30)))
 }
 
 /// Whether a test's metadata sets `key`.
@@ -308,6 +343,8 @@ fn script_metadata(text: &str) -> serde_json::Value {
         ("TST_NEEDS_KCONFIGS", "needs_kconfigs"),
     ];
     let mut test = serde_json::Map::new();
+    let mut timeout = None;
+    let mut timed_shell = false;
     for line in text.lines().map(str::trim) {
         if line.starts_with('#') {
             continue;
@@ -321,7 +358,21 @@ fn script_metadata(text: &str) -> serde_json::Value {
         if line == ". tst_net.sh" {
             test.insert("needs_root".to_owned(), true.into());
         }
+        // testcases/lib/tst_test.sh _tst_setup_timer defaults to 300 seconds;
+        // tst_net.sh sources that library too, including for its legacy API.
+        timed_shell |= matches!(line, ". tst_test.sh" | ". tst_net.sh");
         let assignment = line.strip_prefix("export ").unwrap_or(line);
+        if let Some(value) = assignment.strip_prefix("TST_TIMEOUT=") {
+            let value = value
+                .split_whitespace()
+                .next()
+                .unwrap_or_default()
+                .trim_matches(['\'', '"']);
+            timeout = match value {
+                "-1" => Some(0), // LTP disables its timer; retain the runner's configured floor.
+                value => value.parse::<u64>().ok(),
+            };
+        }
         for (variable, key) in VARIABLES {
             let Some(value) = assignment
                 .strip_prefix(variable)
@@ -334,6 +385,9 @@ fn script_metadata(text: &str) -> serde_json::Value {
                 test.insert((*key).to_owned(), true.into());
             }
         }
+    }
+    if timed_shell || timeout.is_some() {
+        test.insert("overall_timeout".to_owned(), timeout.unwrap_or(300).into());
     }
     test.into()
 }
@@ -1083,6 +1137,10 @@ impl Test {
     }
 
     pub fn run(&self, suite: &Suite) -> Result<Outcome, Failure> {
+        let suite = &Suite {
+            timeout: suite.timeout.max(self.budget),
+            ..suite.clone()
+        };
         let prepared = PREPARED
             .get_or_init(|| prepare(suite).map_err(|e| format!("{e:#}")))
             .as_ref()
@@ -1255,6 +1313,55 @@ mod tests {
     }
 
     #[test]
+    fn capability_declarations_require_root() {
+        assert!(super::needs_root(&[
+            serde_json::json!({"caps": ["TST_CAP(TST_CAP_DROP, CAP_NET_RAW)"]})
+        ]));
+        assert!(super::needs_root(&[serde_json::json!({"needs_root": 1})]));
+        assert!(!super::needs_root(&[serde_json::json!({})]));
+    }
+
+    #[test]
+    fn declared_runtime_is_allowed_to_finish() {
+        use std::time::Duration;
+        let budget = |value| super::declared_budget(&[value], Duration::from_secs(60));
+        assert_eq!(budget(serde_json::json!({})), Duration::from_secs(60));
+        // LTP lib/tst_test.c set_overall_timeout adds DEFAULT_TIMEOUT (30).
+        assert_eq!(
+            budget(serde_json::json!({"runtime": 120})),
+            Duration::from_secs(180)
+        );
+        assert_eq!(
+            budget(serde_json::json!({"runtime": 600})),
+            Duration::from_secs(660)
+        );
+        assert_eq!(
+            budget(serde_json::json!({"runtime": 120, "timeout": 30, "test_variants": 2})),
+            Duration::from_secs(390)
+        );
+        assert_eq!(
+            budget(serde_json::json!({"min_runtime": 180})),
+            Duration::from_secs(240)
+        );
+    }
+
+    #[test]
+    fn shell_timeout_is_an_overall_duration() {
+        use std::time::Duration;
+        let budget =
+            |text| super::declared_budget(&[script_metadata(text)], Duration::from_secs(60));
+        assert_eq!(
+            budget("TST_TIMEOUT=120\n. tst_test.sh\n"),
+            Duration::from_secs(150)
+        );
+        assert_eq!(budget(". tst_net.sh\n"), Duration::from_secs(330));
+        assert_eq!(
+            budget("TST_TIMEOUT=-1\n. tst_test.sh\n"),
+            Duration::from_secs(60)
+        );
+    }
+
+    #[test]
     fn build_parallelism_respects_the_shared_machine_limit() {
         assert!(super::jobs() <= 3);
     }
@@ -1269,6 +1376,7 @@ mod tests {
             args: Vec::new(),
             line: "sched_rr_get_interval01".into(),
             root: true,
+            budget: std::time::Duration::from_secs(60),
         };
         assert!(
             test.environment()
