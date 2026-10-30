@@ -47,10 +47,11 @@ int main(void) {
          munmap(other, page) == 0);
   fd = open("/dev/zero", O_RDONLY);
   assert(fd >= 0);
-  char *readonly = mmap(NULL, page, PROT_READ, MAP_SHARED, fd, 0);
+  char* readonly = mmap(NULL, page, PROT_READ, MAP_SHARED, fd, 0);
   assert(readonly != MAP_FAILED && readonly[0] == 0);
   errno = 0;
-  assert(mprotect(readonly, page, PROT_READ | PROT_WRITE) == -1 && errno == EACCES);
+  assert(mprotect(readonly, page, PROT_READ | PROT_WRITE) == -1 &&
+         errno == EACCES);
   assert(munmap(readonly, page) == 0 && close(fd) == 0);
   puts("PASS");
 }
