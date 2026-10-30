@@ -92,6 +92,7 @@ pub struct Config {
     pub skipped_engines: Vec<(String, String)>,
     pub mapped_directories: Vec<(Host, String)>,
     pub current_directory: Option<String>,
+    pub user: Option<String>,
     pub prefilled_files: Vec<(PathBuf, String)>,
     pub expected_files: Vec<(PathBuf, String)>,
     pub program_name: Option<String>,
@@ -119,6 +120,7 @@ impl Config {
             skipped_engines: Vec::new(),
             mapped_directories: Vec::new(),
             current_directory: None,
+            user: None,
             prefilled_files: Vec::new(),
             expected_files: Vec::new(),
             program_name: None,
@@ -351,6 +353,7 @@ impl Parser<'_> {
                 c.mapped_directories.push((host, guest.to_owned()));
             }
             "CurrentDirectory" => c.current_directory = Some(arg.to_owned()),
+            "User" => c.user = Some(arg.to_owned()),
             "PrefilledFile" | "ExpectedFile" => {
                 let (path, contents) = arg
                     .split_once(':')
@@ -375,5 +378,25 @@ impl Parser<'_> {
             other => bail!("unknown directive `{other}`"),
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn permission_fixtures_can_request_root() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(dir.path().join("main.c"), "//#User: 0:0\n").unwrap();
+        let config = Config::new(
+            Source::C("main.c".into()),
+            dir.path().into(),
+            "perms".into(),
+        );
+        let parsed = parse_configs(&config).unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].user.as_deref(), Some("0:0"));
+        assert_eq!(config.user, None);
     }
 }
