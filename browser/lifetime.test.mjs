@@ -1,6 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { checkLifetimeBounds } from "./lifetime.mjs";
+import { checkLifetimeBounds, liveWorkerCount } from "./lifetime.mjs";
+
+test("worker inventory counts unattached native targets after debugger detachment", async () => {
+    const page = { workers: () => [] };
+    const targetInfos = [{ type: "page" }, { type: "worker", attached: false }, { type: "worker", attached: true }];
+    const cdp = { async send(method) { assert.equal(method, "Target.getTargets"); return { targetInfos }; } };
+    assert.equal(await liveWorkerCount(page, cdp), 2);
+    targetInfos.splice(1);
+    assert.equal(await liveWorkerCount(page, cdp), 0);
+});
+
+test("non-CDP browser inventory retains its worker lifecycle check", async () => {
+    assert.equal(await liveWorkerCount({ workers: () => [1, 2, 3] }), 3);
+});
 
 function samples() {
     return [1, 25, 50, 500].map(iteration => ({ iteration, heapBytes: 32 * 1024 ** 2,
