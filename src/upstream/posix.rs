@@ -225,8 +225,16 @@ impl Test {
 }
 
 fn invocation(module: PathBuf) -> Invocation {
+    // Tests such as sigaltstack/9-1 exec argv[0]. Keep that absolute path visible
+    // inside the guest, as it is under the upstream native runner.
+    let volumes = module
+        .parent()
+        .filter(|_| module.is_absolute())
+        .map(|dir| vec![(dir.to_owned(), dir.to_string_lossy().into_owned())])
+        .unwrap_or_default();
     Invocation {
         module,
+        volumes,
         user: Some("0:0".to_owned()),
         ..Default::default()
     }
@@ -253,6 +261,15 @@ mod tests {
             .arg("-o")
             .arg(suite.build_root.join("posix-timespec-check.o"));
         super::run_build(&mut cc).unwrap();
+    }
+
+    #[test]
+    fn self_exec_can_resolve_the_program_named_by_argv_zero() {
+        let module = std::path::PathBuf::from("/build/posix/test/main");
+        let inv = super::invocation(module.clone());
+        assert!(inv.volumes.iter().any(|(host, guest)| {
+            host == module.parent().unwrap() && guest == "/build/posix/test"
+        }));
     }
 
     #[test]
