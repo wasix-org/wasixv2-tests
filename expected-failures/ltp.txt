@@ -4,6 +4,9 @@
 # list. A name that matches no test fails the `expected-failures` check. Regenerate the whole file
 # with `WASIXV2_TESTS_BLESS=1`.
 
+## needs memory accounting (overcommit/min_free_kbytes enforcement), paused by the user: the test allocates until the 2 GiB scope OOM-kills it (also on train 21)
+ltp/mm/min_free_kbytes
+
 ## TBROK: Failed to run cmd: useradd hsym
 ltp/syscalls/prot_hsymlinks
 
