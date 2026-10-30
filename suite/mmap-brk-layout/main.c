@@ -34,7 +34,7 @@ int main(void) {
 #ifdef __wasm__
   /* Sparse Linux VMAs do not require their intervening holes to be backed.
    * On wasm use a bounded brk gap and grow only through the mappings. */
-  assert(__builtin_wasm_memory_size(0) * page < 256UL * 1024 * 1024);
+  assert((uint64_t)__builtin_wasm_memory_size(0) * page < 256UL * 1024 * 1024);
 #endif
   assert((uintptr_t)syscall(SYS_brk, start + 3 * page) == start + 3 * page);
   char* heap = (char*)(start + page);
