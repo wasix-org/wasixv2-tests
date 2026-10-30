@@ -1313,6 +1313,27 @@ mod tests {
     }
 
     #[test]
+    fn privileged_legacy_scripts_declare_root_to_the_runner() {
+        let root = super::src().join("testcases/kernel");
+        for path in [
+            "containers/netns/netns_sysfs.sh",
+            "security/cap_bound/run_capbounds.sh",
+            "security/filecaps/filecapstest.sh",
+        ] {
+            let text = std::fs::read_to_string(root.join(path)).unwrap();
+            assert!(
+                super::needs_root(&[super::script_metadata(&text)]),
+                "{path}"
+            );
+        }
+        let text = std::fs::read_to_string(root.join("syscalls/statmount/statmount03.c")).unwrap();
+        assert!(
+            text.contains(".needs_root = 1"),
+            "statmount03 unshares a mount namespace"
+        );
+    }
+
+    #[test]
     fn capability_declarations_require_root() {
         assert!(super::needs_root(&[
             serde_json::json!({"caps": ["TST_CAP(TST_CAP_DROP, CAP_NET_RAW)"]})
